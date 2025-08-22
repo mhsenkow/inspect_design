@@ -1,0 +1,61 @@
+name: Playwright E2E Tests
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  playwright:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          # DATABASE_PASSWORD: postgres
+          # DATABASE_USER: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ">=22.0.0"
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: yarn install
+      - name: Create database
+        run: yarn db:create
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+      - name: Wait for database to be ready
+        run: |
+          while ! pg_isready -h localhost -p 5432 -U postgres; do
+            echo "Waiting for database to be ready..."
+            sleep 5
+          done
+      - name: Run database migrations
+        run: yarn db:migrate
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+      - name: Build code for production
+        run: yarn build
+      - name: Start server
+        run: yarn start &
+      - name: Install Playwright dependencies
+        run: yarn playwright install-deps
+      - name: Install Playwright browsers
+        run: yarn playwright install
+      - name: Run Playwright tests
+        run: yarn e2e

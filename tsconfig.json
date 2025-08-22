@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    "skipLibCheck": true,
+    //...truncated...
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "strict": true,
+    "strictNullChecks": true,
+    "noEmit": true,
+    "incremental": true,
+    "module": "esnext",
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "sourceMap": true
+  },
+  "include": [
+    "src/app/types.d.ts",
+    ".next/types/**/*.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "babel.config.cjs",
+    "eslint.config.mjs",
+    "playwright.config.ts",
+    "src/scripts/*.js"
+  ],
+  "exclude": ["node_modules"]
+}

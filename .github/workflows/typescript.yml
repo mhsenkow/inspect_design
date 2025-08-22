@@ -1,0 +1,18 @@
+name: Typescript Compile
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  jest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ">=22.0.0"
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: yarn install
+      - name: Run tsc
+        run: yarn tsc

@@ -1,0 +1,101 @@
+{
+  "name": "inspect-service",
+  "version": "1.0.0",
+  "type": "module",
+  "license": "UNLICENSED",
+  "scripts": {
+    "dev": "next dev",
+    "build": "NODE_OPTIONS='--max-old-space-size=2048' next build",
+    "deploy": "git stash && git pull && git stash pop && yarn cache clean && yarn install && yarn build && sudo pm2 flush && sudo pm2 restart 0",
+    "db:create": "PGPASSWORD=${POSTGRES_PASSWORD} psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -c 'CREATE DATABASE inspect'",
+    "db:migrate": "PGPASSWORD=${POSTGRES_PASSWORD} psql -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d inspect < inspect-dump.sql",
+    "start": "next start",
+    "export": "next export",
+    "jest:watch": "jest --watch",
+    "e2e": "yarn playwright test --reporter=list --workers=5"
+  },
+  "jest": {
+    "verbose": true,
+    "testEnvironment": "jsdom",
+    "testEnvironmentOptions": {
+      "runScripts": "dangerously"
+    },
+    "moduleDirectories": [
+      "src",
+      "node_modules"
+    ],
+    "moduleNameMapper": {
+      "\\.(css)$": "<rootDir>/src/app/tests/__mocks__/styleMock.ts",
+      "^\\.\\./models/reactions$": "<rootDir>/src/app/api/models/reactions"
+    },
+    "testMatch": [
+      "**/*.test.(ts|tsx)"
+    ],
+    "transform": {
+      "^.+\\.(ts|tsx)$": "babel-jest"
+    },
+    "testTimeout": 20000
+  },
+  "dependencies": {
+    "@types/bcryptjs": "^3.0.0",
+    "bcryptjs": "^3.0.2",
+    "bootstrap": "^5.3.3",
+    "dotenv": "^17.2.0",
+    "formidable": "^3.5.4",
+    "global": "^4.4.0",
+    "globals": "^16.3.0",
+    "html-entities": "^2.6.0",
+    "html-react-parser": "^5.1.15",
+    "http-errors": "^2.0.0",
+    "http-proxy-middleware": "^3.0.5",
+    "knex": "^3.1.0",
+    "moment": "^2.30.1",
+    "next": "^15.4.7",
+    "next-client-cookies": "^2.0.0",
+    "objection": "^3.1.5",
+    "open-graph-scraper": "^6.8.1",
+    "pg": "^8.12.0",
+    "react": "^19.0.0",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
+    "react-dom": "^19.0.0",
+    "reflect-metadata": "^0.2.0",
+    "typescript-eslint": "^8.36.0",
+    "webpack": "^5.94.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@babel/plugin-transform-modules-commonjs": "^7.26.3",
+    "@babel/preset-env": "^7.26.0",
+    "@babel/preset-react": "^7.26.3",
+    "@babel/preset-typescript": "^7.26.0",
+    "@next/eslint-plugin-next": "^15.1.6",
+    "@playwright/test": "^1.51.0",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@testing-library/user-event": "^14.5.2",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.0.14",
+    "@types/pg": "^8.11.11",
+    "@types/react": "^19.0.8",
+    "@typescript-eslint/eslint-plugin": "^8.23.0",
+    "@typescript-eslint/parser": "^8.23.0",
+    "babel-jest": "^30.0.4",
+    "copy-webpack-plugin": "^13.0.0",
+    "eslint": "^9.18.0",
+    "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-jest": "^29.0.1",
+    "eslint-plugin-playwright": "^2.2.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-react": "^7.37.4",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "jest": "^30.0.4",
+    "jest-environment-jsdom": "^30.0.4",
+    "jsdom": "^26.1.0",
+    "prettier": "^3.0.0",
+    "source-map-support": "^0.5.21",
+    "tsc": "^2.0.4",
+    "typescript": "^5.7.3"
+  }
+}

@@ -1,0 +1,233 @@
+@media only screen and (max-width: 600px) {
+  #body {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  #body table {
+    font-size: 12px;
+  }
+}
+#header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  font-family: sans-serif;
+  margin-top: 10px;
+}
+#body {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+#source {
+  display: flex;
+  flex: 1;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  width: 100%;
+  font-size: x-large;
+}
+#title {
+  flex: 1;
+  font-family: sans-serif;
+  text-align: center;
+}
+#created_at {
+  flex: 1;
+  text-align: center;
+  margin: 10 0;
+  font-size: 20px;
+}
+.comments {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+}
+.comments img {
+  height: 34px;
+  width: 34px;
+  position: absolute;
+}
+#snippets {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.comment {
+  /* height: 34px; */
+  font-family: serif;
+  margin: 5px 0;
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+}
+.comment > div.tag,
+.comment > div.commenttext {
+  margin-left: 37px;
+  width: calc(100% - 50px);
+  margin-top: 7px;
+}
+.comment img {
+  height: 34px;
+  width: 34px;
+  position: absolute;
+}
+
+.snippet {
+  font-family: sans-serif;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+.snippet::before {
+  content: attr(data-reactions);
+  position: relative;
+  top: 40px;
+  font-size: 30px;
+  right: 30px;
+}
+.snippet .text {
+  margin-bottom: 10px;
+  padding: 5px;
+  border: 1px black dotted;
+  display: flex;
+  flex-direction: column;
+}
+
+#root form label {
+  display: block;
+}
+
+#root #followButton {
+  height: 50;
+  margin: auto 10px;
+}
+
+#reaction,
+#comment,
+#sharing {
+  text-align: center;
+}
+
+.navbar ul.navbar-nav li {
+  margin: 0 5px 0 5px;
+}
+.navbar .nav-item .nav-link.cta {
+  color: #0d6efd;
+  font-weight: bold;
+}
+.navbar .nav-item .nav-link:hover {
+  color: var(--bs-nav-link-hover-color);
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+.insightSnippet {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 5px;
+}
+
+.insightSnippet .sourceLogo {
+  padding: 5px;
+  text-align: center;
+  border: 1px solid black;
+  border-radius: 5px;
+}
+
+.readOnly {
+  padding: 0 5px;
+}
+
+.tag-wrapper {
+  margin: 2px;
+  /* padding: 0 0 0 5px; */
+  display: inline-block;
+  font:
+    12px "Helvetica Neue",
+    Helvetica,
+    Arial,
+    sans-serif;
+  /* height: 26px; */
+  line-height: 25px;
+  border-radius: 3px;
+  color: #fff;
+  font-weight: 700;
+  cursor: default !important;
+  margin-left: 34px;
+}
+.tag-wrapper.type-problem {
+  background-color: #d9534f;
+}
+.tag-wrapper.type-solution {
+  background-color: #337ab7;
+}
+.tag-wrapper.header {
+  cursor: pointer !important;
+}
+
+.potentialInsightsToggle button {
+  margin: 0;
+  margin-top: 16px;
+  padding: 4px 8px;
+  font-weight: bold;
+  font-size: 110%;
+  border: none;
+  background-color: transparent;
+  border-radius: 5px;
+}
+.potentialInsightsToggle button[aria-expanded="false"]::before {
+  content: url("data:image/svg+xml,%3C%3Fxml version='1.0' encoding='utf-8'%3F%3E%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' style='forced-color-adjust: auto;'%3E%3Cpolygon points='1 1, 1 11, 8 6' fill='currentcolor' stroke= 'currentcolor' /%3E%3C/svg%3E%0A");
+  position: relative;
+  left: -2px;
+}
+.potentialInsightsToggle button[aria-expanded="true"]::before {
+  content: url("data:image/svg+xml,%3C%3Fxml version='1.0' encoding='utf-8'%3F%3E%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' style='forced-color-adjust: auto;'%3E%3Cpolygon points='1 1, 11 1, 6 8' fill='currentcolor' stroke= 'currentcolor' /%3E%3C/svg%3E ");
+  position: relative;
+  left: -4px;
+  top: 2px;
+}
+
+dialog.large-dialog {
+  width: 80%;
+  height: 80%;
+}
+dialog .sticky {
+  position: sticky;
+}
+
+dialog .top {
+  top: 0;
+}
+dialog .bottom {
+  bottom: 0;
+}
+dialog .bg_white {
+  background-color: "white";
+}
+dialog .dotted {
+  border: "1px black dotted";
+}
+dialog .right {
+  float: right;
+}
+
+.facts-table > thead > tr > th {
+  border: 1px black dotted;
+  text-align: center;
+  cursor: pointer;
+}
