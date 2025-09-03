@@ -154,30 +154,20 @@ const FactsListView = ({
     <>
       <div
         id={HEADER_ELEMENT_ID}
-        style={{
-          padding: "5px",
-          margin: "5px 0",
-        }}
+        className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6"
       >
         {(!selectedFacts || selectedFacts.length == 0) && (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "space-around",
-            }}
-          >
+          <div className="flex gap-4">
             {loggedIn &&
               unselectedActions &&
               unselectedActions
                 .filter((a) => a.enabled)
                 .map((unselectedAction, i) => (
                   <div
-                    style={{ padding: "2px" }}
                     key={`${factName} unselectedAction #${i}`}
                   >
                     <SelectedFactsButton
-                      classNames={unselectedAction.className}
+                      classNames="btn btn-primary"
                       text={unselectedAction.text}
                       handleOnClick={() => {
                         unselectedAction.handleOnClick();
@@ -194,24 +184,20 @@ const FactsListView = ({
           </div>
         )}
         {selectedFacts && selectedFacts.length > 0 && (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "space-around",
-            }}
-          >
+          <div className="flex gap-4">
             {loggedIn &&
               selectedActions &&
               selectedActions
                 .filter((a) => a.enabled)
                 .map((selectedAction, i) => (
                   <div
-                    style={{ padding: "2px" }}
                     key={`${factName} selectedAction #${i}`}
                   >
                     <SelectedFactsButton
-                      classNames={selectedAction.className}
+                      classNames={selectedAction.className === "btn bg-danger" 
+                        ? "btn btn-danger"
+                        : "btn btn-primary"
+                      }
                       text={selectedAction.text}
                       handleOnClick={() => {
                         selectedAction.handleOnClick(selectedFacts);

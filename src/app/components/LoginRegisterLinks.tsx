@@ -19,39 +19,39 @@ const LoginRegisterLinks = ({
   if (loggedIn) {
     return (
       <>
-        <li className={`nav-item ${path == "/login" ? "active" : ""}`}>
-          <span
-            className="nav-link"
-            style={{ cursor: "pointer" }}
-            onClick={() => {
-              logout();
-              window.location.href = returnPath || "/";
-            }}
-          >
-            Log Out
-          </span>
-        </li>
-        <li className={`nav-item ${path == "/login" ? "active" : ""}`}>
-          <Link className="nav-link cta" href="/insights">
-            My Insights
-          </Link>
-        </li>
+        <button
+          onClick={() => {
+            logout();
+            window.location.href = returnPath || "/";
+          }}
+          className="btn btn-ghost"
+        >
+          Log Out
+        </button>
+        <Link 
+          href="/insights"
+          className="btn btn-primary"
+        >
+          My Insights
+        </Link>
       </>
     );
   }
 
   return (
     <>
-      <li className={`nav-item ${path == "/login" ? "active" : ""}`}>
-        <Link className="nav-link" href={`/login?return=${returnPath}`}>
-          Login
-        </Link>
-      </li>
-      <li className={`nav-item ${path == "/register" ? "active" : ""}`}>
-        <Link className="nav-link cta" href={`/register?return=${returnPath}`}>
-          Register
-        </Link>
-      </li>
+      <Link 
+        href={`/login?return=${returnPath}`}
+        className="btn btn-ghost"
+      >
+        Login
+      </Link>
+      <Link 
+        href={`/register?return=${returnPath}`}
+        className="btn btn-primary"
+      >
+        Register
+      </Link>
     </>
   );
 };

@@ -19,57 +19,75 @@ const LoginPage = (): React.JSX.Element => {
   const [error, setError] = useState<string>("");
 
   return (
-    <div id="body">
-      <h2>Login to Inspect</h2>
-      <form name="loginInfo">
-        <label>
-          Email:{" "}
-          <input
-            type="text"
-            name="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-          />
-        </label>
-        <label>
-          Password:{" "}
-          <input
-            type="password"
-            name="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-          />
-        </label>
-        <button
-          type="submit"
-          onClick={async () => {
-            try {
-              const user = await handleLogin();
-              if (user?.token) {
-                setToken(user.token);
-                setLoggedIn(true);
+    <div className="min-h-screen bg-primary flex items-center justify-center p-4">
+      <div className="card w-full max-w-md">
+        <div className="card-body">
+          <h2 className="text-2xl font-bold text-center mb-6">Login to Inspect</h2>
+          <form name="loginInfo" onSubmit={(e) => e.preventDefault()}>
+            <div className="mb-4">
+              <label className="form-label">Email:</label>
+              <input
+                type="text"
+                name="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                className="form-input"
+              />
+            </div>
+            <div className="mb-6">
+              <label className="form-label">Password:</label>
+              <input
+                type="password"
+                name="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                className="form-input"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={async (e) => {
+                e.preventDefault();
+                try {
+                  console.log("Attempting login with:", email);
+                  const user = await handleLogin(email, password);
+                  console.log("Login response:", user);
+                  if (user?.token) {
+                    console.log("Login successful, setting token and redirecting");
+                    setToken(user.token);
+                    setLoggedIn(true);
 
-                if (window) {
-                  window.open(
-                    `${window.location.origin}${returnParam}`,
-                    "_self",
-                  );
+                    // Redirect to the return URL or default to insights
+                    const redirectUrl = returnParam || "/insights";
+                    console.log("Redirecting to:", redirectUrl);
+                    if (window) {
+                      window.location.href = `${window.location.origin}${redirectUrl}`;
+                    }
+                  } else {
+                    console.log("No token in response");
+                  }
+                } catch (err) {
+                  console.error("Login error:", err);
+                  if (err instanceof Error) {
+                    setError(err.message);
+                  } else {
+                    setError("An unknown error occurred.");
+                  }
                 }
-              }
-            } catch (err) {
-              if (err instanceof Error) {
-                setError(err.message);
-              } else {
-                setError("An unknown error occurred.");
-              }
-            }
-          }}
-          disabled={!(email && password)}
-        >
-          Login
-        </button>
-        <div style={{ color: "red" }}>{error}</div>
-      </form>
+              }}
+              disabled={!(email && password)}
+              className="btn btn-primary w-full"
+            >
+              Login
+            </button>
+            {error && (
+              <div className="mt-4 p-3 bg-red-100 border border-red-300 text-red-800 rounded text-sm">
+                {error}
+              </div>
+            )}
+          </form>
+        </div>
+      </div>
     </div>
   );
 };

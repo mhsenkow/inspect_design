@@ -64,6 +64,15 @@ export async function POST(
       );
     }
     console.error("Error during user registration:", error);
+    
+    // Handle database sequence errors
+    if (error instanceof Error && error.message.includes("duplicate key value violates unique constraint")) {
+      return NextResponse.json(
+        { message: "Registration temporarily unavailable. Please try again." },
+        { status: 503 },
+      );
+    }
+    
     return NextResponse.json(
       { message: "An unexpected error occurred during registration." },
       { status: 500 },

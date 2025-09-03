@@ -28,6 +28,7 @@ import {
   addCitationsToInsight,
   createInsightFromCitations,
 } from "../components/SelectedCitationsAPI";
+import ThemeSwitcher from "../components/ThemeSwitcher";
 
 export const SAVE_LINK_DIALOG_ID = "saveLinkDialog";
 
@@ -110,9 +111,13 @@ const ClientSidePage = ({
 
   const LIMIT = 20;
   return (
-    <div id="body">
-      <h2>My Insights ({liveData.length})</h2>
-      <CurrentUserContext.Provider value={currentUser}>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">My Insights ({liveData.length})</h1>
+          <ThemeSwitcher className="relative" />
+        </div>
+        <CurrentUserContext.Provider value={currentUser}>
         <InfiniteScrollLoader
           data={liveData}
           setData={
@@ -200,7 +205,7 @@ const ClientSidePage = ({
                 name: "💭↑",
                 dataColumn: "parents",
                 display: (insight: Fact | Insight) => (
-                  <span className="badge text-bg-danger">
+                  <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
                     {insight.parents?.length ?? 0}
                   </span>
                 ),
@@ -209,7 +214,7 @@ const ClientSidePage = ({
                 name: "💭↓",
                 dataColumn: "children",
                 display: (insight: Fact | Insight) => (
-                  <span className="badge text-bg-danger">
+                  <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-green-50 text-green-700 border border-green-200">
                     {insight.children?.length ?? 0}
                   </span>
                 ),
@@ -218,7 +223,7 @@ const ClientSidePage = ({
                 name: "📄",
                 dataColumn: "evidence",
                 display: (insight: Fact | Insight) => (
-                  <span className="badge text-bg-danger">
+                  <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-purple-50 text-purple-700 border border-purple-200">
                     {insight.evidence?.length ?? 0}
                   </span>
                 ),
@@ -242,6 +247,7 @@ const ClientSidePage = ({
           setActiveServerFunction={setActiveServerFunctionForInsightsList}
         />
       </CurrentUserContext.Provider>
+      </div>
     </div>
   );
 };

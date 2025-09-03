@@ -18,11 +18,18 @@ const useUser = () => {
     if (token) {
       setToken(token);
       setLoggedIn(true);
-      const { user_id, email, username } = decryptToken(
+      const userDetails = decryptToken(
         token!,
-        "secret", // TODO: get from .env
+        process.env.NEXT_PUBLIC_TOKEN_KEY || "your-secret-jwt-key-change-this-in-production",
       );
-      setUserDetails({ user_id, email, username });
+      if (userDetails) {
+        setUserDetails(userDetails);
+      } else {
+        // If token is invalid, clear it
+        setLoggedIn(false);
+        setToken(undefined);
+        document.cookie = `token=; path=/; expires=${new Date(0)}`;
+      }
     }
   }, []);
 

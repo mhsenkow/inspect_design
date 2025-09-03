@@ -155,113 +155,109 @@ const FactsTable = ({
     }
   }, [returnPath]);
 
-  return (
-    <table
-      className="facts-table"
-      style={{
-        backgroundColor: "white",
-      }}
-      id={`factsTable-${factName}`}
-      onClick={(event) => {
-        const targetElement = event.target as HTMLElement;
-        const dataColumn = targetElement.getAttribute("data-column");
-        if (
-          targetElement.tagName == "TH" &&
-          targetElement?.textContent &&
-          Array.from(targetElement.classList).includes("sortable")
-        ) {
+    return (
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
+        <h3 className="text-sm font-medium text-gray-700 uppercase tracking-wider">Data Table</h3>
+      </div>
+      <table
+        className="w-full"
+        id={`factsTable-${factName}`}
+        onClick={(event) => {
+          const targetElement = event.target as HTMLElement;
+          const dataColumn = targetElement.getAttribute("data-column");
           if (
-            targetElement.textContent.slice(-1) != "▲" &&
-            targetElement.textContent.slice(-1) != "▼"
+            targetElement.tagName == "TH" &&
+            targetElement?.textContent &&
+            Array.from(targetElement.classList).includes("sortable")
           ) {
-            const columnText = targetElement.textContent;
-            targetElement.textContent = columnText + "▼";
-            if (dataColumn || columnText == "Updated") {
-              setSortDir({
-                column: dataColumn || "updated_at",
-                dir: "desc",
-              });
+            if (
+              targetElement.textContent.slice(-1) != "▲" &&
+              targetElement.textContent.slice(-1) != "▼"
+            ) {
+              const columnText = targetElement.textContent;
+              targetElement.textContent = columnText + "▼";
+              if (dataColumn || columnText == "Updated") {
+                setSortDir({
+                  column: dataColumn || "updated_at",
+                  dir: "desc",
+                });
+              }
+            } else if (targetElement.textContent.slice(-1) == "▼") {
+              const columnText = targetElement.textContent.slice(0, -1);
+              targetElement.textContent = columnText + "▲";
+              if (dataColumn || columnText == "Updated") {
+                setSortDir({
+                  column: dataColumn || "updated_at",
+                  dir: "asc",
+                });
+              }
+            } else if (targetElement.textContent.slice(-1) == "▲") {
+              const columnText = targetElement.textContent.slice(0, -1);
+              targetElement.textContent = columnText;
+              setSortDir(undefined);
             }
-          } else if (targetElement.textContent.slice(-1) == "▼") {
-            const columnText = targetElement.textContent.slice(0, -1);
-            targetElement.textContent = columnText + "▲";
-            if (dataColumn || columnText == "Updated") {
-              setSortDir({
-                column: dataColumn || "updated_at",
-                dir: "asc",
-              });
-            }
-          } else if (targetElement.textContent.slice(-1) == "▲") {
-            const columnText = targetElement.textContent.slice(0, -1);
-            targetElement.textContent = columnText;
-            setSortDir(undefined);
           }
-        }
-      }}
-    >
-      {!hideHead && (
-        <thead
-          style={{
-            position: "sticky",
-            top: theadTopCSS,
-            zIndex: 1000,
-            backgroundColor: "white",
-          }}
-        >
-          <tr>
-            <th>
-              <input
-                type="checkbox"
-                name="selectAllFacts"
-                checked={
-                  !!data &&
-                  data.length > 0 &&
-                  selectedFacts &&
-                  selectedFacts.length == data.length
-                }
-                onChange={() => {
-                  if (filteredData) {
-                    return toggleSelectedFacts(...filteredData);
-                  }
-                }}
-              />
-            </th>
-            <th className="sortable">Updated</th>
-            <th>
-              {/* search */}
-              {setDataFilter && (
+        }}
+      >
+        {!hideHead && (
+          <thead className="bg-gray-100 border-b border-gray-200">
+            <tr>
+              <th className="px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                 <input
-                  type="text"
-                  placeholder="Search the titles..."
-                  style={{ width: "100%", border: 0 }}
-                  className="factsTableSearch"
-                  value={dataFilter}
-                  onChange={async (event) => {
-                    setDataFilter(event.target.value.toLocaleLowerCase());
-                  }}
-                  onFocus={(event) => {
-                    // TODO: can I get the ClientSidePage itself or something other than the button title?
-                    if (
-                      event.relatedTarget &&
-                      event.relatedTarget.textContent == "Add Evidence"
-                    ) {
-                      event.target.blur();
+                  type="checkbox"
+                  name="selectAllFacts"
+                  checked={
+                    !!data &&
+                    data.length > 0 &&
+                    selectedFacts &&
+                    selectedFacts.length == data.length
+                  }
+                  onChange={() => {
+                    if (filteredData) {
+                      return toggleSelectedFacts(...filteredData);
                     }
                   }}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
-              )}
-              {loading && <strong>Loading...</strong>}
-            </th>
-            {columns &&
-              columns.map((column) => (
-                <th
-                  className="sortable"
-                  key={`Column: ${column.name}`}
-                  data-column={column.dataColumn}
-                >
-                  {column.name}
-                </th>
-              ))}
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider sortable cursor-pointer hover:text-gray-900 transition-colors duration-200">
+                Updated
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                {/* search */}
+                {setDataFilter && (
+                  <input
+                    type="text"
+                    placeholder="Search the titles..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
+                    value={dataFilter}
+                    onChange={async (event) => {
+                      setDataFilter(event.target.value.toLocaleLowerCase());
+                    }}
+                    onFocus={(event) => {
+                      // TODO: can I get the ClientSidePage itself or something other than the button title?
+                      if (
+                        event.relatedTarget &&
+                        event.relatedTarget.textContent == "Add Evidence"
+                      ) {
+                        event.target.blur();
+                      }
+                    }}
+                  />
+                )}
+                {loading && <span className="text-sm text-gray-500">Loading...</span>}
+              </th>
+                          {columns &&
+                columns.map((column) => (
+                  <th
+                    className="px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider sortable cursor-pointer hover:text-gray-900 transition-colors duration-200"
+                    key={`Column: ${column.name}`}
+                    data-column={column.dataColumn}
+                  >
+                    {column.name}
+                  </th>
+                ))}
           </tr>
         </thead>
       )}
@@ -269,10 +265,7 @@ const FactsTable = ({
         <tbody>
           {filteredData.sort(sortFunction).map((fact) => {
             // TODO: think of a better way to combine disabled and category styles
-            let trStyle: React.CSSProperties = {
-              border: "1px black dotted",
-              borderRadius: "5px",
-            };
+            let trClassName = "hover:bg-gray-50";
             if (
               disabledIds?.includes(
                 factName == "snippet"
@@ -280,9 +273,7 @@ const FactsTable = ({
                   : (fact.id ?? -1),
               )
             ) {
-              trStyle = { ...trStyle, backgroundColor: "#ccc" };
-            } else {
-              trStyle = { ...trStyle, backgroundColor: "white" };
+              trClassName += " bg-gray-100 opacity-50";
             }
             let trOnClick: React.MouseEventHandler<
               HTMLTableRowElement
@@ -304,8 +295,8 @@ const FactsTable = ({
             }
             return (
               <React.Fragment key={`${factName} #${fact.id}`}>
-                <tr style={trStyle} onClick={trOnClick}>
-                  <td style={{ verticalAlign: "top" }}>
+                <tr className={`${trClassName} border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors duration-200`} onClick={trOnClick}>
+                  <td className="px-6 py-4 whitespace-nowrap">
                     <input
                       type="checkbox"
                       name="selectedFact"
@@ -323,15 +314,10 @@ const FactsTable = ({
                           ? (fact as InsightEvidence).summary_id
                           : (fact.id ?? -1),
                       )}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
                   </td>
-                  <td
-                    style={{
-                      verticalAlign: "top",
-                      textAlign: "right",
-                      fontFamily: "fixedsys",
-                    }}
-                  >
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-mono">
                     {fact.updated_at &&
                       new Date(fact.updated_at).toLocaleDateString("en-US", {
                         month: "2-digit",
@@ -340,22 +326,16 @@ const FactsTable = ({
                       })}
                     {!fact.updated_at && "---"}
                   </td>
-                  <td
-                    style={{
-                      verticalAlign: "top",
-                      width: "100%",
-                      textAlign: "left",
-                    }}
-                  >
+                  <td className="px-6 py-4 text-sm text-gray-900 font-medium">
                     {!selectRows &&
                       (factName == "snippet" ? (
-                        <Link href={`/links/${fact.uid}`}>{fact.title}</Link>
+                        <Link href={`/links/${fact.uid}`} className="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200">{fact.title}</Link>
                       ) : (
-                        <Link href={`/insights/${fact.uid}`}>{fact.title}</Link>
+                        <Link href={`/insights/${fact.uid}`} className="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200">{fact.title}</Link>
                       ))}
                     {selectRows && fact.title}
                     {/* FIXME: updates several times until reactions is an empty array */}
-                    <span>
+                    <span className="ml-2 text-gray-400">
                       {fact.reactions &&
                         fact.reactions.map((r) => r.reaction).join("")}
                     </span>
@@ -363,10 +343,7 @@ const FactsTable = ({
                   {columns &&
                     columns.map((column) => (
                       <td
-                        style={{
-                          verticalAlign: "top",
-                          textAlign: "center",
-                        }}
+                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 text-center"
                         key={`Table column: ${column.name}`}
                       >
                         {column.display && column.display(fact)}
@@ -378,21 +355,9 @@ const FactsTable = ({
                     <tr>
                       <td
                         colSpan={columns ? columns.length + 3 : 4}
-                        style={{
-                          background: "#f6f6ff",
-                          fontSize: "0.95em",
-                          padding: "6px 0",
-                        }}
+                        className="bg-secondary text-sm p-2"
                       >
-                        <div
-                          style={{
-                            display: "flex",
-                            flexDirection: "row",
-                            justifyContent: "space-around",
-                            width: "100%",
-                            margin: "10px",
-                          }}
-                        >
+                        <div className="flex justify-around w-full m-4">
                           <FeedbackLink
                             actionVerb="React"
                             icon="😲"
@@ -512,19 +477,10 @@ const FactsTable = ({
                       {fact.comments && fact.comments.length > 0 && (
                         <td
                           colSpan={columns ? columns.length + 3 : 4}
-                          style={{
-                            background: "#f9f9f9",
-                            fontSize: "0.95em",
-                          }}
+                          className="bg-tertiary text-sm"
                         >
-                          <div style={{ padding: "8px 0" }}>
-                            <ul
-                              style={{
-                                margin: "4px 0 0 0",
-                                paddingLeft: "18px",
-                                listStyleType: "none",
-                              }}
-                            >
+                          <div className="p-2">
+                            <ul className="m-1 pl-4 list-none">
                               {fact.comments.map((comment, idx) => (
                                 <li key={idx}>
                                   <Comment
@@ -564,6 +520,7 @@ const FactsTable = ({
         </tbody>
       )}
     </table>
+    </div>
   );
 };
 

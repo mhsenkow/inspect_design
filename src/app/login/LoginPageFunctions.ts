@@ -9,27 +9,35 @@ export const allFieldsAreFilled = (formName: string): boolean => {
   return !!(form && form.email.value && form.password.value);
 };
 
-export async function handleLogin(): Promise<User | undefined> {
-  if (allFieldsAreFilled("loginInfo")) {
-    const form = Array.from(document.forms).find((f) => f.name == "loginInfo");
-    const formData = new FormData(form);
+export async function handleLogin(email: string, password: string): Promise<User | undefined> {
+  if (email && password) {
     const formObject: Awaited<PostLoginSessionRequestBody> = {
-      email: formData.get("email") as string,
-      password: formData.get("password") as string,
+      email: email,
+      password: password,
     };
     const bodyString = JSON.stringify(formObject);
-    const response = (await fetch("/api/login", {
-      method: "POST",
-      body: bodyString,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })) as PostLoginSessionResponse;
-    if (response.status == 200) {
-      return await response.json();
-    } else {
-      const textObject = await response.json();
-      throw new Error(textObject.message || response.statusText);
+    
+    try {
+      const response = (await fetch("/api/login", {
+        method: "POST",
+        body: bodyString,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })) as PostLoginSessionResponse;
+      
+      if (response.status === 200) {
+        return await response.json();
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Login failed: ${response.status} ${response.statusText}`);
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      } else {
+        throw new Error("Network error during login");
+      }
     }
   } else {
     alert("Please fill out all fields");
