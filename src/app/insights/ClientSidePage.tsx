@@ -111,10 +111,10 @@ const ClientSidePage = ({
 
   const LIMIT = 20;
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">My Insights ({liveData.length})</h1>
+    <div className="min-h-screen bg-neutral-100">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-12">
+        <div className="flex items-center justify-between mb-12">
+          <h1 className="text-4xl font-bold text-base-950">My Insights ({liveData.length})</h1>
           <ThemeSwitcher className="relative" />
         </div>
         <CurrentUserContext.Provider value={currentUser}>
@@ -205,7 +205,7 @@ const ClientSidePage = ({
                 name: "💭↑",
                 dataColumn: "parents",
                 display: (insight: Fact | Insight) => (
-                  <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                                          <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-base-50 text-base-700 border border-base-200">
                     {insight.parents?.length ?? 0}
                   </span>
                 ),
@@ -214,7 +214,7 @@ const ClientSidePage = ({
                 name: "💭↓",
                 dataColumn: "children",
                 display: (insight: Fact | Insight) => (
-                  <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-green-50 text-green-700 border border-green-200">
+                                          <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-base-100 text-base-600 border border-base-300">
                     {insight.children?.length ?? 0}
                   </span>
                 ),
@@ -223,7 +223,7 @@ const ClientSidePage = ({
                 name: "📄",
                 dataColumn: "evidence",
                 display: (insight: Fact | Insight) => (
-                  <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-purple-50 text-purple-700 border border-purple-200">
+                                          <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-base-200 text-base-500 border border-base-400">
                     {insight.evidence?.length ?? 0}
                   </span>
                 ),

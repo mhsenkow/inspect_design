@@ -156,10 +156,10 @@ const FactsTable = ({
   }, [returnPath]);
 
     return (
-    <div className="card">
-      <div className="card-header">
-        <h3 className="card-header-title">Data Table</h3>
-      </div>
+                <div className="card">
+              <div className="card-header p-6">
+                <h3 className="card-header-title text-lg">Data Table</h3>
+              </div>
       <table
         className="w-full"
         id={`factsTable-${factName}`}
@@ -201,9 +201,9 @@ const FactsTable = ({
         }}
       >
         {!hideHead && (
-          <thead className="bg-primary border-b border-primary">
-            <tr>
-              <th className="px-6 py-4 text-left text-xs font-medium text-inverse uppercase tracking-wider">
+                            <thead className="bg-base-500 border-b border-base-600">
+                    <tr>
+                      <th className="px-8 py-5 text-left text-xs font-medium text-inverse uppercase tracking-wider">
                 <input
                   type="checkbox"
                   name="selectAllFacts"
@@ -221,16 +221,16 @@ const FactsTable = ({
                   className="rounded border-inverse text-inverse focus:ring-inverse"
                 />
               </th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-inverse uppercase tracking-wider sortable cursor-pointer hover:text-secondary transition-colors duration-200">
+                                    <th className="px-8 py-5 text-left text-xs font-medium text-inverse uppercase tracking-wider sortable cursor-pointer hover:text-secondary transition-colors duration-200">
                 Updated
               </th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-inverse uppercase tracking-wider">
+                                    <th className="px-8 py-5 text-left text-xs font-medium text-inverse uppercase tracking-wider">
                 {/* search */}
                 {setDataFilter && (
                   <input
                     type="text"
                     placeholder="Search the titles..."
-                    className="w-full px-3 py-2 border border-inverse rounded-md focus:outline-none focus:ring-2 focus:ring-inverse focus:border-transparent text-sm bg-inverse text-primary"
+                    className="w-full px-4 py-3 border border-inverse rounded-lg focus:outline-none focus:ring-2 focus:ring-inverse focus:border-transparent text-sm bg-inverse text-base-950"
                     value={dataFilter}
                     onChange={async (event) => {
                       setDataFilter(event.target.value.toLocaleLowerCase());
@@ -251,7 +251,7 @@ const FactsTable = ({
                           {columns &&
                 columns.map((column) => (
                   <th
-                    className="px-6 py-4 text-left text-xs font-medium text-inverse uppercase tracking-wider sortable cursor-pointer hover:text-secondary transition-colors duration-200"
+                    className="px-8 py-5 text-left text-xs font-medium text-inverse uppercase tracking-wider sortable cursor-pointer hover:text-secondary transition-colors duration-200"
                     key={`Column: ${column.name}`}
                     data-column={column.dataColumn}
                   >
@@ -295,8 +295,8 @@ const FactsTable = ({
             }
             return (
               <React.Fragment key={`${factName} #${fact.id}`}>
-                <tr className={`${trClassName} border-b border-secondary last:border-b-0 hover:bg-secondary transition-colors duration-200`} onClick={trOnClick}>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                                        <tr className={`${trClassName} border-b border-secondary last:border-b-0 hover:bg-secondary transition-colors duration-200`} onClick={trOnClick}>
+                          <td className="px-8 py-5 whitespace-nowrap">
                     <input
                       type="checkbox"
                       name="selectedFact"
@@ -317,7 +317,7 @@ const FactsTable = ({
                       className="rounded border-primary text-primary focus:ring-primary"
                     />
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary font-mono">
+                                            <td className="px-8 py-5 whitespace-nowrap text-sm text-secondary font-mono">
                     {fact.updated_at &&
                       new Date(fact.updated_at).toLocaleDateString("en-US", {
                         month: "2-digit",
@@ -326,7 +326,7 @@ const FactsTable = ({
                       })}
                     {!fact.updated_at && "---"}
                   </td>
-                  <td className="px-6 py-4 text-sm text-primary font-medium">
+                                            <td className="px-8 py-5 text-sm text-primary font-medium">
                     {!selectRows &&
                       (factName == "snippet" ? (
                         <Link href={`/links/${fact.uid}`} className="text-primary hover:text-primary-600 transition-colors duration-200">{fact.title}</Link>
@@ -342,8 +342,8 @@ const FactsTable = ({
                   </td>
                   {columns &&
                     columns.map((column) => (
-                      <td
-                        className="px-6 py-4 whitespace-nowrap text-sm text-secondary text-center"
+                                                    <td
+                                className="px-8 py-5 whitespace-nowrap text-sm text-secondary text-center"
                         key={`Table column: ${column.name}`}
                       >
                         {column.display && column.display(fact)}

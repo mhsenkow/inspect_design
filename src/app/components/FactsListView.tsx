@@ -154,7 +154,7 @@ const FactsListView = ({
     <>
       <div
         id={HEADER_ELEMENT_ID}
-        className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6"
+        className="bg-neutral-50 rounded-xl shadow-sm border border-neutral-200 p-8 mb-8"
       >
         {(!selectedFacts || selectedFacts.length == 0) && (
           <div className="flex gap-4">

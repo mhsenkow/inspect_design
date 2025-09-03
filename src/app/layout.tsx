@@ -36,31 +36,34 @@ const Dashboard = async ({ children }: Props): Promise<React.JSX.Element> => {
         <Script src="/bootstrap.bundle.js" />
       </head>
       <body>
-        <div className="bg-primary border-b border-secondary shadow-sm">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
+        <div className="bg-base-500 border-b border-base-600 shadow-lg">
+          <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+            <div className="flex items-center justify-between h-20">
               <div className="flex items-center space-x-6">
                 <LoginRegisterLinks loggedIn={loggedIn} />
               </div>
               <div className="flex items-center">
-                <h1 className="text-2xl font-bold text-primary flex items-center">
+                <h1 className="text-3xl font-bold text-inverse flex items-center tracking-tight">
                   Inspect
-                  <Image
-                    src="/images/icon.png"
-                    width="28"
-                    height="28"
-                    alt="Inspect Logo"
-                    className="ml-2"
-                  />
+                  <div className="ml-4 w-10 h-10 bg-inverse rounded-xl flex items-center justify-center shadow-sm border border-base-400">
+                    <Image
+                      src="/images/icon.png"
+                      width="22"
+                      height="22"
+                      alt="Inspect Logo"
+                      className="opacity-80"
+                    />
+                  </div>
                 </h1>
               </div>
-              <div className="flex items-center space-x-4">
-                <Link href="http://datagotchi.net" target="_blank" className="flex items-center">
+              <div className="flex items-center space-x-6">
+                <Link href="http://datagotchi.net" target="_blank" className="flex items-center p-3 bg-base-600 rounded-xl hover:bg-base-700 transition-all duration-200 shadow-sm hover:shadow-md">
                   <Image
                     src="/images/Color1.png"
-                    width="32"
-                    height="32"
+                    width="24"
+                    height="24"
                     alt="Datagotchi Logo"
+                    className="opacity-85"
                   />
                 </Link>
               </div>

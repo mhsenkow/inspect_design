@@ -19,10 +19,10 @@ const LoginPage = (): React.JSX.Element => {
   const [error, setError] = useState<string>("");
 
   return (
-    <div className="min-h-screen bg-secondary flex items-center justify-center p-4">
-      <div className="card w-full max-w-md">
-        <div className="card-body">
-          <h2 className="text-2xl font-bold text-center mb-6">Login to Inspect</h2>
+                    <div className="min-h-screen bg-neutral-100 flex items-center justify-center p-6">
+          <div className="card w-full max-w-lg">
+            <div className="card-body p-8">
+              <h2 className="text-3xl font-bold text-center mb-8">Login to Inspect</h2>
           <form name="loginInfo" onSubmit={(e) => e.preventDefault()}>
             <div className="mb-4">
               <label className="form-label">Email:</label>
@@ -76,7 +76,7 @@ const LoginPage = (): React.JSX.Element => {
                 }
               }}
               disabled={!(email && password)}
-              className="btn btn-primary w-full"
+              className="btn btn-primary w-full py-4 text-lg font-medium"
             >
               Login
             </button>

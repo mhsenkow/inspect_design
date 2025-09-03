@@ -7,51 +7,68 @@
      CORE DESIGN TOKENS
      =================================== */
   
-  /* Primary Colors - Workplace Meta Blue */
-  --color-primary-50: #f0f4ff;
-  --color-primary-100: #e0e9ff;
-  --color-primary-200: #c7d6ff;
-  --color-primary-300: #a5b8ff;
-  --color-primary-400: #7c93ff;
-  --color-primary-500: #1877f2;
-  --color-primary-600: #166fe5;
-  --color-primary-700: #1464d0;
-  --color-primary-800: #1259bb;
-  --color-primary-900: #104ea6;
-  --color-primary-950: #0e4391;
+  /* ===================================
+     CORE DESIGN TOKENS
+     =================================== */
 
-  /* Neutral Colors - Workplace Meta Grays */
+  /* Base Color - Professional Blue Spectrum */
+  --color-base-50: #f0f4ff;
+  --color-base-100: #e0e9ff;
+  --color-base-200: #c7d6ff;
+  --color-base-300: #a5b8ff;
+  --color-base-400: #7c93ff;
+  --color-base-500: #1877f2;
+  --color-base-600: #166fe5;
+  --color-base-700: #1464d0;
+  --color-base-800: #1259bb;
+  --color-base-900: #104ea6;
+  --color-base-950: #0e4391;
+
+  /* Neutral Colors - Derived from Base Blue */
   --color-neutral-50: #ffffff;
-  --color-neutral-100: #f7f8fa;
-  --color-neutral-200: #e4e6eb;
-  --color-neutral-300: #dadde1;
-  --color-neutral-400: #bcc0c4;
-  --color-neutral-500: #8e8e93;
-  --color-neutral-600: #65676b;
-  --color-neutral-700: #4a4b4d;
-  --color-neutral-800: #3a3b3c;
-  --color-neutral-900: #1c1e21;
-  --color-neutral-950: #0c0d0e;
+  --color-neutral-100: #f8f9ff;
+  --color-neutral-200: #eef1ff;
+  --color-neutral-300: #e4e8ff;
+  --color-neutral-400: #d1d8ff;
+  --color-neutral-500: #b8c2ff;
+  --color-neutral-600: #9aa6ff;
+  --color-neutral-700: #7c8aff;
+  --color-neutral-800: #5e6eff;
+  --color-neutral-900: #4052ff;
+  --color-neutral-950: #2236ff;
 
-  /* Semantic Colors */
-  --color-text-primary: #1c1e21;
-  --color-text-secondary: #65676b;
-  --color-text-tertiary: #8e8e93;
-  --color-text-muted: #bcc0c4;
+  /* Semantic Colors - All Derived from Base Spectrum */
+  --color-text-primary: #0e4391;
+  --color-text-secondary: #4052ff;
+  --color-text-tertiary: #7c8aff;
+  --color-text-muted: #b8c2ff;
   --color-text-inverse: #ffffff;
   
   --color-background-primary: #ffffff;
-  --color-background-secondary: #f7f8fa;
-  --color-background-tertiary: #e4e6eb;
-  --color-background-inverse: #1c1e21;
+  --color-background-secondary: #f8f9ff;
+  --color-background-tertiary: #eef1ff;
+  --color-background-inverse: #0e4391;
   
-  --color-border-primary: #e4e6eb;
-  --color-border-secondary: #dadde1;
+  --color-border-primary: #e4e8ff;
+  --color-border-secondary: #d1d8ff;
   --color-border-focus: #1877f2;
   
   --color-link-primary: #1877f2;
   --color-link-hover: #166fe5;
   --color-link-active: #1464d0;
+
+  /* Success/Error Colors - Derived from Base Blue */
+  --color-success-50: #f0f4ff;
+  --color-success-100: #e0e9ff;
+  --color-success-500: #1877f2;
+  --color-success-600: #166fe5;
+  --color-success-700: #1464d0;
+
+  --color-error-50: #fff0f0;
+  --color-error-100: #ffe0e0;
+  --color-error-500: #ff4444;
+  --color-error-600: #ff3333;
+  --color-error-700: #ff2222;
 
   /* Success Colors */
   --color-success-50: #f0fdf4;
@@ -415,21 +432,21 @@ body {
 
 /* Button variants */
 .btn-primary {
-  background-color: var(--color-primary-500);
-  border-color: var(--color-primary-500);
+  background-color: var(--color-base-500);
+  border-color: var(--color-base-500);
   color: var(--color-text-inverse);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: var(--color-primary-600);
-  border-color: var(--color-primary-600);
+  background-color: var(--color-base-600);
+  border-color: var(--color-base-600);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .btn-primary:active:not(:disabled) {
-  background-color: var(--color-primary-700);
-  border-color: var(--color-primary-700);
+  background-color: var(--color-base-700);
+  border-color: var(--color-base-700);
   transform: translateY(1px);
 }
 
@@ -474,20 +491,20 @@ body {
 
 .btn-outline {
   background-color: transparent;
-  border-color: var(--color-primary-500);
-  color: var(--color-primary-500);
+  border-color: var(--color-base-500);
+  color: var(--color-base-500);
   box-shadow: none;
 }
 
 .btn-outline:hover:not(:disabled) {
-  background-color: var(--color-primary-50);
-  border-color: var(--color-primary-600);
-  color: var(--color-primary-600);
+  background-color: var(--color-base-50);
+  border-color: var(--color-base-600);
+  color: var(--color-base-600);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .btn-outline:active:not(:disabled) {
-  background-color: var(--color-primary-100);
+  background-color: var(--color-base-100);
   transform: translateY(1px);
 }
 
@@ -634,7 +651,8 @@ body {
 }
 
 .form-input::placeholder {
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
+  opacity: 1;
 }
 
 .form-input.error {

@@ -18,10 +18,10 @@ const RegisterPage = (): React.JSX.Element => {
   const { setLoggedIn, setToken } = useUser();
 
   return (
-    <div className="min-h-screen bg-secondary flex items-center justify-center p-4">
-      <div className="card w-full max-w-md">
-        <div className="card-body">
-          <h2 className="text-2xl font-bold text-center mb-6">Register for Inspect by Datagotchi Labs</h2>
+            <div className="min-h-screen bg-neutral-100 flex items-center justify-center p-6">
+      <div className="card w-full max-w-lg">
+        <div className="card-body p-8">
+          <h2 className="text-3xl font-bold text-center mb-8">Register for Inspect by Datagotchi Labs</h2>
           <form name="registerInfo" onSubmit={(e) => e.preventDefault()}>
             <div className="mb-4">
               <label className="form-label">Email:</label>

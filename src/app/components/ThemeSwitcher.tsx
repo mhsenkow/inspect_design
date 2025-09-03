@@ -14,7 +14,8 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ className = '' }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const themes = [
-    { name: 'Default (Blue)', class: 'theme-blue' },
+    { name: 'Default (Blue)', class: '' },
+    { name: 'Blue', class: 'theme-blue' },
     { name: 'Green', class: 'theme-green' },
     { name: 'Purple', class: 'theme-purple' },
     { name: 'Orange', class: 'theme-orange' },
@@ -69,11 +70,11 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ className = '' }) => {
       'shadow-subtle', 'shadow-bold'
     );
     
-    // Add new theme classes
-    if (theme) body.classList.add(theme);
-    if (spacing) body.classList.add(spacing);
-    if (radius) body.classList.add(radius);
-    if (shadow) body.classList.add(shadow);
+    // Add new theme classes (only if not empty string)
+    if (theme && theme !== '') body.classList.add(theme);
+    if (spacing && spacing !== '') body.classList.add(spacing);
+    if (radius && radius !== '') body.classList.add(radius);
+    if (shadow && shadow !== '') body.classList.add(shadow);
   };
 
   const handleThemeChange = (themeClass: string) => {
