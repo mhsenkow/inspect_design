@@ -11,6 +11,7 @@ import "./design-system.css";
 import "./themes.css";
 import "./style.css";
 import LoginRegisterLinks from "./components/LoginRegisterLinks";
+import ThemeSwitcher from "./components/ThemeSwitcher";
 // import { getUserFromServer } from "./api/functions";
 
 interface Props {
@@ -35,33 +36,44 @@ const Dashboard = async ({ children }: Props): Promise<React.JSX.Element> => {
       <head>
         <Script src="/bootstrap.bundle.js" />
       </head>
-      <body>
-        <div className="bg-base-500 border-b border-base-600 shadow-lg">
+      <body className="bg-background-secondary min-h-screen">
+        {/* Header - Parent Level */}
+        <header className="bg-background-inverse border-b border-border-primary shadow-sm sticky top-0 z-header">
           <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-            <div className="flex items-center justify-between h-20">
-              <div className="flex items-center space-x-6">
+            <div className="flex items-center justify-between h-16">
+              {/* Left Navigation */}
+              <div className="flex items-center space-x-4">
                 <LoginRegisterLinks loggedIn={loggedIn} />
               </div>
+
+              {/* Center Brand */}
               <div className="flex items-center">
-                <h1 className="text-3xl font-bold text-inverse flex items-center tracking-tight">
+                <h1 className="text-2xl font-bold text-text-inverse flex items-center tracking-tight">
                   Inspect
-                  <div className="ml-4 w-10 h-10 bg-inverse rounded-xl flex items-center justify-center shadow-sm border border-base-400">
+                  <div className="ml-3 w-8 h-8 bg-text-inverse rounded-lg flex items-center justify-center shadow-sm border border-border-primary">
                     <Image
                       src="/images/icon.png"
-                      width="22"
-                      height="22"
+                      width="18"
+                      height="18"
                       alt="Inspect Logo"
                       className="opacity-80"
                     />
                   </div>
                 </h1>
               </div>
-              <div className="flex items-center space-x-6">
-                <Link href="http://datagotchi.net" target="_blank" className="flex items-center p-3 bg-base-600 rounded-xl hover:bg-base-700 transition-all duration-200 shadow-sm hover:shadow-md">
+
+              {/* Right Navigation */}
+              <div className="flex items-center space-x-4">
+                <ThemeSwitcher />
+                <Link
+                  href="http://datagotchi.net"
+                  target="_blank"
+                  className="flex items-center p-2 bg-background-primary rounded-lg hover:bg-background-secondary transition-all duration-200 shadow-sm hover:shadow-md"
+                >
                   <Image
                     src="/images/Color1.png"
-                    width="24"
-                    height="24"
+                    width="20"
+                    height="20"
                     alt="Datagotchi Logo"
                     className="opacity-85"
                   />
@@ -69,8 +81,12 @@ const Dashboard = async ({ children }: Props): Promise<React.JSX.Element> => {
               </div>
             </div>
           </div>
-        </div>
-        <CookiesProvider>{children}</CookiesProvider>
+        </header>
+
+        {/* Main Content - Main Level */}
+        <main className="flex-1">
+          <CookiesProvider>{children}</CookiesProvider>
+        </main>
       </body>
     </html>
   );

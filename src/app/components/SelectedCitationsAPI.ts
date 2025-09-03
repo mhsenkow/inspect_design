@@ -40,7 +40,7 @@ export const addCitationsToInsight = async (
     } as InsightEvidence);
   }
 
-  return fetch("/api/evidence", {
+  const response = await fetch("/api/evidence", {
     method: "POST",
     body: JSON.stringify({
       evidence: evidence?.map((c) => ({
@@ -52,7 +52,25 @@ export const addCitationsToInsight = async (
       "Content-Type": "application/json",
       "x-access-token": token,
     },
-  }).then(async (response) => ({ action: 1, facts: await response.json() }));
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to add evidence: ${response.statusText}`);
+  }
+
+  const result = await response.json();
+
+  // Transform evidence data to flatten the summary relationship for display
+  const transformedEvidence = result.map((evidence: any) => ({
+    ...evidence,
+    title: evidence.summary?.title || "Untitled",
+    uid: evidence.summary?.uid,
+    updated_at: evidence.summary?.updated_at,
+    logo_uri: evidence.summary?.source?.logo_uri,
+    source_baseurl: evidence.summary?.source?.baseurl,
+  }));
+
+  return { action: 1, facts: transformedEvidence };
 };
 
 export const addChildrenToInsight = async (

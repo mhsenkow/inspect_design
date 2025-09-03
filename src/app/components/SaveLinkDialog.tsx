@@ -217,7 +217,7 @@ const SaveLinkDialog = ({
         }}
       >
         <button
-                          className="btn btn-danger"
+          className="btn btn-danger"
           onClick={() => {
             cancelDialog();
           }}

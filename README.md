@@ -19,12 +19,14 @@ yarn install
 Make sure PostgreSQL is running locally. You can install it via:
 
 **macOS (using Homebrew):**
+
 ```bash
 brew install postgresql
 brew services start postgresql
 ```
 
 **Ubuntu/Debian:**
+
 ```bash
 sudo apt update
 sudo apt install postgresql postgresql-contrib
@@ -77,6 +79,7 @@ The application will be available at `http://localhost:3000`
 ## Database Schema
 
 The database includes the following tables:
+
 - `users` - User accounts and authentication
 - `insights` - Main content pieces with titles and metadata
 - `summaries` - Source content and URLs
@@ -120,13 +123,16 @@ The database includes the following tables:
 ## Troubleshooting
 
 ### Database Connection Issues
+
 - Ensure PostgreSQL is running
 - Check that the database credentials in `.env` match your PostgreSQL setup
 - Verify the database `inspect` exists
 
 ### Port Already in Use
+
 - Change the port in `next.config.js` or use `yarn dev -p 3001`
 
 ### Build Issues
+
 - Clear node_modules and reinstall: `rm -rf node_modules && yarn install`
 - Clear Next.js cache: `rm -rf .next && yarn dev`

@@ -8,8 +8,8 @@ export const getEncryptedToken = (user: User): string => {
       user_id: user.id,
       email: user.email,
       username: user.username,
-    })
-  ).toString('base64');
+    }),
+  ).toString("base64");
   const keyIntegers = process.env
     .TOKEN_KEY!.split("")
     .map((char) => char.charCodeAt(0));
@@ -32,7 +32,7 @@ export const decryptToken = (
   if (!tokenKey || !token) {
     return null;
   }
-  
+
   try {
     // First, try to decode the token safely
     let decodedToken: string;
@@ -42,37 +42,37 @@ export const decryptToken = (
       // If URL decoding fails, the token is corrupted
       return null;
     }
-    
+
     const keyIntegers = tokenKey.split("").map((char) => char.charCodeAt(0));
     const tokenIntegers = decodedToken
       .split("")
       .map((char) => char.charCodeAt(0));
-    
+
     const intermediateString = tokenIntegers
       .map((tokenCharInt, i) =>
         String.fromCharCode(tokenCharInt - keyIntegers[i % keyIntegers.length]),
       )
       .join("");
-    
+
     // Validate that the intermediate string looks like base64
     if (!/^[A-Za-z0-9+/]*={0,2}$/.test(intermediateString)) {
       return null;
     }
-    
-    const jsonStr = Buffer.from(intermediateString, 'base64').toString('utf-8');
-    
+
+    const jsonStr = Buffer.from(intermediateString, "base64").toString("utf-8");
+
     // Validate that the JSON string looks reasonable
-    if (!jsonStr.startsWith('{') || !jsonStr.includes('"user_id"')) {
+    if (!jsonStr.startsWith("{") || !jsonStr.includes('"user_id"')) {
       return null;
     }
-    
+
     const parsed = JSON.parse(jsonStr);
-    
+
     // Validate the parsed object has required fields
     if (!parsed.user_id || !parsed.email || !parsed.username) {
       return null;
     }
-    
+
     return parsed;
   } catch (error) {
     // Silently fail for any decryption errors

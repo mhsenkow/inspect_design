@@ -22,7 +22,7 @@ export async function handleRegister(): Promise<User | undefined> {
       password: formData.get("password") as string,
     };
     const bodyString = JSON.stringify(formObject);
-    
+
     try {
       const response = (await fetch("/api/register", {
         method: "POST",
@@ -31,12 +31,15 @@ export async function handleRegister(): Promise<User | undefined> {
           "Content-Type": "application/json",
         },
       })) as RegisterPostRouteResponse;
-      
+
       if (response.status === 201) {
         return await response.json();
       } else {
         const errorData = await response.json();
-        throw new Error(errorData.message || `Registration failed: ${response.status} ${response.statusText}`);
+        throw new Error(
+          errorData.message ||
+            `Registration failed: ${response.status} ${response.statusText}`,
+        );
       }
     } catch (error) {
       if (error instanceof Error) {

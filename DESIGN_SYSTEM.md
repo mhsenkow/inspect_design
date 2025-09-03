@@ -115,9 +115,9 @@ Apply to `<body>` or any container:
 ```html
 <!-- Apply a color theme -->
 <body class="theme-purple">
-
-<!-- Apply multiple theme variations -->
-<body class="theme-green spacing-compact radius-rounded shadow-bold">
+  <!-- Apply multiple theme variations -->
+  <body class="theme-green spacing-compact radius-rounded shadow-bold"></body>
+</body>
 ```
 
 ## Theme Switcher Component
@@ -125,10 +125,10 @@ Apply to `<body>` or any container:
 The `ThemeSwitcher` component provides an interactive way to test different theme combinations:
 
 ```tsx
-import ThemeSwitcher from './components/ThemeSwitcher';
+import ThemeSwitcher from "./components/ThemeSwitcher";
 
 // Use in any component
-<ThemeSwitcher className="fixed top-4 right-4 z-50" />
+<ThemeSwitcher className="fixed top-4 right-4 z-50" />;
 ```
 
 ### Features
@@ -145,37 +145,41 @@ import ThemeSwitcher from './components/ThemeSwitcher';
 To migrate existing styles to use the design system:
 
 1. **Replace hardcoded colors** with semantic variables:
+
    ```css
    /* Before */
    color: #333;
-   
+
    /* After */
    color: var(--color-text-primary);
    ```
 
 2. **Replace hardcoded spacing** with spacing variables:
+
    ```css
    /* Before */
    padding: 16px;
-   
+
    /* After */
    padding: var(--spacing-4);
    ```
 
 3. **Replace hardcoded border radius** with radius variables:
+
    ```css
    /* Before */
    border-radius: 8px;
-   
+
    /* After */
    border-radius: var(--radius-lg);
    ```
 
 4. **Replace hardcoded shadows** with shadow variables:
+
    ```css
    /* Before */
-   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-   
+   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
    /* After */
    box-shadow: var(--shadow-sm);
    ```
@@ -185,6 +189,7 @@ To migrate existing styles to use the design system:
 To create a new color theme:
 
 1. Add the theme class to `themes.css`:
+
    ```css
    .theme-custom {
      --color-primary-50: #f0f9ff;
@@ -197,7 +202,7 @@ To create a new color theme:
    ```tsx
    const themes = [
      // ... existing themes
-     { name: 'Custom', class: 'theme-custom' },
+     { name: "Custom", class: "theme-custom" },
    ];
    ```
 
@@ -213,6 +218,7 @@ To create a new color theme:
 ## Browser Support
 
 The design system uses CSS custom properties which are supported in:
+
 - Chrome 49+
 - Firefox 31+
 - Safari 9.1+

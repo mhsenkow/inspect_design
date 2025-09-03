@@ -28,7 +28,7 @@ const LoginRegisterLinks = ({
         >
           Log Out
         </button>
-        <Link 
+        <Link
           href="/insights"
           className="btn btn-primary px-6 py-3 rounded-xl transition-all duration-200 font-medium shadow-sm hover:shadow-md text-base"
         >
@@ -40,13 +40,13 @@ const LoginRegisterLinks = ({
 
   return (
     <>
-      <Link 
+      <Link
         href={`/login?return=${returnPath}`}
         className="btn btn-ghost text-inverse hover:text-inverse hover:bg-base-600 px-6 py-3 rounded-xl transition-all duration-200 font-medium text-base"
       >
         Login
       </Link>
-      <Link 
+      <Link
         href={`/register?return=${returnPath}`}
         className="btn btn-primary px-6 py-3 rounded-xl transition-all duration-200 font-medium shadow-sm hover:shadow-md text-base"
       >

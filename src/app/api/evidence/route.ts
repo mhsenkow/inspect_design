@@ -29,15 +29,50 @@ export async function POST(
       const evidenceToInsert = evidence
         .filter((e) => !!e.summary_id && !!e.insight_id)
         .map((e) => ({
-          summary_id: e.summary_id,
-          insight_id: e.insight_id,
+          summary_id: e.summary_id!,
+          insight_id: e.insight_id!,
         }));
       if (evidenceToInsert.length > 0) {
         try {
-          const insertedEvidence = await EvidenceModel.query()
-            .insert(evidenceToInsert)
+          // Check for existing evidence to avoid duplicates
+          const existingEvidence = await EvidenceModel.query()
+            .where((builder) => {
+              evidenceToInsert.forEach((e, index) => {
+                if (index === 0) {
+                  builder
+                    .where("summary_id", e.summary_id)
+                    .andWhere("insight_id", e.insight_id);
+                } else {
+                  builder.orWhere((subBuilder) =>
+                    subBuilder
+                      .where("summary_id", e.summary_id)
+                      .andWhere("insight_id", e.insight_id),
+                  );
+                }
+              });
+            })
             .withGraphFetched("summary.source");
-          return NextResponse.json(insertedEvidence);
+
+          // Filter out evidence that already exists
+          const newEvidence = evidenceToInsert.filter(
+            (e) =>
+              !existingEvidence.some(
+                (existing) =>
+                  existing.summary_id === e.summary_id &&
+                  existing.insight_id === e.insight_id,
+              ),
+          );
+
+          let insertedEvidence: EvidenceModel[] = [];
+          if (newEvidence.length > 0) {
+            insertedEvidence = await EvidenceModel.query()
+              .insert(newEvidence)
+              .withGraphFetched("summary.source");
+          }
+
+          // Return both existing and newly inserted evidence
+          const allEvidence = [...existingEvidence, ...insertedEvidence];
+          return NextResponse.json(allEvidence);
         } catch (err) {
           if (err instanceof ForeignKeyViolationError) {
             console.error("Foreign key violation:", err.message);

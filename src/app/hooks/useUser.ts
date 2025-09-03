@@ -20,7 +20,8 @@ const useUser = () => {
       setLoggedIn(true);
       const userDetails = decryptToken(
         token!,
-        process.env.NEXT_PUBLIC_TOKEN_KEY || "your-secret-jwt-key-change-this-in-production",
+        process.env.NEXT_PUBLIC_TOKEN_KEY ||
+          "your-secret-jwt-key-change-this-in-production",
       );
       if (userDetails) {
         setUserDetails(userDetails);

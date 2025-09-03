@@ -9,14 +9,17 @@ export const allFieldsAreFilled = (formName: string): boolean => {
   return !!(form && form.email.value && form.password.value);
 };
 
-export async function handleLogin(email: string, password: string): Promise<User | undefined> {
+export async function handleLogin(
+  email: string,
+  password: string,
+): Promise<User | undefined> {
   if (email && password) {
     const formObject: Awaited<PostLoginSessionRequestBody> = {
       email: email,
       password: password,
     };
     const bodyString = JSON.stringify(formObject);
-    
+
     try {
       const response = (await fetch("/api/login", {
         method: "POST",
@@ -25,12 +28,15 @@ export async function handleLogin(email: string, password: string): Promise<User
           "Content-Type": "application/json",
         },
       })) as PostLoginSessionResponse;
-      
+
       if (response.status === 200) {
         return await response.json();
       } else {
         const errorData = await response.json();
-        throw new Error(errorData.message || `Login failed: ${response.status} ${response.statusText}`);
+        throw new Error(
+          errorData.message ||
+            `Login failed: ${response.status} ${response.statusText}`,
+        );
       }
     } catch (error) {
       if (error instanceof Error) {

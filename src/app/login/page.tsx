@@ -19,10 +19,12 @@ const LoginPage = (): React.JSX.Element => {
   const [error, setError] = useState<string>("");
 
   return (
-                    <div className="min-h-screen bg-neutral-100 flex items-center justify-center p-6">
-          <div className="card w-full max-w-lg">
-            <div className="card-body p-8">
-              <h2 className="text-3xl font-bold text-center mb-8">Login to Inspect</h2>
+    <div className="min-h-screen bg-neutral-100 flex items-center justify-center p-6">
+      <div className="card w-full max-w-lg">
+        <div className="card-body p-8">
+          <h2 className="text-3xl font-bold text-center mb-8">
+            Login to Inspect
+          </h2>
           <form name="loginInfo" onSubmit={(e) => e.preventDefault()}>
             <div className="mb-4">
               <label className="form-label">Email:</label>
@@ -53,7 +55,9 @@ const LoginPage = (): React.JSX.Element => {
                   const user = await handleLogin(email, password);
                   console.log("Login response:", user);
                   if (user?.token) {
-                    console.log("Login successful, setting token and redirecting");
+                    console.log(
+                      "Login successful, setting token and redirecting",
+                    );
                     setToken(user.token);
                     setLoggedIn(true);
 

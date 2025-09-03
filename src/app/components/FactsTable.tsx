@@ -155,11 +155,11 @@ const FactsTable = ({
     }
   }, [returnPath]);
 
-    return (
-                <div className="card">
-              <div className="card-header p-6">
-                <h3 className="card-header-title text-lg">Data Table</h3>
-              </div>
+  return (
+    <div className="card">
+      <div className="card-header p-6">
+        <h3 className="card-header-title text-lg">Data Table</h3>
+      </div>
       <table
         className="w-full"
         id={`factsTable-${factName}`}
@@ -201,9 +201,9 @@ const FactsTable = ({
         }}
       >
         {!hideHead && (
-                            <thead className="bg-base-500 border-b border-base-600">
-                    <tr>
-                      <th className="px-8 py-5 text-left text-xs font-medium text-inverse uppercase tracking-wider">
+          <thead className="bg-base-500 border-b border-base-600">
+            <tr>
+              <th className="px-8 py-5 text-left text-xs font-medium text-inverse uppercase tracking-wider">
                 <input
                   type="checkbox"
                   name="selectAllFacts"
@@ -221,10 +221,10 @@ const FactsTable = ({
                   className="rounded border-inverse text-inverse focus:ring-inverse"
                 />
               </th>
-                                    <th className="px-8 py-5 text-left text-xs font-medium text-inverse uppercase tracking-wider sortable cursor-pointer hover:text-secondary transition-colors duration-200">
+              <th className="px-8 py-5 text-left text-xs font-medium text-inverse uppercase tracking-wider sortable cursor-pointer hover:text-secondary transition-colors duration-200">
                 Updated
               </th>
-                                    <th className="px-8 py-5 text-left text-xs font-medium text-inverse uppercase tracking-wider">
+              <th className="px-8 py-5 text-left text-xs font-medium text-inverse uppercase tracking-wider">
                 {/* search */}
                 {setDataFilter && (
                   <input
@@ -246,9 +246,11 @@ const FactsTable = ({
                     }}
                   />
                 )}
-                {loading && <span className="text-sm text-tertiary">Loading...</span>}
+                {loading && (
+                  <span className="text-sm text-tertiary">Loading...</span>
+                )}
               </th>
-                          {columns &&
+              {columns &&
                 columns.map((column) => (
                   <th
                     className="px-8 py-5 text-left text-xs font-medium text-inverse uppercase tracking-wider sortable cursor-pointer hover:text-secondary transition-colors duration-200"
@@ -258,268 +260,284 @@ const FactsTable = ({
                     {column.name}
                   </th>
                 ))}
-          </tr>
-        </thead>
-      )}
-      {!loading && filteredData && (
-        <tbody>
-          {filteredData.sort(sortFunction).map((fact) => {
-            // TODO: think of a better way to combine disabled and category styles
-            let trClassName = "hover:bg-secondary";
-            if (
-              disabledIds?.includes(
-                factName == "snippet"
-                  ? (fact as InsightEvidence).summary_id
-                  : (fact.id ?? -1),
-              )
-            ) {
-              trClassName += " bg-tertiary opacity-50";
-            }
-            let trOnClick: React.MouseEventHandler<
-              HTMLTableRowElement
-            > = (): boolean => true;
-            if (
-              selectRows &&
-              !disabledIds?.includes(
-                factName == "snippet"
-                  ? (fact as InsightEvidence).summary_id
-                  : (fact.id ?? -1),
-              )
-            ) {
-              /**
-               * Select the row when the <tr> is clicked.
-               */
-              trOnClick = () => {
-                toggleSelectedFacts(fact);
-              };
-            }
-            return (
-              <React.Fragment key={`${factName} #${fact.id}`}>
-                                        <tr className={`${trClassName} border-b border-secondary last:border-b-0 hover:bg-secondary transition-colors duration-200`} onClick={trOnClick}>
-                          <td className="px-8 py-5 whitespace-nowrap">
-                    <input
-                      type="checkbox"
-                      name="selectedFact"
-                      checked={
-                        selectedFacts &&
-                        selectedFacts.map((f) => f.id).includes(fact.id)
-                      }
-                      onChange={() => {
-                        if (!selectRows) {
-                          return toggleSelectedFacts(fact);
+            </tr>
+          </thead>
+        )}
+        {!loading && filteredData && (
+          <tbody>
+            {filteredData.sort(sortFunction).map((fact) => {
+              // TODO: think of a better way to combine disabled and category styles
+              let trClassName = "hover:bg-secondary";
+              if (
+                disabledIds?.includes(
+                  factName == "snippet"
+                    ? (fact as InsightEvidence).summary_id
+                    : (fact.id ?? -1),
+                )
+              ) {
+                trClassName += " bg-tertiary opacity-50";
+              }
+              let trOnClick: React.MouseEventHandler<
+                HTMLTableRowElement
+              > = (): boolean => true;
+              if (
+                selectRows &&
+                !disabledIds?.includes(
+                  factName == "snippet"
+                    ? (fact as InsightEvidence).summary_id
+                    : (fact.id ?? -1),
+                )
+              ) {
+                /**
+                 * Select the row when the <tr> is clicked.
+                 */
+                trOnClick = () => {
+                  toggleSelectedFacts(fact);
+                };
+              }
+              return (
+                <React.Fragment key={`${factName} #${fact.id}`}>
+                  <tr
+                    className={`${trClassName} border-b border-secondary last:border-b-0 hover:bg-secondary transition-colors duration-200`}
+                    onClick={trOnClick}
+                  >
+                    <td className="px-8 py-5 whitespace-nowrap">
+                      <input
+                        type="checkbox"
+                        name="selectedFact"
+                        checked={
+                          selectedFacts &&
+                          selectedFacts.map((f) => f.id).includes(fact.id)
                         }
-                      }}
-                      disabled={disabledIds?.includes(
-                        factName == "snippet"
-                          ? (fact as InsightEvidence).summary_id
-                          : (fact.id ?? -1),
-                      )}
-                      className="rounded border-primary text-primary focus:ring-primary"
-                    />
-                  </td>
-                                            <td className="px-8 py-5 whitespace-nowrap text-sm text-secondary font-mono">
-                    {fact.updated_at &&
-                      new Date(fact.updated_at).toLocaleDateString("en-US", {
-                        month: "2-digit",
-                        day: "2-digit",
-                        year: "numeric",
-                      })}
-                    {!fact.updated_at && "---"}
-                  </td>
-                                            <td className="px-8 py-5 text-sm text-primary font-medium">
-                    {!selectRows &&
-                      (factName == "snippet" ? (
-                        <Link href={`/links/${fact.uid}`} className="text-primary hover:text-primary-600 transition-colors duration-200">{fact.title}</Link>
-                      ) : (
-                        <Link href={`/insights/${fact.uid}`} className="text-primary hover:text-primary-600 transition-colors duration-200">{fact.title}</Link>
+                        onChange={() => {
+                          if (!selectRows) {
+                            return toggleSelectedFacts(fact);
+                          }
+                        }}
+                        disabled={disabledIds?.includes(
+                          factName == "snippet"
+                            ? (fact as InsightEvidence).summary_id
+                            : (fact.id ?? -1),
+                        )}
+                        className="rounded border-primary text-primary focus:ring-primary"
+                      />
+                    </td>
+                    <td className="px-8 py-5 whitespace-nowrap text-sm text-secondary font-mono">
+                      {fact.updated_at &&
+                        new Date(fact.updated_at).toLocaleDateString("en-US", {
+                          month: "2-digit",
+                          day: "2-digit",
+                          year: "numeric",
+                        })}
+                      {!fact.updated_at && "---"}
+                    </td>
+                    <td className="px-8 py-5 text-sm text-primary font-medium">
+                      {!selectRows &&
+                        (factName == "snippet" ? (
+                          <Link
+                            href={`/links/${fact.uid}`}
+                            className="text-primary hover:text-primary-600 transition-colors duration-200"
+                          >
+                            {fact.title}
+                          </Link>
+                        ) : (
+                          <Link
+                            href={`/insights/${fact.uid}`}
+                            className="text-primary hover:text-primary-600 transition-colors duration-200"
+                          >
+                            {fact.title}
+                          </Link>
+                        ))}
+                      {selectRows && fact.title}
+                      {/* FIXME: updates several times until reactions is an empty array */}
+                      <span className="ml-2 text-muted">
+                        {fact.reactions &&
+                          fact.reactions.map((r) => r.reaction).join("")}
+                      </span>
+                    </td>
+                    {columns &&
+                      columns.map((column) => (
+                        <td
+                          className="px-8 py-5 whitespace-nowrap text-sm text-secondary text-center"
+                          key={`Table column: ${column.name}`}
+                        >
+                          {column.display && column.display(fact)}
+                        </td>
                       ))}
-                    {selectRows && fact.title}
-                    {/* FIXME: updates several times until reactions is an empty array */}
-                    <span className="ml-2 text-muted">
-                      {fact.reactions &&
-                        fact.reactions.map((r) => r.reaction).join("")}
-                    </span>
-                  </td>
-                  {columns &&
-                    columns.map((column) => (
-                                                    <td
-                                className="px-8 py-5 whitespace-nowrap text-sm text-secondary text-center"
-                        key={`Table column: ${column.name}`}
-                      >
-                        {column.display && column.display(fact)}
-                      </td>
-                    ))}
-                </tr>
-                {enableFeedback && (
-                  <>
-                    <tr>
-                      <td
-                        colSpan={columns ? columns.length + 3 : 4}
-                        className="bg-secondary text-sm p-2"
-                      >
-                        <div className="flex justify-around w-full m-4">
-                          <FeedbackLink
-                            actionVerb="React"
-                            icon="😲"
-                            setOnClickFunction={() => {
-                              if (loggedIn) {
-                                const newIsEditing = {} as EditingForFact;
-                                newIsEditing[fact.id!] = true;
-                                setIsEditingReactionForFact({
-                                  ...isEditingReactionForFact,
-                                  ...newIsEditing,
-                                });
-                              } else {
-                                confirmAndRegister();
-                              }
-                            }}
-                          />
-                          <FeedbackLink
-                            actionVerb="Comment"
-                            icon="💬"
-                            setOnClickFunction={() => {
-                              if (loggedIn) {
-                                const newIsEditing = {} as EditingForFact;
-                                newIsEditing[fact.id!] = true;
-                                setIsEditingCommentForFact({
-                                  ...isEditingCommentForFact,
-                                  ...newIsEditing,
-                                });
-                              } else {
-                                confirmAndRegister();
-                              }
-                            }}
-                          />
-                        </div>
-                        <div>
-                          {loggedIn && isEditingReactionForFact[fact.id!] && (
-                            <FeedbackInputElement
-                              actionType="reaction"
-                              submitFunc={(reaction) => {
-                                if (token) {
-                                  return submitReaction(
-                                    {
-                                      reaction,
-                                      // FIXME: update this submitReaction logic
-                                      summary_id: fact.summary_id,
-                                      insight_id: fact.insight_id,
-                                    },
-                                    token,
-                                  );
-                                }
-                                return Promise.resolve();
-                              }}
-                              directions="Select an emoji character"
-                              afterSubmit={(newObject) => {
-                                if (newObject) {
-                                  if (!fact.reactions) {
-                                    fact.reactions = [];
-                                  }
-                                  fact.reactions = [
-                                    ...fact.reactions.filter(
-                                      (r) => r.user_id != newObject.user_id,
-                                    ),
-                                    newObject as FactReaction,
-                                  ];
-                                  setData([...data!]);
-                                }
-                              }}
-                              closeFunc={() => {
-                                const newIsEditing = {} as EditingForFact;
-                                newIsEditing[fact.id!] = false;
-                                setIsEditingReactionForFact({
-                                  ...isEditingReactionForFact,
-                                  ...newIsEditing,
-                                });
-                              }}
-                            />
-                          )}
-                          {loggedIn && isEditingCommentForFact[fact.id!] && (
-                            <FeedbackInputElement
-                              actionType="comment"
-                              submitFunc={(comment) => {
-                                if (token) {
-                                  return submitComment(
-                                    {
-                                      comment,
-                                      summary_id: fact.summary_id,
-                                      insight_id: fact.insight_id,
-                                    },
-                                    token,
-                                  );
-                                }
-                                return Promise.resolve();
-                              }}
-                              directions="Enter a text comment"
-                              afterSubmit={(newObject) => {
-                                if (newObject) {
-                                  if (!fact.comments) {
-                                    fact.comments = [];
-                                  }
-                                  fact.comments = [...fact.comments, newObject];
-                                  setData([...data!]);
-                                }
-                              }}
-                              closeFunc={() => {
-                                const newIsEditing = {} as EditingForFact;
-                                newIsEditing[fact.id!] = false;
-                                setIsEditingCommentForFact({
-                                  ...isEditingCommentForFact,
-                                  ...newIsEditing,
-                                });
-                              }}
-                            />
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                    <tr>
-                      {fact.comments && fact.comments.length > 0 && (
+                  </tr>
+                  {enableFeedback && (
+                    <>
+                      <tr>
                         <td
                           colSpan={columns ? columns.length + 3 : 4}
-                          className="bg-secondary text-sm"
+                          className="bg-secondary text-sm p-2"
                         >
-                          <div className="p-2">
-                            <ul className="m-1 pl-4 list-none">
-                              {fact.comments.map((comment, idx) => (
-                                <li key={idx}>
-                                  <Comment
-                                    comment={comment}
-                                    removeCommentFunc={(id) => {
-                                      if (!fact.comments) {
-                                        fact.comments = [];
-                                      }
-                                      fact.comments =
-                                        fact.comments.filter(
-                                          (c) => c.id != id,
-                                        ) ?? [];
-                                      setData([...data!]);
-                                    }}
-                                  />
-                                </li>
-                              ))}
-                            </ul>
+                          <div className="flex justify-around w-full m-4">
+                            <FeedbackLink
+                              actionVerb="React"
+                              icon="😲"
+                              setOnClickFunction={() => {
+                                if (loggedIn) {
+                                  const newIsEditing = {} as EditingForFact;
+                                  newIsEditing[fact.id!] = true;
+                                  setIsEditingReactionForFact({
+                                    ...isEditingReactionForFact,
+                                    ...newIsEditing,
+                                  });
+                                } else {
+                                  confirmAndRegister();
+                                }
+                              }}
+                            />
+                            <FeedbackLink
+                              actionVerb="Comment"
+                              icon="💬"
+                              setOnClickFunction={() => {
+                                if (loggedIn) {
+                                  const newIsEditing = {} as EditingForFact;
+                                  newIsEditing[fact.id!] = true;
+                                  setIsEditingCommentForFact({
+                                    ...isEditingCommentForFact,
+                                    ...newIsEditing,
+                                  });
+                                } else {
+                                  confirmAndRegister();
+                                }
+                              }}
+                            />
+                          </div>
+                          <div>
+                            {loggedIn && isEditingReactionForFact[fact.id!] && (
+                              <FeedbackInputElement
+                                actionType="reaction"
+                                submitFunc={(reaction) => {
+                                  if (token) {
+                                    return submitReaction(
+                                      {
+                                        reaction,
+                                        // FIXME: update this submitReaction logic
+                                        summary_id: fact.summary_id,
+                                        insight_id: fact.insight_id,
+                                      },
+                                      token,
+                                    );
+                                  }
+                                  return Promise.resolve();
+                                }}
+                                directions="Select an emoji character"
+                                afterSubmit={(newObject) => {
+                                  if (newObject) {
+                                    if (!fact.reactions) {
+                                      fact.reactions = [];
+                                    }
+                                    fact.reactions = [
+                                      ...fact.reactions.filter(
+                                        (r) => r.user_id != newObject.user_id,
+                                      ),
+                                      newObject as FactReaction,
+                                    ];
+                                    setData([...data!]);
+                                  }
+                                }}
+                                closeFunc={() => {
+                                  const newIsEditing = {} as EditingForFact;
+                                  newIsEditing[fact.id!] = false;
+                                  setIsEditingReactionForFact({
+                                    ...isEditingReactionForFact,
+                                    ...newIsEditing,
+                                  });
+                                }}
+                              />
+                            )}
+                            {loggedIn && isEditingCommentForFact[fact.id!] && (
+                              <FeedbackInputElement
+                                actionType="comment"
+                                submitFunc={(comment) => {
+                                  if (token) {
+                                    return submitComment(
+                                      {
+                                        comment,
+                                        summary_id: fact.summary_id,
+                                        insight_id: fact.insight_id,
+                                      },
+                                      token,
+                                    );
+                                  }
+                                  return Promise.resolve();
+                                }}
+                                directions="Enter a text comment"
+                                afterSubmit={(newObject) => {
+                                  if (newObject) {
+                                    if (!fact.comments) {
+                                      fact.comments = [];
+                                    }
+                                    fact.comments = [
+                                      ...fact.comments,
+                                      newObject,
+                                    ];
+                                    setData([...data!]);
+                                  }
+                                }}
+                                closeFunc={() => {
+                                  const newIsEditing = {} as EditingForFact;
+                                  newIsEditing[fact.id!] = false;
+                                  setIsEditingCommentForFact({
+                                    ...isEditingCommentForFact,
+                                    ...newIsEditing,
+                                  });
+                                }}
+                              />
+                            )}
                           </div>
                         </td>
-                      )}
-                    </tr>
-                  </>
-                )}
-              </React.Fragment>
-            );
-          })}
-        </tbody>
-      )}
-      {!filteredData && (
-        <tbody>
-          <tr>
-            <td>
-              <strong>Loading data...</strong>
-            </td>
-          </tr>
-        </tbody>
-      )}
-    </table>
+                      </tr>
+                      <tr>
+                        {fact.comments && fact.comments.length > 0 && (
+                          <td
+                            colSpan={columns ? columns.length + 3 : 4}
+                            className="bg-secondary text-sm"
+                          >
+                            <div className="p-2">
+                              <ul className="m-1 pl-4 list-none">
+                                {fact.comments.map((comment, idx) => (
+                                  <li key={idx}>
+                                    <Comment
+                                      comment={comment}
+                                      removeCommentFunc={(id) => {
+                                        if (!fact.comments) {
+                                          fact.comments = [];
+                                        }
+                                        fact.comments =
+                                          fact.comments.filter(
+                                            (c) => c.id != id,
+                                          ) ?? [];
+                                        setData([...data!]);
+                                      }}
+                                    />
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                    </>
+                  )}
+                </React.Fragment>
+              );
+            })}
+          </tbody>
+        )}
+        {!filteredData && (
+          <tbody>
+            <tr>
+              <td>
+                <strong>Loading data...</strong>
+              </td>
+            </tr>
+          </tbody>
+        )}
+      </table>
     </div>
   );
 };
