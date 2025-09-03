@@ -19,7 +19,7 @@ const LoginPage = (): React.JSX.Element => {
   const [error, setError] = useState<string>("");
 
   return (
-    <div className="min-h-screen bg-primary flex items-center justify-center p-4">
+    <div className="min-h-screen bg-secondary flex items-center justify-center p-4">
       <div className="card w-full max-w-md">
         <div className="card-body">
           <h2 className="text-2xl font-bold text-center mb-6">Login to Inspect</h2>
@@ -81,8 +81,10 @@ const LoginPage = (): React.JSX.Element => {
               Login
             </button>
             {error && (
-              <div className="mt-4 p-3 bg-red-100 border border-red-300 text-red-800 rounded text-sm">
-                {error}
+              <div className="alert alert-error">
+                <div className="alert-content">
+                  <div className="alert-message">{error}</div>
+                </div>
               </div>
             )}
           </form>

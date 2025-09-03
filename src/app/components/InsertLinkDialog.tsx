@@ -216,7 +216,7 @@ const InsertLinkDialog = ({ html, setHtml }: Props) => {
         }}
       >
         <button
-          className="btn bg-danger"
+                          className="btn btn-danger"
           onClick={() => {
             cancelDialog();
           }}

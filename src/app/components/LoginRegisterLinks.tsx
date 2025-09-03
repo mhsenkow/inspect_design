@@ -24,7 +24,7 @@ const LoginRegisterLinks = ({
             logout();
             window.location.href = returnPath || "/";
           }}
-          className="btn btn-ghost"
+          className="btn btn-ghost text-secondary hover:text-primary hover:bg-secondary"
         >
           Log Out
         </button>
@@ -42,7 +42,7 @@ const LoginRegisterLinks = ({
     <>
       <Link 
         href={`/login?return=${returnPath}`}
-        className="btn btn-ghost"
+        className="btn btn-ghost text-secondary hover:text-primary hover:bg-secondary"
       >
         Login
       </Link>

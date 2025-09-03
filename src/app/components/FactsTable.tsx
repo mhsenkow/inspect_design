@@ -156,9 +156,9 @@ const FactsTable = ({
   }, [returnPath]);
 
     return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-      <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
-        <h3 className="text-sm font-medium text-gray-700 uppercase tracking-wider">Data Table</h3>
+    <div className="card">
+      <div className="card-header">
+        <h3 className="card-header-title">Data Table</h3>
       </div>
       <table
         className="w-full"
@@ -201,9 +201,9 @@ const FactsTable = ({
         }}
       >
         {!hideHead && (
-          <thead className="bg-gray-100 border-b border-gray-200">
+          <thead className="bg-primary border-b border-primary">
             <tr>
-              <th className="px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-xs font-medium text-inverse uppercase tracking-wider">
                 <input
                   type="checkbox"
                   name="selectAllFacts"
@@ -218,19 +218,19 @@ const FactsTable = ({
                       return toggleSelectedFacts(...filteredData);
                     }
                   }}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-inverse text-inverse focus:ring-inverse"
                 />
               </th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider sortable cursor-pointer hover:text-gray-900 transition-colors duration-200">
+              <th className="px-6 py-4 text-left text-xs font-medium text-inverse uppercase tracking-wider sortable cursor-pointer hover:text-secondary transition-colors duration-200">
                 Updated
               </th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+              <th className="px-6 py-4 text-left text-xs font-medium text-inverse uppercase tracking-wider">
                 {/* search */}
                 {setDataFilter && (
                   <input
                     type="text"
                     placeholder="Search the titles..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
+                    className="w-full px-3 py-2 border border-inverse rounded-md focus:outline-none focus:ring-2 focus:ring-inverse focus:border-transparent text-sm bg-inverse text-primary"
                     value={dataFilter}
                     onChange={async (event) => {
                       setDataFilter(event.target.value.toLocaleLowerCase());
@@ -246,12 +246,12 @@ const FactsTable = ({
                     }}
                   />
                 )}
-                {loading && <span className="text-sm text-gray-500">Loading...</span>}
+                {loading && <span className="text-sm text-tertiary">Loading...</span>}
               </th>
                           {columns &&
                 columns.map((column) => (
                   <th
-                    className="px-6 py-4 text-left text-xs font-medium text-gray-700 uppercase tracking-wider sortable cursor-pointer hover:text-gray-900 transition-colors duration-200"
+                    className="px-6 py-4 text-left text-xs font-medium text-inverse uppercase tracking-wider sortable cursor-pointer hover:text-secondary transition-colors duration-200"
                     key={`Column: ${column.name}`}
                     data-column={column.dataColumn}
                   >
@@ -265,7 +265,7 @@ const FactsTable = ({
         <tbody>
           {filteredData.sort(sortFunction).map((fact) => {
             // TODO: think of a better way to combine disabled and category styles
-            let trClassName = "hover:bg-gray-50";
+            let trClassName = "hover:bg-secondary";
             if (
               disabledIds?.includes(
                 factName == "snippet"
@@ -273,7 +273,7 @@ const FactsTable = ({
                   : (fact.id ?? -1),
               )
             ) {
-              trClassName += " bg-gray-100 opacity-50";
+              trClassName += " bg-tertiary opacity-50";
             }
             let trOnClick: React.MouseEventHandler<
               HTMLTableRowElement
@@ -295,7 +295,7 @@ const FactsTable = ({
             }
             return (
               <React.Fragment key={`${factName} #${fact.id}`}>
-                <tr className={`${trClassName} border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors duration-200`} onClick={trOnClick}>
+                <tr className={`${trClassName} border-b border-secondary last:border-b-0 hover:bg-secondary transition-colors duration-200`} onClick={trOnClick}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <input
                       type="checkbox"
@@ -314,10 +314,10 @@ const FactsTable = ({
                           ? (fact as InsightEvidence).summary_id
                           : (fact.id ?? -1),
                       )}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className="rounded border-primary text-primary focus:ring-primary"
                     />
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-mono">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary font-mono">
                     {fact.updated_at &&
                       new Date(fact.updated_at).toLocaleDateString("en-US", {
                         month: "2-digit",
@@ -326,16 +326,16 @@ const FactsTable = ({
                       })}
                     {!fact.updated_at && "---"}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900 font-medium">
+                  <td className="px-6 py-4 text-sm text-primary font-medium">
                     {!selectRows &&
                       (factName == "snippet" ? (
-                        <Link href={`/links/${fact.uid}`} className="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200">{fact.title}</Link>
+                        <Link href={`/links/${fact.uid}`} className="text-primary hover:text-primary-600 transition-colors duration-200">{fact.title}</Link>
                       ) : (
-                        <Link href={`/insights/${fact.uid}`} className="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200">{fact.title}</Link>
+                        <Link href={`/insights/${fact.uid}`} className="text-primary hover:text-primary-600 transition-colors duration-200">{fact.title}</Link>
                       ))}
                     {selectRows && fact.title}
                     {/* FIXME: updates several times until reactions is an empty array */}
-                    <span className="ml-2 text-gray-400">
+                    <span className="ml-2 text-muted">
                       {fact.reactions &&
                         fact.reactions.map((r) => r.reaction).join("")}
                     </span>
@@ -343,7 +343,7 @@ const FactsTable = ({
                   {columns &&
                     columns.map((column) => (
                       <td
-                        className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 text-center"
+                        className="px-6 py-4 whitespace-nowrap text-sm text-secondary text-center"
                         key={`Table column: ${column.name}`}
                       >
                         {column.display && column.display(fact)}
@@ -477,7 +477,7 @@ const FactsTable = ({
                       {fact.comments && fact.comments.length > 0 && (
                         <td
                           colSpan={columns ? columns.length + 3 : 4}
-                          className="bg-tertiary text-sm"
+                          className="bg-secondary text-sm"
                         >
                           <div className="p-2">
                             <ul className="m-1 pl-4 list-none">

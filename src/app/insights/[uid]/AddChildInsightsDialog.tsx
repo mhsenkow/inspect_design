@@ -193,7 +193,7 @@ const AddChildInsightsDialog = ({
 
       <div className="sticky bottom right">
         <button
-          className="btn bg-danger"
+                          className="btn btn-danger"
           onClick={() => {
             cancelDialog();
           }}

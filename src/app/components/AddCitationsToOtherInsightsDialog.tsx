@@ -211,7 +211,7 @@ const AddCitationsToOtherInsightsDialog = ({
         }}
       >
         <button
-          className="btn bg-danger"
+                          className="btn btn-danger"
           onClick={() => {
             cancelDialog();
           }}

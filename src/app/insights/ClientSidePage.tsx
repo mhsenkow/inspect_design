@@ -193,7 +193,7 @@ const ClientSidePage = ({
                 serverFunction: publishInsights,
               },
               {
-                className: "btn bg-danger",
+                className: "btn btn-danger",
                 text: "Delete Insights",
                 enabled: !!currentUser,
                 handleOnClick: showConfirmation,

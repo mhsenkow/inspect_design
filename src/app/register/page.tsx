@@ -18,7 +18,7 @@ const RegisterPage = (): React.JSX.Element => {
   const { setLoggedIn, setToken } = useUser();
 
   return (
-    <div className="min-h-screen bg-primary flex items-center justify-center p-4">
+    <div className="min-h-screen bg-secondary flex items-center justify-center p-4">
       <div className="card w-full max-w-md">
         <div className="card-body">
           <h2 className="text-2xl font-bold text-center mb-6">Register for Inspect by Datagotchi Labs</h2>

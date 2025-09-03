@@ -36,14 +36,14 @@ const Dashboard = async ({ children }: Props): Promise<React.JSX.Element> => {
         <Script src="/bootstrap.bundle.js" />
       </head>
       <body>
-        <div className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="bg-primary border-b border-secondary shadow-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <div className="flex items-center space-x-6">
                 <LoginRegisterLinks loggedIn={loggedIn} />
               </div>
               <div className="flex items-center">
-                <h1 className="text-2xl font-bold text-gray-900 flex items-center">
+                <h1 className="text-2xl font-bold text-primary flex items-center">
                   Inspect
                   <Image
                     src="/images/icon.png"
