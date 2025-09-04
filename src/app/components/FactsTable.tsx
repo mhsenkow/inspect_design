@@ -39,6 +39,7 @@ const FactsTable = ({
   hideHead = false,
   theadTopCSS = "0px",
   enableFeedback = false,
+  cellActions,
 }: {
   data?: Fact[];
   setData: React.Dispatch<React.SetStateAction<Fact[] | undefined>>;
@@ -60,6 +61,12 @@ const FactsTable = ({
   height?: string;
   theadTopCSS?: string;
   enableFeedback?: boolean;
+  cellActions?: {
+    icon: string;
+    label: string;
+    onClick: (fact: Fact) => void;
+    enabled?: (fact: Fact) => boolean;
+  }[];
 }): React.JSX.Element => {
   const { token, loggedIn } = useUser();
   const [returnPath, setReturnPath] = useState<string>();
@@ -331,29 +338,63 @@ const FactsTable = ({
                         })}
                       {!fact.updated_at && "---"}
                     </td>
-                    <td className="px-8 py-5 text-sm text-primary font-medium">
-                      {!selectRows &&
-                        (factName == "snippet" ? (
-                          <Link
-                            href={`/links/${fact.uid}`}
-                            className="text-primary hover:text-primary-600 transition-colors duration-200"
-                          >
-                            {fact.title}
-                          </Link>
-                        ) : (
-                          <Link
-                            href={`/insights/${fact.uid}`}
-                            className="text-primary hover:text-primary-600 transition-colors duration-200"
-                          >
-                            {fact.title}
-                          </Link>
-                        ))}
-                      {selectRows && fact.title}
-                      {/* FIXME: updates several times until reactions is an empty array */}
-                      <span className="ml-2 text-muted">
-                        {fact.reactions &&
-                          fact.reactions.map((r) => r.reaction).join("")}
-                      </span>
+                    <td className="px-8 py-5 text-sm text-primary font-medium relative">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          {!selectRows &&
+                            (factName == "snippet" ? (
+                              <Link
+                                href={`/links/${fact.uid}`}
+                                className="text-primary hover:text-primary-600 transition-colors duration-200"
+                              >
+                                {fact.title}
+                              </Link>
+                            ) : (
+                              <Link
+                                href={`/insights/${fact.uid}`}
+                                className="text-primary hover:text-primary-600 transition-colors duration-200"
+                              >
+                                {fact.title}
+                              </Link>
+                            ))}
+                          {selectRows && fact.title}
+                          {/* FIXME: updates several times until reactions is an empty array */}
+                          <span className="ml-2 text-muted">
+                            {fact.reactions &&
+                              fact.reactions.map((r) => r.reaction).join("")}
+                          </span>
+                        </div>
+                        {cellActions && (
+                          <div className="flex items-center space-x-1 ml-2">
+                            {cellActions.map((action, index) => {
+                              const isEnabled = action.enabled
+                                ? action.enabled(fact)
+                                : true;
+                              return (
+                                <button
+                                  key={`${action.label}-${fact.id}-${index}`}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (isEnabled) {
+                                      action.onClick(fact);
+                                    }
+                                  }}
+                                  className={`btn btn-icon btn-sm ${
+                                    isEnabled
+                                      ? "btn-ghost text-text-secondary hover:text-text-primary hover:bg-background-secondary"
+                                      : "btn-ghost text-text-tertiary opacity-50 cursor-not-allowed"
+                                  }`}
+                                  disabled={!isEnabled}
+                                  aria-label={action.label}
+                                  title={action.label}
+                                >
+                                  {action.icon}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
                     </td>
                     {columns &&
                       columns.map((column) => (

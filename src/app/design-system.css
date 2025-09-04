@@ -1179,7 +1179,6 @@ body {
   background-color: var(--color-background-primary);
   border: 1px solid var(--color-border-primary);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
   overflow: hidden;
 }
 
@@ -1278,7 +1277,6 @@ body {
   background-color: var(--color-background-primary);
   border: 1px solid var(--color-border-primary);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
 }
 
 /* Main Level - Core content */
@@ -1288,7 +1286,6 @@ body {
   background-color: var(--color-background-primary);
   border: 1px solid var(--color-border-primary);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
 }
 
 /* Child Level - Supporting content */
@@ -1331,13 +1328,12 @@ body {
   background-color: var(--color-background-primary);
   border: 1px solid var(--color-border-primary);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
   overflow: hidden;
   transition: all var(--transition-base);
 }
 
 .content-card:hover {
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-xs);
 }
 
 .content-card-header {

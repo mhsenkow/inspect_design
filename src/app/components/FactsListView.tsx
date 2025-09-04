@@ -26,6 +26,7 @@ const FactsListView = ({
   activeServerFunction,
   hideHead,
   enableFeedback,
+  cellActions,
 }: {
   factName: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -34,8 +35,8 @@ const FactsListView = ({
   setServerFunctionInput: React.Dispatch<React.SetStateAction<any | undefined>>;
   selectedFacts: Fact[];
   setSelectedFacts: React.Dispatch<React.SetStateAction<Fact[]>>;
-  unselectedActions: FactsListViewAction[];
-  selectedActions: FactsListViewAction[];
+  unselectedActions?: FactsListViewAction[];
+  selectedActions?: FactsListViewAction[];
   columns?: {
     name: string;
     dataColumn?: string;
@@ -49,6 +50,12 @@ const FactsListView = ({
   activeServerFunction: { function: ServerFunction<any> } | undefined;
   hideHead?: boolean;
   enableFeedback?: boolean;
+  cellActions?: {
+    icon: string;
+    label: string;
+    onClick: (fact: Fact) => void;
+    enabled?: (fact: Fact) => boolean;
+  }[];
 }): React.JSX.Element => {
   const { data, setData } = useContext(FactsDataContext);
   const [flvResponses, setFLVResponses] = useState<FLVResponse[]>([]);
@@ -232,6 +239,7 @@ const FactsListView = ({
               theadTopCSS="100px"
               hideHead={hideHead}
               enableFeedback={enableFeedback}
+              cellActions={cellActions}
             />
           </div>
         )}
