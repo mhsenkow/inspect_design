@@ -44,6 +44,9 @@
   background-color: var(--color-background-secondary);
   position: relative;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .modalHeader::before {

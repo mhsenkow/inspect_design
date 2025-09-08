@@ -125,10 +125,15 @@ const SaveLinkDialog = ({
                 value={linkUrl}
                 onChange={(event) => {
                   const text = event.target.value;
-                  if (text && text.match(/https?:\/\/[^ ]+/)) {
-                    setLinkUrl(text);
+                  
+                  if (text && (text.match(/https?:\/\/[^ ]+/) || text.match(/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}.*$/))) {
+                    // If it doesn't start with http/https, add https://
+                    const fullUrl = text.startsWith('http') ? text : `https://${text}`;
+                    setLinkUrl(fullUrl);
                     setLoading(true);
+                    setLinkUrlError("");
                   } else {
+                    setLinkUrl(text);
                     setPageTitle("");
                     setLinkUrlError("");
                     setLoading(false);
