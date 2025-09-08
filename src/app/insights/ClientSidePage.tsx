@@ -1,5 +1,7 @@
 "use client";
 
+import styles from "../../styles/components/main-insights-page.module.css";
+import cardStyles from "../../styles/components/card.module.css";
 import React, { useState } from "react";
 
 import {
@@ -115,17 +117,17 @@ const ClientSidePage = ({
   const LIMIT = 20;
   const loggedIn = !!currentUser;
   return (
-    <div className="min-h-screen bg-background-secondary">
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-8">
+    <div className={styles.pageContainer}>
+      <div className={styles.mainContent}>
         {/* Page Header - Overall Page Level */}
-        <div className="content-card space-main">
-          <div className="content-card-header">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-text-primary">
+        <div className={styles.pageHeader}>
+          <div className={styles.pageHeaderContent}>
+            <div className={styles.headerTop}>
+              <div className={styles.headerInfo}>
+                <h1 className={styles.headerTitle}>
                   My Insights
                 </h1>
-                <p className="text-text-secondary mt-1">
+                <p className={styles.headerSubtitle}>
                   {liveData.length > 0
                     ? `${liveData.length} insight${liveData.length !== 1 ? "s" : ""}`
                     : "No insights yet"}
@@ -135,15 +137,15 @@ const ClientSidePage = ({
 
             {/* Big Actions */}
             {loggedIn && (
-              <div className="flex items-center justify-center space-x-4 pt-4 border-t border-border-primary">
+              <div className={`${cardStyles.actionsSection} ${cardStyles.actionsSectionCenter}`}>
                 <button
-                  className="btn btn-primary"
+                  className={`${cardStyles.actionButton} ${cardStyles.actionButtonPrimary}`}
                   onClick={promptForNewInsightName}
                 >
                   Create New Insight
                 </button>
                 <button
-                  className="btn btn-secondary"
+                  className={`${cardStyles.actionButton} ${cardStyles.actionButtonSecondary}`}
                   onClick={() => {
                     (
                       document.getElementById(
@@ -161,20 +163,20 @@ const ClientSidePage = ({
 
         {/* Main Content - Main Level */}
         <CurrentUserContext.Provider value={currentUser}>
-          <div className="content-card space-main">
-            <div className="content-card-header">
-              <div className="hierarchy-indicator main">Insights List</div>
-              <h3 className="section-header main">
-                Your insights and research:
-              </h3>
-              <div className="flex items-center justify-between">
-                <p className="text-text-secondary">
-                  Manage and organize your insights
-                </p>
+          <div className={cardStyles.contentCard}>
+            <div className={cardStyles.contentCardHeader}>
+              <div className={cardStyles.hierarchyIndicator}>
+                <span className={cardStyles.hierarchyIcon}>📋</span>
+                Insights List
+              </div>
+              <div className={cardStyles.sectionHeader}>
+                <h3 className={cardStyles.sectionTitle}>
+                  Your insights and research:
+                </h3>
                 {loggedIn && (
-                  <div className="flex space-x-2">
+                  <div className={cardStyles.sectionActions}>
                     <button
-                      className="btn btn-success"
+                      className={`${cardStyles.actionButton} ${cardStyles.actionButtonPrimary}`}
                       onClick={() => {
                         setServerFunctionInputForInsightsList({
                           insights: selectedInsights,
@@ -185,7 +187,7 @@ const ClientSidePage = ({
                       Publish Selected
                     </button>
                     <button
-                      className="btn btn-danger"
+                      className={`${cardStyles.actionButton} ${cardStyles.actionButtonSecondary}`}
                       onClick={showConfirmation}
                       disabled={selectedInsights.length === 0}
                     >
@@ -194,8 +196,11 @@ const ClientSidePage = ({
                   </div>
                 )}
               </div>
+              <div className={cardStyles.sectionSubtitle}>
+                Manage and organize your insights
+              </div>
             </div>
-            <div className="content-card-body">
+            <div className={cardStyles.contentCardBody}>
               <InfiniteScrollLoader
                 data={liveData}
                 setData={

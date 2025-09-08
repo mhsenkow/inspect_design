@@ -1,6 +1,7 @@
 "use client";
 
 import styles from "../../../styles/components/client-side-page.module.css";
+import cardStyles from "../../../styles/components/card.module.css";
 import React, {
   Dispatch,
   SetStateAction,
@@ -276,18 +277,18 @@ const ClientSidePage = ({
 
           {/* Parent Insights Section */}
           {(loggedIn || insight.parents.length > 0) && (
-            <div className={styles.contentCard}>
-              <div className={styles.contentCardHeader}>
-                <div className={styles.hierarchyIndicator}>
-                  <span className={styles.hierarchyIcon}>⬆️</span>
+            <div className={cardStyles.contentCard}>
+              <div className={cardStyles.contentCardHeader}>
+                <div className={cardStyles.hierarchyIndicator}>
+                  <span className={cardStyles.hierarchyIcon}>⬆️</span>
                   Parent Insights
                 </div>
-                <div className={styles.sectionHeader}>
-                  <h3 className={styles.sectionTitle}>
+                <div className={cardStyles.sectionHeader}>
+                  <h3 className={cardStyles.sectionTitle}>
                     This insight is important because:
                   </h3>
                   {currentUser?.id == insight.user_id && (
-                    <div className={styles.sectionActions}>
+                    <div className={cardStyles.sectionActions}>
                       <button
                         onClick={() => {
                           showAddParentInsightsDialog();
@@ -312,23 +313,23 @@ const ClientSidePage = ({
                             },
                           });
                         }}
-                        className={styles.addButton}
+                        className={cardStyles.addButton}
                         aria-label="Add Parent Insight"
                         title="Add Parent Insight"
                       >
-                        <span className={styles.addButtonIcon}>+</span>
-                        <span className={styles.addButtonText}>Add</span>
+                        <span className={cardStyles.addButtonIcon}>+</span>
+                        <span className={cardStyles.addButtonText}>Add</span>
                       </button>
                     </div>
                   )}
                 </div>
-                <div className={styles.sectionSubtitle}>
+                <div className={cardStyles.sectionSubtitle}>
                   {insight.parents.length > 0
                     ? `${insight.parents.length} parent insight${insight.parents.length !== 1 ? "s" : ""}`
                     : "No parent insights yet"}
                 </div>
               </div>
-              <div className={styles.contentCardBody}>
+              <div className={cardStyles.contentCardBody}>
                 <FactsDataContext.Provider
                   value={{
                     data:
@@ -377,18 +378,18 @@ const ClientSidePage = ({
           )}
 
           {/* Child Insights Section */}
-          <div className={styles.contentCard}>
-            <div className={styles.contentCardHeader}>
-              <div className={styles.hierarchyIndicator}>
-                <span className={styles.hierarchyIcon}>📋</span>
+          <div className={cardStyles.contentCard}>
+            <div className={cardStyles.contentCardHeader}>
+              <div className={cardStyles.hierarchyIndicator}>
+                <span className={cardStyles.hierarchyIcon}>📋</span>
                 Child Insights
               </div>
-              <div className={styles.sectionHeader}>
-                <h3 className={styles.sectionTitle}>
+              <div className={cardStyles.sectionHeader}>
+                <h3 className={cardStyles.sectionTitle}>
                   Insights that build upon this one:
                 </h3>
                 {currentUser?.id == insight.user_id && (
-                  <div className={styles.sectionActions}>
+                  <div className={cardStyles.sectionActions}>
                     <button
                       onClick={() => {
                         showAddChildInsightsDialog();
@@ -431,23 +432,23 @@ const ClientSidePage = ({
                           },
                         });
                       }}
-                      className={styles.addButton}
+                      className={cardStyles.addButton}
                       aria-label="Add Child Insight"
                       title="Add Child Insight"
                     >
-                      <span className={styles.addButtonIcon}>+</span>
-                      <span className={styles.addButtonText}>Add</span>
+                      <span className={cardStyles.addButtonIcon}>+</span>
+                      <span className={cardStyles.addButtonText}>Add</span>
                     </button>
                   </div>
                 )}
               </div>
-              <div className={styles.sectionSubtitle}>
+              <div className={cardStyles.sectionSubtitle}>
                 {insight.children.length > 0
                   ? `${insight.children.length} child insight${insight.children.length !== 1 ? "s" : ""}`
                   : "No child insights yet"}
               </div>
             </div>
-            <div className={styles.contentCardBody}>
+            <div className={cardStyles.contentCardBody}>
               <FactsDataContext.Provider
                 value={{
                   data: insight.children.map((c) => ({
@@ -511,18 +512,18 @@ const ClientSidePage = ({
           </div>
 
           {/* Evidence Section */}
-          <div className={styles.contentCard}>
-            <div className={styles.contentCardHeader}>
-              <div className={styles.hierarchyIndicator}>
-                <span className={styles.hierarchyIcon}>📄</span>
+          <div className={cardStyles.contentCard}>
+            <div className={cardStyles.contentCardHeader}>
+              <div className={cardStyles.hierarchyIndicator}>
+                <span className={cardStyles.hierarchyIcon}>📄</span>
                 Evidence
               </div>
-              <div className={styles.sectionHeader}>
-                <h3 className={styles.sectionTitle}>
+              <div className={cardStyles.sectionHeader}>
+                <h3 className={cardStyles.sectionTitle}>
                   Supporting evidence and citations:
                 </h3>
                 {currentUser?.id == insight.user_id && (
-                  <div className={styles.sectionActions}>
+                  <div className={cardStyles.sectionActions}>
                     <button
                       onClick={() => {
                         showAddLinksAsEvidenceDialog();
@@ -543,12 +544,12 @@ const ClientSidePage = ({
                           },
                         });
                       }}
-                      className={styles.addButton}
+                      className={cardStyles.addButton}
                       aria-label="Add Evidence"
                       title="Add Evidence"
                     >
-                      <span className={styles.addButtonIcon}>+</span>
-                      <span className={styles.addButtonText}>Add</span>
+                      <span className={cardStyles.addButtonIcon}>+</span>
+                      <span className={cardStyles.addButtonText}>Add</span>
                     </button>
                     <button
                       onClick={() => {
@@ -568,23 +569,23 @@ const ClientSidePage = ({
                           },
                         });
                       }}
-                      className={styles.addButton}
+                      className={cardStyles.addButton}
                       aria-label="Move Citations"
                       title="Move Citations"
                     >
-                      <span className={styles.addButtonIcon}>🔄</span>
-                      <span className={styles.addButtonText}>Move</span>
+                      <span className={cardStyles.addButtonIcon}>🔄</span>
+                      <span className={cardStyles.addButtonText}>Move</span>
                     </button>
                   </div>
                 )}
               </div>
-              <div className={styles.sectionSubtitle}>
+              <div className={cardStyles.sectionSubtitle}>
                 {liveSnippetData.length > 0
                   ? `${liveSnippetData.length} citation${liveSnippetData.length !== 1 ? "s" : ""}`
                   : "No evidence yet"}
               </div>
             </div>
-            <div className={styles.contentCardBody}>
+            <div className={cardStyles.contentCardBody}>
               <InfiniteScrollLoader
                 data={liveSnippetData}
                 setData={
@@ -634,10 +635,15 @@ const ClientSidePage = ({
           </div>
 
           {/* Feedback Section */}
-          <div className={styles.contentCard}>
-            <div className={styles.contentCardHeader}>
-              <div className="hierarchy-indicator child">Feedback</div>
-              <h3 className="section-header child">Reactions and comments:</h3>
+          <div className={cardStyles.contentCard}>
+            <div className={cardStyles.contentCardHeader}>
+              <div className={cardStyles.hierarchyIndicator}>
+                <span className={cardStyles.hierarchyIcon}>💬</span>
+                Feedback
+              </div>
+              <h3 className={cardStyles.sectionTitle}>
+                Reactions and comments:
+              </h3>
               <div className="flex items-center justify-center space-x-8">
                 <FeedbackLink
                   actionVerb="React"
@@ -659,7 +665,7 @@ const ClientSidePage = ({
                 />
               </div>
             </div>
-            <div className={styles.contentCardBody}>
+            <div className={cardStyles.contentCardBody}>
               {/* Comments */}
               {insightComments && insightComments.length > 0 && (
                 <div className="space-y-3">

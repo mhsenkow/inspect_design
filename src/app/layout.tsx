@@ -46,9 +46,12 @@ const Dashboard = async ({ children }: Props): Promise<React.JSX.Element> => {
 
               {/* Center Brand */}
               <div className="flex items-center">
-                <h1 className="text-2xl font-bold text-inverse flex items-center tracking-tight">
+                <Link 
+                  href="/"
+                  className="text-2xl font-bold text-inverse flex items-center tracking-tight hover:text-primary transition-colors duration-200"
+                >
                   Inspect
-                  <div className="ml-3 w-8 h-8 bg-inverse rounded-lg flex items-center justify-center shadow-sm border border-primary">
+                  <div className="ml-3 w-8 h-8 bg-inverse rounded-lg flex items-center justify-center shadow-sm border border-primary hover:bg-primary hover:border-inverse transition-all duration-200">
                     <Image
                       src="/images/icon.png"
                       width="18"
@@ -57,7 +60,7 @@ const Dashboard = async ({ children }: Props): Promise<React.JSX.Element> => {
                       className="opacity-80"
                     />
                   </div>
-                </h1>
+                </Link>
               </div>
 
               {/* Right Navigation */}

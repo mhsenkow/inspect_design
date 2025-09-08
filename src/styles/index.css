@@ -13,6 +13,8 @@
 
 /* Import component styles */
 @import "./components/button.css";
+@import "./components/card.module.css";
+@import "./components/main-insights-page.module.css";
 
 /* Import theme variations */
 @import "./themes/theme-variations.css";
