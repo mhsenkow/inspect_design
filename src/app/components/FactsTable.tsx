@@ -73,51 +73,67 @@ const FactsTable = ({
   useEffect(() => setReturnPath(window.location.pathname), []);
 
   const [loading, setLoading] = useState(false);
-  const [fetchedDataFitler, setFetchedDataFilter] = useState<string>();
+  const [fetchedDataFilter, setFetchedDataFilter] = useState<string>();
 
   useEffect(() => {
     if (
       queryFunction &&
       dataFilter != undefined &&
-      dataFilter != fetchedDataFitler &&
+      dataFilter != fetchedDataFilter &&
       !loading
     ) {
       setLoading(true);
       debounce({
         func: async () => {
-          const encodedDataFilter = encodeStringURI(dataFilter);
-          const localData = await queryFunction(encodedDataFilter);
-          setData(localData);
-          setFetchedDataFilter(dataFilter);
-          setLoading(false);
+          try {
+            const encodedDataFilter = encodeStringURI(dataFilter);
+            const localData = await queryFunction(encodedDataFilter);
+            setData(localData);
+            setFetchedDataFilter(dataFilter);
+          } catch (error) {
+            console.error("Search error:", error);
+          } finally {
+            setLoading(false);
+          }
         },
         key: queryFunction.name,
+        wait: 500, // Longer debounce for better UX
       });
     }
   }, [
     dataFilter,
-    fetchedDataFitler,
+    fetchedDataFilter,
     loading,
     queryFunction,
     setData,
-    setLoading,
   ]);
 
   const [filteredData, setFilteredData] = useState<Fact[]>();
   useEffect(() => {
     if (data) {
-      setFilteredData(
-        data.filter((fact) => {
-          if (dataFilter != undefined && fact.title) {
-            return fact.title // can't put ? here, so using `if` above
-              .toLocaleLowerCase()
-              .includes(dataFilter.toLocaleLowerCase());
+      // Only filter client-side if no queryFunction is provided (server-side search)
+      if (!queryFunction) {
+        const filtered = data.filter((fact) => {
+          if (dataFilter && dataFilter.trim() !== "") {
+            // Check multiple possible title fields for complex data structures
+            const title = fact.title || fact.childInsight?.title || fact.parentInsight?.title || "";
+            if (title) {
+              return title
+                .toLowerCase()
+                .includes(dataFilter.toLowerCase().trim());
+            }
           }
           return true;
-        }),
-      );
+        });
+        setFilteredData(filtered);
+      } else {
+        // For server-side search, just use the data as-is
+        setFilteredData(data);
+      }
+    } else {
+      setFilteredData([]);
     }
-  }, [data, dataFilter]);
+  }, [data, dataFilter, queryFunction]);
 
   const toggleSelectedFacts = (...facts: Fact[]) => {
     if (selectedFacts) {
@@ -234,27 +250,71 @@ const FactsTable = ({
               <th className="px-8 py-5 text-left text-xs font-medium text-inverse uppercase tracking-wider">
                 {/* search */}
                 {setDataFilter && (
-                  <input
-                    type="text"
-                    placeholder="Search the titles..."
-                    className="w-full px-4 py-3 border border-inverse rounded-lg focus:outline-none focus:ring-2 focus:ring-inverse focus:border-transparent text-sm bg-inverse text-base-950"
-                    value={dataFilter}
-                    onChange={async (event) => {
-                      setDataFilter(event.target.value.toLocaleLowerCase());
-                    }}
-                    onFocus={(event) => {
-                      // TODO: can I get the ClientSidePage itself or something other than the button title?
-                      if (
-                        event.relatedTarget &&
-                        event.relatedTarget.textContent == "Add Evidence"
-                      ) {
-                        event.target.blur();
-                      }
-                    }}
-                  />
-                )}
-                {loading && (
-                  <span className="text-sm text-tertiary">Loading...</span>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder={loading ? "Searching..." : "Search the titles..."}
+                      style={{
+                        backgroundColor: 'var(--color-background-primary)',
+                        borderColor: 'var(--color-border-primary)',
+                        color: 'var(--color-text-primary)',
+                      }}
+                      onFocus={(event) => {
+                        const target = event.target as HTMLInputElement;
+                        target.style.borderColor = 'var(--color-border-focus)';
+                        target.style.boxShadow = '0 0 0 2px rgba(24, 119, 242, 0.2)';
+                        // TODO: can I get the ClientSidePage itself or something other than the button title?
+                        if (
+                          event.relatedTarget &&
+                          (event.relatedTarget as HTMLElement).textContent == "Add Evidence"
+                        ) {
+                          target.blur();
+                        }
+                      }}
+                      onBlur={(event) => {
+                        const target = event.target as HTMLInputElement;
+                        target.style.borderColor = 'var(--color-border-primary)';
+                        target.style.boxShadow = 'none';
+                      }}
+                      className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 text-sm transition-all duration-200 ${loading ? 'pr-16 opacity-75' : (dataFilter ? 'pr-8' : '')}`}
+                      value={dataFilter || ""}
+                      onChange={(event) => {
+                        const value = event.target.value;
+                        setDataFilter(value);
+                      }}
+                      disabled={loading}
+                    />
+                    {dataFilter && !loading && (
+                      <button
+                        type="button"
+                        onClick={() => setDataFilter("")}
+                        className="absolute right-3 top-half transform-center w-6 h-6 flex items-center justify-center rounded-full transition-all duration-200"
+                        style={{
+                          color: 'var(--color-text-tertiary)',
+                          backgroundColor: 'transparent',
+                        }}
+                        onMouseEnter={(e) => {
+                          const target = e.target as HTMLElement;
+                          target.style.backgroundColor = 'var(--color-background-secondary)';
+                          target.style.color = 'var(--color-text-primary)';
+                        }}
+                        onMouseLeave={(e) => {
+                          const target = e.target as HTMLElement;
+                          target.style.backgroundColor = 'transparent';
+                          target.style.color = 'var(--color-text-tertiary)';
+                        }}
+                        aria-label="Clear search"
+                        title="Clear search"
+                      >
+                        <span style={{ fontSize: '16px', fontWeight: 'normal', lineHeight: '1' }}>×</span>
+                      </button>
+                    )}
+                    {loading && (
+                      <div className="absolute right-3 top-half transform-center">
+                        <div className="animate-spin h-4 w-4 border-2 border-t-transparent rounded-full" style={{ borderColor: 'var(--color-base-500)', borderTopColor: 'transparent' }}></div>
+                      </div>
+                    )}
+                  </div>
                 )}
               </th>
               {columns &&
@@ -569,11 +629,37 @@ const FactsTable = ({
             })}
           </tbody>
         )}
-        {!filteredData && (
+        {!filteredData && !loading && (
           <tbody>
             <tr>
-              <td>
+              <td colSpan={columns ? columns.length + 3 : 4} className="px-8 py-12 text-center text-text-tertiary">
                 <strong>Loading data...</strong>
+              </td>
+            </tr>
+          </tbody>
+        )}
+        {filteredData && filteredData.length === 0 && dataFilter && dataFilter.trim() !== "" && (
+          <tbody>
+            <tr>
+              <td colSpan={columns ? columns.length + 3 : 4} className="px-8 py-12 text-center text-text-tertiary">
+                <div>
+                  <div className="text-lg mb-2">🔍</div>
+                  <div><strong>No results found for "{dataFilter}"</strong></div>
+                  <div className="text-sm mt-1">Try a different search term</div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        )}
+        {filteredData && filteredData.length === 0 && (!dataFilter || dataFilter.trim() === "") && (
+          <tbody>
+            <tr>
+              <td colSpan={columns ? columns.length + 3 : 4} className="px-8 py-12 text-center text-text-tertiary">
+                <div>
+                  <div className="text-lg mb-2">📝</div>
+                  <div><strong>No items yet</strong></div>
+                  <div className="text-sm mt-1">Add some items to get started</div>
+                </div>
               </td>
             </tr>
           </tbody>

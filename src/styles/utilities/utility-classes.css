@@ -664,6 +664,52 @@
   opacity: 0.95;
 }
 
+/* Animation utilities */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Additional position utilities for search spinner */
+.right-3 {
+  right: var(--spacing-3);
+}
+.top-half {
+  top: 50%;
+}
+.transform-center {
+  transform: translateY(-50%);
+}
+.h-4 {
+  height: 1rem;
+}
+.w-4 {
+  width: 1rem;
+}
+.w-6 {
+  width: 1.5rem;
+}
+.h-6 {
+  height: 1.5rem;
+}
+.border-2 {
+  border-width: 2px;
+}
+.border-t-transparent {
+  border-top-color: transparent;
+}
+.rounded-full {
+  border-radius: 9999px;
+}
+
 .cursor-pointer {
   cursor: pointer;
 }
