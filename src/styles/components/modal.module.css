@@ -1,0 +1,466 @@
+/* ===================================
+   UNIFIED MODAL COMPONENT STYLES
+   =================================== */
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--spacing-4);
+}
+
+.modalDialog {
+  background-color: var(--color-background-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-2xl);
+  width: 100%;
+  max-width: 48rem; /* 768px */
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.modalDialogLarge {
+  max-width: 64rem; /* 1024px */
+}
+
+.modalDialogSmall {
+  max-width: 32rem; /* 512px */
+}
+
+.modalHeader {
+  padding: var(--spacing-6);
+  border-bottom: 1px solid var(--color-border-primary);
+  background-color: var(--color-background-secondary);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.modalHeader::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-base-500), var(--color-base-600));
+}
+
+.modalTitle {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: var(--line-height-tight);
+}
+
+.modalBody {
+  padding: var(--spacing-6);
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.modalFooter {
+  padding: var(--spacing-6);
+  border-top: 1px solid var(--color-border-primary);
+  background-color: var(--color-background-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacing-3);
+  flex-shrink: 0;
+}
+
+.modalFooterCenter {
+  justify-content: center;
+}
+
+.modalFooterLeft {
+  justify-content: flex-start;
+}
+
+/* ===================================
+   TAB SYSTEM STYLES
+   =================================== */
+
+.tabNav {
+  display: flex;
+  border-bottom: 1px solid var(--color-border-primary);
+  background-color: var(--color-background-secondary);
+  margin: calc(-1 * var(--spacing-6)) calc(-1 * var(--spacing-6)) var(--spacing-6);
+  padding: 0 var(--spacing-6);
+}
+
+.tabNavItem {
+  flex: 1;
+}
+
+.tabNavButton {
+  width: 100%;
+  padding: var(--spacing-3) var(--spacing-4);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  text-align: center;
+}
+
+.tabNavButton:hover {
+  color: var(--color-text-primary);
+  background-color: var(--color-background-tertiary);
+}
+
+.tabNavButton.active {
+  color: var(--color-text-primary);
+  border-bottom-color: var(--color-base-500);
+  background-color: var(--color-background-primary);
+}
+
+.tabContent {
+  display: none;
+}
+
+.tabContent.active {
+  display: block;
+}
+
+/* ===================================
+   FORM ELEMENTS
+   =================================== */
+
+.formGroup {
+  margin-bottom: var(--spacing-4);
+}
+
+.formLabel {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-2);
+}
+
+.formInput {
+  width: 100%;
+  padding: var(--spacing-3);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-background-primary);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  transition: all var(--transition-base);
+}
+
+.formInput:focus {
+  outline: none;
+  border-color: var(--color-base-500);
+  box-shadow: 0 0 0 3px rgba(var(--color-base-500-rgb), 0.1);
+}
+
+.formInput::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.formTextarea {
+  resize: vertical;
+  min-height: 6rem;
+}
+
+.formError {
+  color: var(--color-error);
+  font-size: var(--font-size-xs);
+  margin-top: var(--spacing-1);
+}
+
+.formSuccess {
+  color: var(--color-success);
+  font-size: var(--font-size-xs);
+  margin-top: var(--spacing-1);
+}
+
+/* ===================================
+   BUTTON STYLES
+   =================================== */
+
+.modalButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3) var(--spacing-4);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-normal);
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  font-family: var(--font-family-sans);
+  text-decoration: none;
+  white-space: nowrap;
+  min-height: 2.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.modalButton:hover:not(:disabled) {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.modalButton:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.modalButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.modalButtonPrimary {
+  background-color: var(--color-base-500);
+  border-color: var(--color-base-500);
+  color: var(--color-text-inverse);
+}
+
+.modalButtonPrimary:hover:not(:disabled) {
+  background-color: var(--color-base-600);
+  border-color: var(--color-base-600);
+}
+
+.modalButtonPrimary:active:not(:disabled) {
+  background-color: var(--color-base-700);
+  border-color: var(--color-base-700);
+}
+
+.modalButtonSecondary {
+  background-color: var(--color-background-primary);
+  border-color: var(--color-border-primary);
+  color: var(--color-text-primary);
+}
+
+.modalButtonSecondary:hover:not(:disabled) {
+  background-color: var(--color-background-secondary);
+  border-color: var(--color-border-secondary);
+}
+
+.modalButtonSecondary:active:not(:disabled) {
+  background-color: var(--color-background-tertiary);
+  border-color: var(--color-border-primary);
+}
+
+.modalButtonDanger {
+  background-color: var(--color-error);
+  border-color: var(--color-error);
+  color: var(--color-text-inverse);
+}
+
+.modalButtonDanger:hover:not(:disabled) {
+  background-color: var(--color-error-dark);
+  border-color: var(--color-error-dark);
+}
+
+.modalButtonDanger:active:not(:disabled) {
+  background-color: var(--color-error-darker);
+  border-color: var(--color-error-darker);
+}
+
+/* ===================================
+   CONTENT AREAS
+   =================================== */
+
+.modalContentSection {
+  margin-bottom: var(--spacing-6);
+}
+
+.modalContentSection:last-child {
+  margin-bottom: 0;
+}
+
+.modalContentTitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-3);
+  line-height: var(--line-height-tight);
+}
+
+.modalContentSubtitle {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--spacing-4);
+  line-height: var(--line-height-normal);
+}
+
+.modalLoadingState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-8);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.modalLoadingSpinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid var(--color-border-primary);
+  border-top: 2px solid var(--color-base-500);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: var(--spacing-2);
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ===================================
+   RESPONSIVE DESIGN
+   =================================== */
+
+@media (max-width: 768px) {
+  .modal {
+    padding: var(--spacing-2);
+  }
+  
+  .modalDialog {
+    max-height: 95vh;
+  }
+  
+  .modalHeader,
+  .modalBody,
+  .modalFooter {
+    padding: var(--spacing-4);
+  }
+  
+  .modalTitle {
+    font-size: var(--font-size-lg);
+  }
+  
+  .modalFooter {
+    flex-direction: column;
+    gap: var(--spacing-2);
+  }
+  
+  .modalButton {
+    width: 100%;
+  }
+  
+  .tabNavButton {
+    padding: var(--spacing-2) var(--spacing-3);
+    font-size: var(--font-size-xs);
+  }
+}
+
+@media (max-width: 480px) {
+  .modal {
+    padding: var(--spacing-1);
+  }
+  
+  .modalHeader,
+  .modalBody,
+  .modalFooter {
+    padding: var(--spacing-3);
+  }
+  
+  .modalTitle {
+    font-size: var(--font-size-base);
+  }
+}
+
+/* ===================================
+   ACCESSIBILITY IMPROVEMENTS
+   =================================== */
+
+.modal[aria-hidden="true"] {
+  display: none;
+}
+
+.modalButton:focus {
+  outline: 2px solid var(--color-base-500);
+  outline-offset: 2px;
+}
+
+.formInput:focus {
+  outline: 2px solid var(--color-base-500);
+  outline-offset: 2px;
+}
+
+/* ===================================
+   ANIMATION ENHANCEMENTS
+   =================================== */
+
+.modal {
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+.modalDialog {
+  animation: modalSlideIn 0.2s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* ===================================
+   UTILITY CLASSES
+   =================================== */
+
+.modalScrollable {
+  overflow-y: auto;
+  max-height: 60vh;
+}
+
+.modalNoPadding {
+  padding: 0;
+}
+
+.modalCompact {
+  max-width: 24rem; /* 384px */
+}
+
+.modalWide {
+  max-width: 80rem; /* 1280px */
+}
+
+.modalFullHeight {
+  height: 90vh;
+}
+
+.modalCentered {
+  align-items: center;
+  justify-content: center;
+}
