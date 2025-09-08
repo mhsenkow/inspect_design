@@ -288,6 +288,22 @@
   font-weight: var(--font-weight-medium);
 }
 
+/* Remove Button */
+.removeButton {
+  background-color: var(--color-error-500) !important;
+  border-color: var(--color-error-500) !important;
+}
+
+.removeButton:hover:not(:disabled) {
+  background-color: var(--color-error-600) !important;
+  border-color: var(--color-error-600) !important;
+}
+
+.removeButton:active:not(:disabled) {
+  background-color: var(--color-error-700) !important;
+  border-color: var(--color-error-700) !important;
+}
+
 /* Actions Section */
 .actionsSection {
   display: flex;

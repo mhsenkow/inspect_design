@@ -23,7 +23,8 @@
   box-shadow: var(--shadow-2xl);
   width: 100%;
   max-width: 48rem; /* 768px */
-  max-height: 90vh;
+  height: 70vh; /* Fixed height */
+  max-height: 70vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -32,10 +33,14 @@
 
 .modalDialogLarge {
   max-width: 64rem; /* 1024px */
+  height: 80vh; /* Larger fixed height for large modals */
+  max-height: 80vh;
 }
 
 .modalDialogSmall {
   max-width: 32rem; /* 512px */
+  height: 50vh; /* Smaller fixed height for small modals */
+  max-height: 50vh;
 }
 
 .modalHeader {

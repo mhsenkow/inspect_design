@@ -322,6 +322,29 @@ const ClientSidePage = ({
                         <span className={cardStyles.addButtonIcon}>+</span>
                         <span className={cardStyles.addButtonText}>Add</span>
                       </button>
+                      {selectedParentInsights.length > 0 && (
+                        <button
+                          onClick={() => {
+                            if (confirm("Are you sure you want to remove these parent relationships?")) {
+                              setServerFunctionInputForParentInsights(selectedParentInsights);
+                              setActiveServerFunctionForParentInsights({
+                                function: async (parentLinksToDelete: InsightLink[], token: string) => {
+                                  if (token) {
+                                    return doDeleteParentInsights(parentLinksToDelete, token);
+                                  }
+                                  return Promise.resolve();
+                                },
+                              });
+                            }
+                          }}
+                          className={`${cardStyles.addButton} ${cardStyles.removeButton}`}
+                          aria-label="Remove Selected Parent Insights"
+                          title="Remove Selected Parent Insights"
+                        >
+                          <span className={cardStyles.addButtonIcon}>🗑️</span>
+                          <span className={cardStyles.addButtonText}>Remove</span>
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
@@ -372,6 +395,7 @@ const ClientSidePage = ({
                         React.SetStateAction<Fact[]>
                       >
                     }
+                    selectedActions={[]}
                     hideHead={true}
                   />
                 </FactsDataContext.Provider>
@@ -441,6 +465,29 @@ const ClientSidePage = ({
                       <span className={cardStyles.addButtonIcon}>+</span>
                       <span className={cardStyles.addButtonText}>Add</span>
                     </button>
+                    {selectedChildInsights.length > 0 && (
+                      <button
+                        onClick={() => {
+                          if (confirm("Are you sure you want to remove these child relationships?")) {
+                            setServerFunctionInputForChildInsights(selectedChildInsights);
+                            setActiveServerFunctionForChildInsights({
+                              function: async (childLinksToDelete: InsightLink[], token: string) => {
+                                if (token) {
+                                  return doDeleteInsightChildren(childLinksToDelete, token);
+                                }
+                                return Promise.resolve();
+                              },
+                            });
+                          }
+                        }}
+                        className={`${cardStyles.addButton} ${cardStyles.removeButton}`}
+                        aria-label="Remove Selected Child Insights"
+                        title="Remove Selected Child Insights"
+                      >
+                        <span className={cardStyles.addButtonIcon}>🗑️</span>
+                        <span className={cardStyles.addButtonText}>Remove</span>
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
@@ -490,6 +537,7 @@ const ClientSidePage = ({
                     setActiveServerFunctionForChildInsights
                   }
                   activeServerFunction={activeServerFunctionForChildInsights}
+                  selectedActions={[]}
                   columns={[
                     {
                       name: "📄",
@@ -578,6 +626,29 @@ const ClientSidePage = ({
                       <span className={cardStyles.addButtonIcon}>🔄</span>
                       <span className={cardStyles.addButtonText}>Move</span>
                     </button>
+                    {selectedCitations.length > 0 && (
+                      <button
+                        onClick={() => {
+                          if (confirm("Are you sure you want to remove these citations?")) {
+                            setServerFunctionInputForSnippets({ citations: selectedCitations });
+                            setActiveServerFunctionForSnippets({
+                              function: async (input: doDeleteInsightCitationsSchema, token: string) => {
+                                if (token) {
+                                  return doDeleteInsightCitations(input, token);
+                                }
+                                return Promise.resolve();
+                              },
+                            });
+                          }
+                        }}
+                        className={`${cardStyles.addButton} ${cardStyles.removeButton}`}
+                        aria-label="Remove Selected Citations"
+                        title="Remove Selected Citations"
+                      >
+                        <span className={cardStyles.addButtonIcon}>🗑️</span>
+                        <span className={cardStyles.addButtonText}>Remove</span>
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
@@ -631,6 +702,7 @@ const ClientSidePage = ({
                       React.SetStateAction<Fact[]>
                     >
                   }
+                  selectedActions={[]}
                 />
               </InfiniteScrollLoader>
             </div>
