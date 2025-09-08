@@ -1,5 +1,6 @@
 "use client";
 
+import styles from "../../../styles/components/client-side-page.module.css";
 import React, {
   Dispatch,
   SetStateAction,
@@ -203,33 +204,33 @@ const ClientSidePage = ({
   }, [returnPath]);
 
   return (
-    <div className="min-h-screen bg-background-secondary">
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-8">
+    <div className={styles.pageContainer}>
+      <div className={styles.mainContent}>
         <CurrentUserContext.Provider value={currentUser}>
           {/* Page Header - Overall Page Level */}
-          <div className="content-card space-main">
-            <div className="content-card-header">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center space-x-4">
-                  <div className="w-16 h-16">
+          <div className={styles.pageHeader}>
+            <div className={styles.pageHeaderContent}>
+              <div className={styles.headerTop}>
+                <div className={styles.headerLeft}>
+                  <div className={styles.sourceLogoContainer}>
                     <SourceLogo fact={insight} />
                   </div>
-                  <div>
+                  <div className={styles.headerInfo}>
                     <EditableTitle insight={insight} apiRoot="/api/insights" />
-                    <div className="text-sm text-text-tertiary mt-1">
+                    <div className={styles.headerSubtitle}>
                       {createdOrUpdated}
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-2">
+                <div className={styles.headerRight}>
+                  <div className={styles.reactionsContainer}>
                     {insightReactions?.map((r) => r.reaction).join("") || (
                       <span className="text-text-tertiary">
                         😲 (no reactions)
                       </span>
                     )}
                   </div>
-                  <div className="text-lg text-text-secondary">
+                  <div className={styles.citationsCount}>
                     📄 {liveSnippetData.length ?? 0} citations
                   </div>
                 </div>
@@ -237,10 +238,10 @@ const ClientSidePage = ({
 
               {/* Big Actions */}
               {currentUser && insight.user_id == currentUser.id && (
-                <div className="flex items-center justify-end space-x-2 pt-4 border-t border-border-primary">
+                <div className={styles.actionsSection}>
                   {!insight.is_public && (
                     <button
-                      className="btn btn-sm btn-ghost text-text-secondary hover:text-text-primary hover:bg-background-secondary flex items-center gap-1"
+                      className={styles.actionButton}
                       aria-label="Publish Insight"
                       title="Publish Insight"
                       onClick={async () => {
@@ -275,17 +276,18 @@ const ClientSidePage = ({
 
           {/* Parent Insights Section */}
           {(loggedIn || insight.parents.length > 0) && (
-            <div className="content-card space-main">
-              <div className="content-card-header">
-                <div className="hierarchy-indicator parent">
+            <div className={styles.contentCard}>
+              <div className={styles.contentCardHeader}>
+                <div className={styles.hierarchyIndicator}>
+                  <span className={styles.hierarchyIcon}>⬆️</span>
                   Parent Insights
                 </div>
-                <div className="flex items-center justify-between">
-                  <h3 className="section-header parent">
+                <div className={styles.sectionHeader}>
+                  <h3 className={styles.sectionTitle}>
                     This insight is important because:
                   </h3>
                   {currentUser?.id == insight.user_id && (
-                    <div className="flex items-center space-x-2">
+                    <div className={styles.sectionActions}>
                       <button
                         onClick={() => {
                           showAddParentInsightsDialog();
@@ -310,25 +312,23 @@ const ClientSidePage = ({
                             },
                           });
                         }}
-                        className="btn btn-sm btn-ghost text-text-secondary hover:text-text-primary hover:bg-background-secondary flex items-center gap-1"
+                        className={styles.addButton}
                         aria-label="Add Parent Insight"
                         title="Add Parent Insight"
                       >
-                        <span>➕</span>
-                        <span className="text-xs">Add</span>
+                        <span className={styles.addButtonIcon}>+</span>
+                        <span className={styles.addButtonText}>Add</span>
                       </button>
                     </div>
                   )}
                 </div>
-                <div className="flex items-center justify-between">
-                  <p className="text-text-secondary">
-                    {insight.parents.length > 0
-                      ? `${insight.parents.length} parent insight${insight.parents.length !== 1 ? "s" : ""}`
-                      : "No parent insights yet"}
-                  </p>
+                <div className={styles.sectionSubtitle}>
+                  {insight.parents.length > 0
+                    ? `${insight.parents.length} parent insight${insight.parents.length !== 1 ? "s" : ""}`
+                    : "No parent insights yet"}
                 </div>
               </div>
-              <div className="content-card-body">
+              <div className={styles.contentCardBody}>
                 <FactsDataContext.Provider
                   value={{
                     data:
@@ -377,15 +377,18 @@ const ClientSidePage = ({
           )}
 
           {/* Child Insights Section */}
-          <div className="content-card space-main">
-            <div className="content-card-header">
-              <div className="hierarchy-indicator main">Child Insights</div>
-              <div className="flex items-center justify-between">
-                <h3 className="section-header main">
+          <div className={styles.contentCard}>
+            <div className={styles.contentCardHeader}>
+              <div className={styles.hierarchyIndicator}>
+                <span className={styles.hierarchyIcon}>📋</span>
+                Child Insights
+              </div>
+              <div className={styles.sectionHeader}>
+                <h3 className={styles.sectionTitle}>
                   Insights that build upon this one:
                 </h3>
                 {currentUser?.id == insight.user_id && (
-                  <div className="flex items-center space-x-2">
+                  <div className={styles.sectionActions}>
                     <button
                       onClick={() => {
                         showAddChildInsightsDialog();
@@ -428,25 +431,23 @@ const ClientSidePage = ({
                           },
                         });
                       }}
-                      className="btn btn-sm btn-ghost text-text-secondary hover:text-text-primary hover:bg-background-secondary flex items-center gap-1"
+                      className={styles.addButton}
                       aria-label="Add Child Insight"
                       title="Add Child Insight"
                     >
-                      <span>➕</span>
-                      <span className="text-xs">Add</span>
+                      <span className={styles.addButtonIcon}>+</span>
+                      <span className={styles.addButtonText}>Add</span>
                     </button>
                   </div>
                 )}
               </div>
-              <div className="flex items-center justify-between">
-                <p className="text-text-secondary">
-                  {insight.children.length > 0
-                    ? `${insight.children.length} child insight${insight.children.length !== 1 ? "s" : ""}`
-                    : "No child insights yet"}
-                </p>
+              <div className={styles.sectionSubtitle}>
+                {insight.children.length > 0
+                  ? `${insight.children.length} child insight${insight.children.length !== 1 ? "s" : ""}`
+                  : "No child insights yet"}
               </div>
             </div>
-            <div className="content-card-body">
+            <div className={styles.contentCardBody}>
               <FactsDataContext.Provider
                 value={{
                   data: insight.children.map((c) => ({
@@ -510,15 +511,18 @@ const ClientSidePage = ({
           </div>
 
           {/* Evidence Section */}
-          <div className="content-card space-main">
-            <div className="content-card-header">
-              <div className="hierarchy-indicator child">Evidence</div>
-              <div className="flex items-center justify-between">
-                <h3 className="section-header child">
+          <div className={styles.contentCard}>
+            <div className={styles.contentCardHeader}>
+              <div className={styles.hierarchyIndicator}>
+                <span className={styles.hierarchyIcon}>📄</span>
+                Evidence
+              </div>
+              <div className={styles.sectionHeader}>
+                <h3 className={styles.sectionTitle}>
                   Supporting evidence and citations:
                 </h3>
                 {currentUser?.id == insight.user_id && (
-                  <div className="flex items-center space-x-2">
+                  <div className={styles.sectionActions}>
                     <button
                       onClick={() => {
                         showAddLinksAsEvidenceDialog();
@@ -539,12 +543,12 @@ const ClientSidePage = ({
                           },
                         });
                       }}
-                      className="btn btn-sm btn-ghost text-text-secondary hover:text-text-primary hover:bg-background-secondary flex items-center gap-1"
+                      className={styles.addButton}
                       aria-label="Add Evidence"
                       title="Add Evidence"
                     >
-                      <span>➕</span>
-                      <span className="text-xs">Add</span>
+                      <span className={styles.addButtonIcon}>+</span>
+                      <span className={styles.addButtonText}>Add</span>
                     </button>
                     <button
                       onClick={() => {
@@ -564,25 +568,23 @@ const ClientSidePage = ({
                           },
                         });
                       }}
-                      className="btn btn-sm btn-ghost text-text-secondary hover:text-text-primary hover:bg-background-secondary flex items-center gap-1"
+                      className={styles.addButton}
                       aria-label="Move Citations"
                       title="Move Citations"
                     >
-                      <span>🔄</span>
-                      <span className="text-xs">Move</span>
+                      <span className={styles.addButtonIcon}>🔄</span>
+                      <span className={styles.addButtonText}>Move</span>
                     </button>
                   </div>
                 )}
               </div>
-              <div className="flex items-center justify-between">
-                <p className="text-text-secondary">
-                  {liveSnippetData.length > 0
-                    ? `${liveSnippetData.length} citation${liveSnippetData.length !== 1 ? "s" : ""}`
-                    : "No evidence yet"}
-                </p>
+              <div className={styles.sectionSubtitle}>
+                {liveSnippetData.length > 0
+                  ? `${liveSnippetData.length} citation${liveSnippetData.length !== 1 ? "s" : ""}`
+                  : "No evidence yet"}
               </div>
             </div>
-            <div className="content-card-body">
+            <div className={styles.contentCardBody}>
               <InfiniteScrollLoader
                 data={liveSnippetData}
                 setData={
@@ -632,8 +634,8 @@ const ClientSidePage = ({
           </div>
 
           {/* Feedback Section */}
-          <div className="content-card space-main">
-            <div className="content-card-header">
+          <div className={styles.contentCard}>
+            <div className={styles.contentCardHeader}>
               <div className="hierarchy-indicator child">Feedback</div>
               <h3 className="section-header child">Reactions and comments:</h3>
               <div className="flex items-center justify-center space-x-8">
@@ -657,7 +659,7 @@ const ClientSidePage = ({
                 />
               </div>
             </div>
-            <div className="content-card-body">
+            <div className={styles.contentCardBody}>
               {/* Comments */}
               {insightComments && insightComments.length > 0 && (
                 <div className="space-y-3">

@@ -1,4 +1,5 @@
 "use client";
+import styles from "../../styles/components/login-register-links.module.css";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -18,41 +19,35 @@ const LoginRegisterLinks = ({
 
   if (loggedIn) {
     return (
-      <>
+      <div className={styles.loginRegisterContainer}>
         <button
           onClick={() => {
             logout();
             window.location.href = returnPath || "/";
           }}
-          className="btn btn-ghost text-inverse hover:text-inverse hover:bg-base-600 px-6 py-3 rounded-xl transition-all duration-200 font-medium text-base"
+          className={styles.logoutButton}
         >
           Log Out
         </button>
-        <Link
-          href="/insights"
-          className="btn btn-primary px-6 py-3 rounded-xl transition-all duration-200 font-medium shadow-sm hover:shadow-md text-base"
-        >
+        <Link href="/insights" className={styles.myInsightsButton}>
           My Insights
         </Link>
-      </>
+      </div>
     );
   }
 
   return (
-    <>
-      <Link
-        href={`/login?return=${returnPath}`}
-        className="btn btn-ghost text-inverse hover:text-inverse hover:bg-base-600 px-6 py-3 rounded-xl transition-all duration-200 font-medium text-base"
-      >
+    <div className={styles.loginRegisterContainer}>
+      <Link href={`/login?return=${returnPath}`} className={styles.loginButton}>
         Login
       </Link>
       <Link
         href={`/register?return=${returnPath}`}
-        className="btn btn-primary px-6 py-3 rounded-xl transition-all duration-200 font-medium shadow-sm hover:shadow-md text-base"
+        className={styles.registerButton}
       >
         Register
       </Link>
-    </>
+    </div>
   );
 };
 

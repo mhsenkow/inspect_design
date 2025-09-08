@@ -1,5 +1,6 @@
 "use client";
 
+import styles from "../../styles/components/theme-switcher.module.css";
 import React, { useState, useEffect } from "react";
 
 interface ThemeSwitcherProps {
@@ -119,14 +120,14 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ className = "" }) => {
   };
 
   return (
-    <div className={`theme-switcher ${className} relative`}>
+    <div className={`${styles.themeSwitcher} ${className} relative`}>
       <button
         onClick={() => {
           const newIsOpen = !isOpen;
           setIsOpen(newIsOpen);
           localStorage.setItem("themeSwitcherOpen", newIsOpen.toString());
         }}
-        className="btn btn-icon btn-ghost text-text-inverse hover:text-text-inverse hover:bg-background-secondary"
+        className={styles.dropdownButton}
         aria-label="Theme Switcher"
       >
         <svg
@@ -146,7 +147,7 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ className = "" }) => {
       </button>
 
       {isOpen && (
-        <div className="absolute top-full right-0 mt-2 w-80 bg-background-primary rounded-lg shadow-lg border border-border-primary p-4 z-header">
+        <div className={styles.dropdownMenu}>
           <h3 className="text-lg font-semibold text-text-primary mb-4">
             Theme Switcher
           </h3>
@@ -243,8 +244,8 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ className = "" }) => {
             </div>
           </div>
 
-          <div className="mt-4 p-3 bg-background-secondary rounded-md">
-            <p className="text-sm text-text-secondary">
+          <div className="mt-4 p-3 bg-secondary rounded-md">
+            <p className="text-sm text-secondary">
               <strong>Current Theme:</strong>{" "}
               {themes.find((t) => t.class === currentTheme)?.name || "Default"}
               {currentSpacing &&
