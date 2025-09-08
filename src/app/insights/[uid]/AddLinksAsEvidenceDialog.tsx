@@ -14,9 +14,23 @@ import { getPageTitle } from "../../hooks/functions";
 import useUser from "../../hooks/useUser";
 import { addCitationsToInsightAPISchema } from "../../components/SelectedCitationsAPI";
 import { GetLinksResponse } from "../../api/links/route";
+import {
+  Modal,
+  ModalBody,
+  ModalFooter,
+  TabNav,
+  TabContent,
+  FormGroup,
+  FormInput,
+  ModalButton,
+  ModalContentSection,
+  ModalLoadingState,
+} from "../../components/Modal";
 
 interface Props {
   id: string;
+  isOpen: boolean;
+  onClose: () => void;
   insight: Insight;
   setServerFunctionInput: React.Dispatch<
     React.SetStateAction<addCitationsToInsightAPISchema | undefined>
@@ -28,20 +42,19 @@ interface Props {
 
 const AddLinksAsEvidenceDialog = ({
   id,
+  isOpen,
+  onClose,
   insight,
   setServerFunctionInput,
   setActiveServerFunction,
 }: Props): React.JSX.Element => {
-  // TODO: consider changing output to use returnValue directly: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dialog
-
   const [dataFilter, setDataFilter] = useState("");
-  const [selectedCitations, setSelectedCitations] = useState<InsightEvidence[]>(
-    [],
-  );
+  const [selectedCitations, setSelectedCitations] = useState<InsightEvidence[]>([]);
   const [newLinkUrl, setNewLinkUrl] = useState("");
   const [pageTitle, setPageTitle] = useState("");
   const [loading, setLoading] = useState(false);
   const [linkUrlError, setLinkUrlError] = useState("");
+  const [activeTab, setActiveTab] = useState("existing");
 
   const { token } = useUser();
   const notExistingCitation = useCallback(
@@ -82,38 +95,25 @@ const AddLinksAsEvidenceDialog = ({
     setLoading(false);
     setLinkUrlError("");
     setPageTitle("");
+    setActiveTab("existing");
   };
 
-  const resetAndCloseDialog = useCallback(() => {
-    resetStateValues();
-    // don't use `dialog` bc a call to this function below is before it is set
-    (document.getElementById(id) as HTMLDialogElement).close();
-  }, [id]);
-
-  const cancelDialog = useCallback(() => {
+  const handleClose = useCallback(() => {
     setServerFunctionInput(undefined);
     setActiveServerFunction(undefined);
     resetStateValues();
-    (document.getElementById(id) as HTMLDialogElement).close();
-  }, [id, setActiveServerFunction, setServerFunctionInput]);
+    onClose();
+  }, [setActiveServerFunction, setServerFunctionInput, onClose]);
 
-  useEffect(() => {
-    const d = document.getElementById(id);
-    if (d) {
-      d.addEventListener("click", (event) => {
-        if (event.target == event.currentTarget) {
-          cancelDialog();
-        }
-      });
-      d.addEventListener("keydown", (event) => {
-        if (event.key == "Escape") {
-          cancelDialog();
-        }
-      });
-    } else {
-      throw new Error(`Dialog not found with id: ${id}`);
-    }
-  }, [cancelDialog, id]);
+  const handleSubmit = useCallback(() => {
+    setServerFunctionInput({
+      insight,
+      evidence: selectedCitations,
+      newLinkUrl,
+    });
+    resetStateValues();
+    onClose();
+  }, [insight, selectedCitations, newLinkUrl, setServerFunctionInput, onClose]);
 
   useEffect(() => {
     if (newLinkUrl && !pageTitle) {
@@ -128,7 +128,6 @@ const AddLinksAsEvidenceDialog = ({
           console.error("Error fetching page title:", error);
         });
     }
-    // TODO: warn about paywalls that don't show content after clicking through
   }, [pageTitle, newLinkUrl, linkUrlError, token]);
 
   const queryFunctionForAddLinksAsEvidenceDialog = async (search: string) => {
@@ -142,43 +141,12 @@ const AddLinksAsEvidenceDialog = ({
     return data.filter(notExistingCitation);
   };
 
-  return (
-    <dialog id={id} className="large-dialog">
-      <h3>Add Links to Insight: {insight.title}</h3>
-      <ul className="nav nav-tabs">
-        <li className="nav-item">
-          <button
-            className="nav-link active"
-            type="button"
-            role="tab"
-            data-bs-toggle="tab"
-            data-bs-target="#existing-links"
-            aria-controls="existing links"
-            aria-selected="true"
-          >
-            Existing links
-          </button>
-        </li>
-        <li className="nav-item">
-          <button
-            className="nav-link"
-            type="button"
-            role="tab"
-            data-bs-toggle="tab"
-            data-bs-target="#save-link"
-            aria-controls="save link"
-            aria-selected="false"
-          >
-            Save link
-          </button>
-        </li>
-      </ul>
-      <div className="tab-content">
-        <div
-          className="tab-pane fade show active"
-          id="existing-links"
-          role="tabpanel"
-        >
+  const tabs = [
+    {
+      id: "existing",
+      label: "Existing links",
+      content: (
+        <ModalContentSection>
           <FactsTable
             data={
               (linksToShow?.map((link, index) => ({
@@ -189,83 +157,90 @@ const AddLinksAsEvidenceDialog = ({
                 updated_at: link.updated_at,
               })) ?? []) as unknown as InsightEvidence[]
             }
-            setData={
-              setLinksToShow as React.Dispatch<
-                React.SetStateAction<Fact[] | undefined>
-              >
-            }
+            setData={setLinksToShow as React.Dispatch<React.SetStateAction<Fact[] | undefined>>}
             factName="snippet"
             selectedFacts={selectedCitations}
-            setSelectedFacts={
-              setSelectedCitations as React.Dispatch<
-                React.SetStateAction<Fact[]>
-              >
-            }
+            setSelectedFacts={setSelectedCitations as React.Dispatch<React.SetStateAction<Fact[]>>}
             queryFunction={queryFunctionForAddLinksAsEvidenceDialog}
             dataFilter={dataFilter}
             setDataFilter={setDataFilter}
             selectRows={true}
           />
-        </div>
-        <div
-          className="tab-pane fade"
-          id="save-link"
-          role="tabpanel"
-          style={{ padding: "1rem" }}
-        >
-          <input
-            type="text"
-            placeholder="New link URL"
-            value={newLinkUrl}
-            onChange={(event) => {
-              const text = event.target.value;
-              if (text && text.match(/https?:\/\/[^ ]+/)) {
-                setNewLinkUrl(event.target.value);
-                setLoading(true);
-              } else {
-                setPageTitle("");
-                setLinkUrlError("");
-                setLoading(false);
-              }
-            }}
-          />
-          {loading && (
-            <div style={{ fontWeight: "bold" }}>Title loading...</div>
-          )}
+        </ModalContentSection>
+      ),
+    },
+    {
+      id: "new",
+      label: "Save link",
+      content: (
+        <ModalContentSection>
+          <FormGroup>
+            <FormInput
+              type="text"
+              placeholder="New link URL"
+              value={newLinkUrl}
+              onChange={(event) => {
+                const text = event.target.value;
+                if (text && text.match(/https?:\/\/[^ ]+/)) {
+                  setNewLinkUrl(event.target.value);
+                  setLoading(true);
+                } else {
+                  setPageTitle("");
+                  setLinkUrlError("");
+                  setLoading(false);
+                }
+              }}
+              error={linkUrlError}
+            />
+          </FormGroup>
+          {loading && <ModalLoadingState message="Title loading..." />}
           {!loading && pageTitle && (
-            <div style={{ fontWeight: "bold" }}>{pageTitle}</div>
+            <div style={{ fontWeight: "bold", marginTop: "var(--spacing-2)" }}>
+              {pageTitle}
+            </div>
           )}
-          {linkUrlError && <div style={{ color: "red" }}>{linkUrlError}</div>}
-        </div>
-      </div>
+        </ModalContentSection>
+      ),
+    },
+  ];
 
-      <div className="sticky bottom right">
-        <button
-          className="btn btn-danger"
-          onClick={() => {
-            cancelDialog();
-          }}
-        >
-          Cancel
-        </button>
-        &nbsp;
-        <button
-          className="btn btn-primary"
-          aria-label="Add evidence links"
-          onClick={async () => {
-            setServerFunctionInput({
-              insight,
-              evidence: selectedCitations,
-              newLinkUrl,
-            });
-            resetAndCloseDialog();
-          }}
-          disabled={!newLinkUrl && selectedCitations.length == 0}
-        >
-          Add
-        </button>
-      </div>
-    </dialog>
+  return (
+    <Modal
+      id={id}
+      title={`Add Links to Insight: ${insight.title}`}
+      isOpen={isOpen}
+      onClose={handleClose}
+      size="large"
+    >
+        <ModalBody>
+          <TabNav
+            tabs={tabs}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+          />
+          {tabs.map((tab) => (
+            <TabContent
+              key={tab.id}
+              tabId={tab.id}
+              activeTab={activeTab}
+            >
+              {tab.content}
+            </TabContent>
+          ))}
+        </ModalBody>
+        <ModalFooter>
+          <ModalButton variant="secondary" onClick={handleClose}>
+            Cancel
+          </ModalButton>
+          <ModalButton
+            variant="primary"
+            onClick={handleSubmit}
+            disabled={!newLinkUrl && selectedCitations.length === 0}
+          >
+            Add
+          </ModalButton>
+        </ModalFooter>
+      </Modal>
   );
 };
 

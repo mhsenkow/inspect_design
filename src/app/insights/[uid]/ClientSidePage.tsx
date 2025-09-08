@@ -50,10 +50,6 @@ import {
   doDeleteInsightCitationsSchema,
   doDeleteParentInsights,
   getShowConfirmationFunction,
-  openAddCitationsToOtherInsightsDialog,
-  showAddChildInsightsDialog,
-  showAddLinksAsEvidenceDialog,
-  showAddParentInsightsDialog,
 } from "./functions";
 import {
   addChildrenToInsight,
@@ -135,6 +131,12 @@ const ClientSidePage = ({
   }, [insight.evidence]);
   const [isEditingReaction, setIsEditingReaction] = useState(false);
   const [isEditingComment, setIsEditingComment] = useState(false);
+
+  // Modal states
+  const [isAddLinksAsEvidenceDialogOpen, setIsAddLinksAsEvidenceDialogOpen] = useState(false);
+  const [isAddCitationsToOtherInsightsDialogOpen, setIsAddCitationsToOtherInsightsDialogOpen] = useState(false);
+  const [isAddChildInsightsDialogOpen, setIsAddChildInsightsDialogOpen] = useState(false);
+  const [isAddParentInsightsDialogOpen, setIsAddParentInsightsDialogOpen] = useState(false);
 
   // shared functions for child insights
   const [
@@ -291,7 +293,7 @@ const ClientSidePage = ({
                     <div className={cardStyles.sectionActions}>
                       <button
                         onClick={() => {
-                          showAddParentInsightsDialog();
+                          setIsAddParentInsightsDialogOpen(true);
                           // Set the active server function so it gets called when the dialog submits
                           setActiveServerFunctionForParentInsights({
                             function: async ({
@@ -392,7 +394,7 @@ const ClientSidePage = ({
                   <div className={cardStyles.sectionActions}>
                     <button
                       onClick={() => {
-                        showAddChildInsightsDialog();
+                        setIsAddChildInsightsDialogOpen(true);
                         // Set the active server function so it gets called when the dialog submits
                         setActiveServerFunctionForChildInsights({
                           function: async ({
@@ -526,7 +528,7 @@ const ClientSidePage = ({
                   <div className={cardStyles.sectionActions}>
                     <button
                       onClick={() => {
-                        showAddLinksAsEvidenceDialog();
+                        setIsAddLinksAsEvidenceDialogOpen(true);
                         // Set the active server function so it gets called when the dialog submits
                         setActiveServerFunctionForSnippets({
                           function: async ({
@@ -553,7 +555,7 @@ const ClientSidePage = ({
                     </button>
                     <button
                       onClick={() => {
-                        openAddCitationsToOtherInsightsDialog();
+                        setIsAddCitationsToOtherInsightsDialogOpen(true);
                         // Set the active server function so it gets called when the dialog submits
                         setActiveServerFunctionForSnippets({
                           function: async (
@@ -758,6 +760,8 @@ const ClientSidePage = ({
             <>
               <AddLinksAsEvidenceDialog
                 id={ADD_LINKS_AS_EVIDENCE_DIALOG_ID}
+                isOpen={isAddLinksAsEvidenceDialogOpen}
+                onClose={() => setIsAddLinksAsEvidenceDialogOpen(false)}
                 insight={insight}
                 setServerFunctionInput={
                   setServerFunctionInputForSnippets as React.Dispatch<
@@ -777,6 +781,8 @@ const ClientSidePage = ({
               />
               <AddCitationsToOtherInsightsDialog
                 id={ADD_CITATIONS_TO_OTHER_INSIGHTS_DIALOG_ID}
+                isOpen={isAddCitationsToOtherInsightsDialogOpen}
+                onClose={() => setIsAddCitationsToOtherInsightsDialogOpen(false)}
                 selectedCitations={liveSnippetData}
                 setServerFunctionInput={
                   setServerFunctionInputForSnippets as React.Dispatch<
@@ -796,6 +802,8 @@ const ClientSidePage = ({
               />
               <AddChildInsightsDialog
                 id={ADD_CHILD_INSIGHTS_DIALOG_ID}
+                isOpen={isAddChildInsightsDialogOpen}
+                onClose={() => setIsAddChildInsightsDialogOpen(false)}
                 insight={insight}
                 setServerFunctionInput={setServerFunctionInputForChildInsights}
                 setActiveServerFunction={(value) => {
@@ -840,6 +848,8 @@ const ClientSidePage = ({
               />
               <AddParentInsightsDialog
                 id={ADD_PARENT_INSIGHTS_DIALOG_ID}
+                isOpen={isAddParentInsightsDialogOpen}
+                onClose={() => setIsAddParentInsightsDialogOpen(false)}
                 insight={insight}
                 setServerFunctionInput={setServerFunctionInputForParentInsights}
                 setActiveServerFunction={

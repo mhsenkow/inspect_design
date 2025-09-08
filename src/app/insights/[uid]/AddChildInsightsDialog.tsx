@@ -6,6 +6,17 @@ import { Fact, Insight } from "../../types";
 import FactsTable from "../../components/FactsTable";
 import { potentialInsightsWithoutLoops } from "./functions";
 import { GetInsightsRouteResponse } from "../../api/insights/route";
+import {
+  Modal,
+  ModalBody,
+  ModalFooter,
+  TabNav,
+  TabContent,
+  FormGroup,
+  FormInput,
+  ModalButton,
+  ModalContentSection,
+} from "../../components/Modal";
 
 export type ServerFunctionInputSchemaForChildInsights = {
   insight: Insight;
@@ -15,6 +26,8 @@ export type ServerFunctionInputSchemaForChildInsights = {
 
 interface Props {
   id: string;
+  isOpen: boolean;
+  onClose: () => void;
   insight: Insight;
   setServerFunctionInput: (
     value: ServerFunctionInputSchemaForChildInsights | undefined,
@@ -30,16 +43,20 @@ interface Props {
 
 const AddChildInsightsDialog = ({
   id,
+  isOpen,
+  onClose,
   insight,
   setServerFunctionInput,
   setActiveServerFunction,
 }: Props): React.JSX.Element => {
   const [dataFilter, setDataFilter] = useState("");
   const [childInsights, setChildInsights] = useState<Insight[] | undefined>();
+  const [selectedChildInsights, setSelectedChildInsights] = useState<Insight[]>([]);
+  const [newInsightName, setNewInsightName] = useState("");
+  const [activeTab, setActiveTab] = useState("existing");
+
   useEffect(() => {
-    fetch(
-      "/api/insights?offset=0&limit=20&children=true&parents=true&evidence=true",
-    )
+    fetch("/api/insights?offset=0&limit=20&children=true&parents=true&evidence=true")
       .then(async (response: Response | GetInsightsRouteResponse) => {
         if (!response.ok) {
           throw new Error(response.statusText);
@@ -50,48 +67,30 @@ const AddChildInsightsDialog = ({
         setChildInsights(potentialInsightsWithoutLoops(insight, insights));
       });
   }, [insight]);
-  const [selectedChildInsights, setSelectedChildInsights] = useState<Insight[]>(
-    [],
-  );
-  const [newInsightName, setNewInsightName] = useState("");
 
   const resetStateValues = () => {
     setSelectedChildInsights([]);
     setDataFilter("");
     setNewInsightName("");
+    setActiveTab("existing");
   };
 
-  const resetAndCloseDialog = useCallback(() => {
-    resetStateValues();
-    // don't use `dialog` bc a call to this function below is before it is set
-    (document.getElementById(id) as HTMLDialogElement).close();
-  }, [id]);
-
-  const cancelDialog = useCallback(() => {
+  const handleClose = useCallback(() => {
     setServerFunctionInput(undefined);
     setActiveServerFunction(undefined);
     resetStateValues();
-    const dialog = document.getElementById(id) as HTMLDialogElement;
-    dialog.close();
-  }, [id, setActiveServerFunction, setServerFunctionInput]);
+    onClose();
+  }, [setActiveServerFunction, setServerFunctionInput, onClose]);
 
-  useEffect(() => {
-    const d = document.getElementById(id);
-    if (d) {
-      d.addEventListener("click", (event) => {
-        if (event.target == event.currentTarget) {
-          cancelDialog();
-        }
-      });
-      d.addEventListener("keydown", (event) => {
-        if (event.key == "Escape") {
-          cancelDialog();
-        }
-      });
-    } else {
-      throw new Error(`Dialog not found with id: ${id}`);
-    }
-  }, [cancelDialog, id]);
+  const handleSubmit = useCallback(() => {
+    setServerFunctionInput({
+      insight,
+      children: selectedChildInsights,
+      newInsightName,
+    });
+    resetStateValues();
+    onClose();
+  }, [insight, selectedChildInsights, newInsightName, setServerFunctionInput, onClose]);
 
   const queryFunctionForAddChildInsightDialog = async (search: string) => {
     const response = await fetch(
@@ -104,58 +103,18 @@ const AddChildInsightsDialog = ({
     return potentialInsightsWithoutLoops(insight, data);
   };
 
-  return (
-    <dialog id={id} className="large-dialog">
-      <h3>Add Child Insights to Insight: {insight.title}</h3>
-      <ul className="nav nav-tabs">
-        <li className="nav-item">
-          <button
-            className="nav-link active"
-            type="button"
-            role="tab"
-            data-bs-toggle="tab"
-            data-bs-target="#existing-insights"
-            aria-controls="existing insights"
-            aria-selected="true"
-          >
-            Existing insights
-          </button>
-        </li>
-        <li className="nav-item">
-          <button
-            className="nav-link"
-            type="button"
-            role="tab"
-            data-bs-toggle="tab"
-            data-bs-target="#new-insight"
-            aria-controls="new insight"
-            aria-selected="false"
-          >
-            New insight
-          </button>
-        </li>
-      </ul>
-      <div className="tab-content">
-        <div
-          className="tab-pane fade show active"
-          id="existing-insights"
-          role="tabpanel"
-          aria-labelledby="existing-insights-tab"
-        >
+  const tabs = [
+    {
+      id: "existing",
+      label: "Existing insights",
+      content: (
+        <ModalContentSection>
           <FactsTable
             data={childInsights}
-            setData={
-              setChildInsights as React.Dispatch<
-                React.SetStateAction<Fact[] | undefined>
-              >
-            }
+            setData={setChildInsights as React.Dispatch<React.SetStateAction<Fact[] | undefined>>}
             factName="insight"
             selectedFacts={selectedChildInsights}
-            setSelectedFacts={
-              setSelectedChildInsights as React.Dispatch<
-                React.SetStateAction<Fact[]>
-              >
-            }
+            setSelectedFacts={setSelectedChildInsights as React.Dispatch<React.SetStateAction<Fact[]>>}
             queryFunction={queryFunctionForAddChildInsightDialog}
             dataFilter={dataFilter}
             setDataFilter={setDataFilter}
@@ -166,58 +125,70 @@ const AddChildInsightsDialog = ({
                 dataColumn: "evidence",
                 display: (insight: Fact | Insight): React.JSX.Element => (
                   <span className="badge text-bg-danger">
-                    {/* FIXME: insight.evidence is not defined */}
                     {insight.evidence?.length ?? 0}
                   </span>
                 ),
               },
             ]}
           />
-        </div>
-        <div
-          className="tab-pane fade"
-          id="new-insight"
-          role="tabpanel"
-          style={{ padding: "1rem" }}
-        >
-          <input
-            type="text"
-            placeholder="New insight name"
-            value={newInsightName}
-            onChange={(event) => {
-              setNewInsightName(event.target.value);
-            }}
-          />
-        </div>
-      </div>
+        </ModalContentSection>
+      ),
+    },
+    {
+      id: "new",
+      label: "New insight",
+      content: (
+        <ModalContentSection>
+          <FormGroup>
+            <FormInput
+              type="text"
+              placeholder="New insight name"
+              value={newInsightName}
+              onChange={(event) => setNewInsightName(event.target.value)}
+            />
+          </FormGroup>
+        </ModalContentSection>
+      ),
+    },
+  ];
 
-      <div className="sticky bottom right">
-        <button
-          className="btn btn-danger"
-          onClick={() => {
-            cancelDialog();
-          }}
-        >
-          Cancel
-        </button>
-        &nbsp;
-        <button
-          className="btn btn-primary"
-          aria-label="Add child insights"
-          onClick={async () => {
-            setServerFunctionInput({
-              insight,
-              children: selectedChildInsights,
-              newInsightName,
-            });
-            resetAndCloseDialog();
-          }}
-          disabled={selectedChildInsights.length == 0 && !newInsightName.trim()}
-        >
-          Add
-        </button>
-      </div>
-    </dialog>
+  return (
+    <Modal
+      id={id}
+      title={`Add Child Insights to Insight: ${insight.title}`}
+      isOpen={isOpen}
+      onClose={handleClose}
+      size="large"
+    >
+        <ModalBody>
+          <TabNav
+            tabs={tabs}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+          />
+          {tabs.map((tab) => (
+            <TabContent
+              key={tab.id}
+              tabId={tab.id}
+              activeTab={activeTab}
+            >
+              {tab.content}
+            </TabContent>
+          ))}
+        </ModalBody>
+        <ModalFooter>
+          <ModalButton variant="secondary" onClick={handleClose}>
+            Cancel
+          </ModalButton>
+          <ModalButton
+            variant="primary"
+            onClick={handleSubmit}
+            disabled={selectedChildInsights.length === 0 && !newInsightName.trim()}
+          >
+            Add
+          </ModalButton>
+        </ModalFooter>
+      </Modal>
   );
 };
 

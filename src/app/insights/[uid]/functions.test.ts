@@ -24,7 +24,7 @@ import {
   ADD_CITATIONS_TO_OTHER_INSIGHTS_DIALOG_ID,
   ADD_LINKS_AS_EVIDENCE_DIALOG_ID,
   ADD_PARENT_INSIGHTS_DIALOG_ID,
-} from "./ClientSidePageNew";
+} from "./ClientSidePage";
 import { Insight, InsightEvidence, InsightLink } from "../../types";
 
 jest.mock("../../components/SelectedCitationsAPI", () => ({

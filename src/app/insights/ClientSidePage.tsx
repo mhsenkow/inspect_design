@@ -43,6 +43,7 @@ const ClientSidePage = ({
   const { token } = useUser();
   const [liveData, setLiveData] = useState(insights);
   const [selectedInsights, setSelectedInsights] = useState<Insight[]>([]);
+  const [isSaveLinkDialogOpen, setIsSaveLinkDialogOpen] = useState(false);
 
   const [
     serverFunctionInputForInsightsList,
@@ -64,18 +65,17 @@ const ClientSidePage = ({
       setServerFunctionInputForInsightsList({
         insights: [{ title, citations: [] }] as unknown as Insight[],
       });
+      setActiveServerFunctionForInsightsList({
+        function: async (input: InsightsAPISchema, token: string) => {
+          if (token) {
+            return createInsights(input, token);
+          }
+          return Promise.resolve([]);
+        },
+      });
     }
   };
 
-  const showConfirmation = () => {
-    if (
-      selectedInsights &&
-      selectedInsights.length > 0 &&
-      confirm("Are you sure?")
-    ) {
-      setServerFunctionInputForInsightsList({ insights: selectedInsights });
-    }
-  };
 
   const createLinkAndAddToInsights = async ({
     url,
@@ -146,13 +146,7 @@ const ClientSidePage = ({
                 </button>
                 <button
                   className={`${cardStyles.actionButton} ${cardStyles.actionButtonSecondary}`}
-                  onClick={() => {
-                    (
-                      document.getElementById(
-                        SAVE_LINK_DIALOG_ID,
-                      ) as HTMLDialogElement
-                    ).showModal();
-                  }}
+                  onClick={() => setIsSaveLinkDialogOpen(true)}
                 >
                   Save Link
                 </button>
@@ -181,6 +175,14 @@ const ClientSidePage = ({
                         setServerFunctionInputForInsightsList({
                           insights: selectedInsights,
                         });
+                        setActiveServerFunctionForInsightsList({
+                          function: async (input: InsightsAPISchema, token: string) => {
+                            if (token) {
+                              return publishInsights(input, token);
+                            }
+                            return Promise.resolve([]);
+                          },
+                        });
                       }}
                       disabled={selectedInsights.length === 0}
                     >
@@ -188,7 +190,23 @@ const ClientSidePage = ({
                     </button>
                     <button
                       className={`${cardStyles.actionButton} ${cardStyles.actionButtonSecondary}`}
-                      onClick={showConfirmation}
+                      onClick={() => {
+                        if (
+                          selectedInsights &&
+                          selectedInsights.length > 0 &&
+                          confirm("Are you sure?")
+                        ) {
+                          setServerFunctionInputForInsightsList({ insights: selectedInsights });
+                          setActiveServerFunctionForInsightsList({
+                            function: async (input: InsightsAPISchema, token: string) => {
+                              if (token) {
+                                return deleteInsights(input, token);
+                              }
+                              return Promise.resolve([]);
+                            },
+                          });
+                        }
+                      }}
                       disabled={selectedInsights.length === 0}
                     >
                       Delete Selected
@@ -273,11 +291,32 @@ const ClientSidePage = ({
           {/* Child Level - Dialogs */}
           <SaveLinkDialog
             id={SAVE_LINK_DIALOG_ID}
+            isOpen={isSaveLinkDialogOpen}
+            onClose={() => setIsSaveLinkDialogOpen(false)}
             potentialInsightsFromServer={liveData.filter(
               (insight) => insight.user_id == currentUser?.id,
             )}
-            setServerFunctionInput={setServerFunctionInputForInsightsList}
-            setActiveServerFunction={setActiveServerFunctionForInsightsList}
+            setServerFunctionInput={(input) => {
+              if (input) {
+                // When SaveLinkDialog submits, trigger createLinkAndAddToInsights
+                createLinkAndAddToInsights(input).then((responses) => {
+                  // Update the live data with the responses
+                  responses.forEach((response) => {
+                    if (response.action === 1) {
+                      setLiveData([...(response.facts as Insight[]), ...liveData]);
+                    } else if (response.action === 0) {
+                      // Update existing insights
+                      const updatedData = liveData.map(insight => {
+                        const updatedInsight = response.facts.find(f => f.uid === insight.uid) as Insight;
+                        return updatedInsight ? { ...insight, ...updatedInsight } : insight;
+                      });
+                      setLiveData(updatedData);
+                    }
+                  });
+                });
+              }
+            }}
+            setActiveServerFunction={() => {}} // Not needed since we handle it above
           />
         </CurrentUserContext.Provider>
       </div>
