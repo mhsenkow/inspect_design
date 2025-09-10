@@ -81,9 +81,13 @@ describe("AddCitationsToOtherInsightsDialog", () => {
     });
 
     // Check that the main sections exist
-    expect(screen.getByText("First: select citations to remove from this insight")).toBeInTheDocument();
-    expect(screen.getByText("Then: select other insights to add them to")).toBeInTheDocument();
-    
+    expect(
+      screen.getByText("First: select citations to remove from this insight"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Then: select other insights to add them to"),
+    ).toBeInTheDocument();
+
     // Check that the second table has content
     await waitFor(() => {
       expect(screen.getByText("Insight 1")).toBeInTheDocument();
@@ -234,7 +238,9 @@ describe("AddCitationsToOtherInsightsDialog", () => {
 
     mockPotentialInsights.forEach((mockPotentialInsight) => {
       const row = screen.getByText(mockPotentialInsight.title!).closest("tr")!;
-      const citationTd = row.querySelector("td:last-child") as HTMLTableCellElement;
+      const citationTd = row.querySelector(
+        "td:last-child",
+      ) as HTMLTableCellElement;
       const span = citationTd.children[0];
       expect(span.tagName.toLowerCase()).toBe("span");
       expect(span).toHaveAttribute("class", "badge text-bg-danger");
