@@ -67,9 +67,8 @@ export const addCitationsToInsight = async (
       title: (evidence.summary as Record<string, unknown>)?.title || "Untitled",
       uid: (evidence.summary as Record<string, unknown>)?.uid,
       updated_at: (evidence.summary as Record<string, unknown>)?.updated_at,
-      logo_uri: (evidence.summary as Record<string, unknown>)?.source?.logo_uri,
-      source_baseurl: (evidence.summary as Record<string, unknown>)?.source
-        ?.baseurl,
+      logo_uri: ((evidence.summary as Record<string, unknown>)?.source as Record<string, unknown>)?.logo_uri,
+      source_baseurl: ((evidence.summary as Record<string, unknown>)?.source as Record<string, unknown>)?.baseurl,
     }),
   );
 
