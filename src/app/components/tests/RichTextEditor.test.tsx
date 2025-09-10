@@ -1,5 +1,5 @@
 import React from "react";
-import { render, fireEvent, waitFor } from "@testing-library/react";
+import { render, fireEvent, waitFor, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
 import RichTextEditor from "../RichTextEditor";
@@ -15,6 +15,7 @@ describe("RichTextEditor", () => {
     if (!HTMLDialogElement.prototype.showModal) {
       HTMLDialogElement.prototype.showModal = function () {
         this.open = true;
+        this.dispatchEvent(new Event("show"));
       };
     }
     if (!HTMLDialogElement.prototype.close) {
@@ -36,7 +37,7 @@ describe("RichTextEditor", () => {
     await waitFor(() => expect(editableDiv.firstChild?.nodeName).toBe("P"));
   });
 
-  it("opens the insert link dialog", () => {
+  it("opens the insert link dialog", async () => {
     const { getByAltText } = render(
       <RichTextEditor html="Some text" setHtml={setHtmlMock} />,
     );
@@ -44,8 +45,9 @@ describe("RichTextEditor", () => {
     const linkButton = getByAltText("Insert Link");
     fireEvent.click(linkButton);
 
-    const dialog = document.getElementById(INSERT_LINK_DIALOG_ID);
-    expect(dialog).toBeVisible();
+    await waitFor(() => {
+      expect(screen.getByText("Insert a Link into Comment")).toBeInTheDocument();
+    });
   });
 
   it("updates HTML content on input", () => {

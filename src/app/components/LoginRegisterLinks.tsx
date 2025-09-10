@@ -2,7 +2,7 @@
 import styles from "../../styles/components/login-register-links.module.css";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-// import { usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 import useUser from "../hooks/useUser";
 
@@ -15,7 +15,7 @@ const LoginRegisterLinks = ({
   useEffect(() => setReturnPath(window.location.pathname), []);
 
   const { logout } = useUser();
-  // const path = usePathname();
+  const path = usePathname();
 
   if (loggedIn) {
     return (
@@ -38,15 +38,22 @@ const LoginRegisterLinks = ({
 
   return (
     <div className={styles.loginRegisterContainer}>
-      <Link href={`/login?return=${returnPath}`} className={styles.loginButton}>
-        Login
-      </Link>
-      <Link
-        href={`/register?return=${returnPath}`}
-        className={styles.registerButton}
-      >
-        Register
-      </Link>
+      <li className={path === "/login" ? "active" : ""}>
+        <Link 
+          href={`/login?return=${returnPath}`} 
+          className={styles.loginButton}
+        >
+          Login
+        </Link>
+      </li>
+      <li className={path === "/register" ? "active" : ""}>
+        <Link
+          href={`/register?return=${returnPath}`}
+          className={styles.registerButton}
+        >
+          Register
+        </Link>
+      </li>
     </div>
   );
 };

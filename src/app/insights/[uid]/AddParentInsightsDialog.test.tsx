@@ -57,6 +57,8 @@ describe("AddParentInsightsDialog", () => {
     return render(
       <AddParentInsightsDialog
         id="test-dialog"
+        isOpen={true}
+        onClose={jest.fn()}
         insight={mockInsight}
         setServerFunctionInput={setServerFunctionInput}
         setActiveServerFunction={setActiveServerFunction}

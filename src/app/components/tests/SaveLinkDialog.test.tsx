@@ -73,6 +73,8 @@ describe("SaveLinkDialog", () => {
     render(
       <SaveLinkDialog
         id="saveLinkDialog"
+        isOpen={true}
+        onClose={jest.fn()}
         potentialInsightsFromServer={mockPotentialInsights}
         setServerFunctionInput={mockSetServerFunctionInput}
         setActiveServerFunction={jest.fn()}
@@ -87,6 +89,8 @@ describe("SaveLinkDialog", () => {
       render(
         <SaveLinkDialog
           id="saveLinkDialog"
+          isOpen={true}
+          onClose={jest.fn()}
           potentialInsightsFromServer={mockPotentialInsights}
           setServerFunctionInput={mockSetServerFunctionInput}
           setActiveServerFunction={jest.fn()}
@@ -111,6 +115,8 @@ describe("SaveLinkDialog", () => {
       render(
         <SaveLinkDialog
           id="saveLinkDialog"
+          isOpen={true}
+          onClose={jest.fn()}
           potentialInsightsFromServer={mockPotentialInsights}
           setServerFunctionInput={mockSetServerFunctionInput}
           setActiveServerFunction={jest.fn()}
@@ -141,6 +147,8 @@ describe("SaveLinkDialog", () => {
       render(
         <SaveLinkDialog
           id="saveLinkDialog"
+          isOpen={true}
+          onClose={jest.fn()}
           potentialInsightsFromServer={mockPotentialInsights}
           setServerFunctionInput={mockSetServerFunctionInput}
           setActiveServerFunction={jest.fn()}
@@ -167,6 +175,8 @@ describe("SaveLinkDialog", () => {
     render(
       <SaveLinkDialog
         id="saveLinkDialog"
+        isOpen={true}
+        onClose={jest.fn()}
         potentialInsightsFromServer={mockPotentialInsights}
         setServerFunctionInput={mockSetServerFunctionInput}
         setActiveServerFunction={jest.fn()}
@@ -193,6 +203,8 @@ describe("SaveLinkDialog", () => {
     const { getByText, getByPlaceholderText } = render(
       <SaveLinkDialog
         id="saveLinkDialog"
+        isOpen={true}
+        onClose={jest.fn()}
         potentialInsightsFromServer={mockPotentialInsights}
         setServerFunctionInput={mockSetServerFunctionInput}
         setActiveServerFunction={mockSetActiveServerFunction}
@@ -213,6 +225,8 @@ describe("SaveLinkDialog", () => {
     render(
       <SaveLinkDialog
         id="saveLinkDialog"
+        isOpen={true}
+        onClose={jest.fn()}
         potentialInsightsFromServer={mockPotentialInsights}
         setServerFunctionInput={mockSetServerFunctionInput}
         setActiveServerFunction={jest.fn()}
@@ -234,6 +248,8 @@ describe("SaveLinkDialog", () => {
       render(
         <SaveLinkDialog
           id="saveLinkDialog"
+          isOpen={true}
+          onClose={jest.fn()}
           potentialInsightsFromServer={mockPotentialInsights}
           setServerFunctionInput={mockSetServerFunctionInput}
           setActiveServerFunction={jest.fn()}
@@ -258,6 +274,8 @@ describe("SaveLinkDialog", () => {
     render(
       <SaveLinkDialog
         id="saveLinkDialog"
+        isOpen={true}
+        onClose={jest.fn()}
         potentialInsightsFromServer={mockPotentialInsights}
         setServerFunctionInput={mockSetServerFunctionInput}
         setActiveServerFunction={jest.fn()}
@@ -291,6 +309,8 @@ describe("SaveLinkDialog", () => {
     render(
       <SaveLinkDialog
         id="saveLinkDialog"
+        isOpen={true}
+        onClose={jest.fn()}
         potentialInsightsFromServer={mockPotentialInsights}
         setServerFunctionInput={mockSetServerFunctionInput}
         setActiveServerFunction={mockSetActiveServerFunction}
@@ -331,6 +351,8 @@ describe("SaveLinkDialog", () => {
     render(
       <SaveLinkDialog
         id="saveLinkDialog"
+        isOpen={true}
+        onClose={jest.fn()}
         potentialInsightsFromServer={mockPotentialInsights}
         setServerFunctionInput={mockSetServerFunctionInput}
         setActiveServerFunction={jest.fn()}
@@ -358,6 +380,8 @@ describe("SaveLinkDialog", () => {
     render(
       <SaveLinkDialog
         id="saveLinkDialog"
+        isOpen={true}
+        onClose={jest.fn()}
         potentialInsightsFromServer={mockPotentialInsights}
         setServerFunctionInput={mockSetServerFunctionInput}
         setActiveServerFunction={jest.fn()}

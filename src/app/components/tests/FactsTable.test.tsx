@@ -228,8 +228,8 @@ describe("FactsTable", () => {
       />,
     );
 
-    expect(screen.getByText("Fact 1").closest("tr")).toHaveStyle(
-      "background-color: #ccc",
+    expect(screen.getByText("Fact 1").closest("tr")).toHaveClass(
+      "bg-tertiary",
     );
   });
 

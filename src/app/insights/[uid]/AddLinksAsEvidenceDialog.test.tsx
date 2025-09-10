@@ -88,6 +88,8 @@ describe("AddLinksAsEvidenceDialog", () => {
     render(
       <AddLinksAsEvidenceDialog
         id="test-dialog"
+        isOpen={true}
+        onClose={jest.fn()}
         insight={mockInsight}
         setServerFunctionInput={mockSetServerFunctionInput}
         setActiveServerFunction={mockSetActiveServerFunction}
@@ -104,6 +106,8 @@ describe("AddLinksAsEvidenceDialog", () => {
     render(
       <AddLinksAsEvidenceDialog
         id="test-dialog"
+        isOpen={true}
+        onClose={jest.fn()}
         insight={mockInsight}
         setServerFunctionInput={mockSetServerFunctionInput}
         setActiveServerFunction={mockSetActiveServerFunction}
@@ -119,6 +123,8 @@ describe("AddLinksAsEvidenceDialog", () => {
     render(
       <AddLinksAsEvidenceDialog
         id="test-dialog"
+        isOpen={true}
+        onClose={jest.fn()}
         insight={mockInsight}
         setServerFunctionInput={mockSetServerFunctionInput}
         setActiveServerFunction={mockSetActiveServerFunction}
@@ -146,6 +152,8 @@ describe("AddLinksAsEvidenceDialog", () => {
     render(
       <AddLinksAsEvidenceDialog
         id="test-dialog"
+        isOpen={true}
+        onClose={jest.fn()}
         insight={mockInsight}
         setServerFunctionInput={mockSetServerFunctionInput}
         setActiveServerFunction={mockSetActiveServerFunction}
@@ -173,6 +181,8 @@ describe("AddLinksAsEvidenceDialog", () => {
     render(
       <AddLinksAsEvidenceDialog
         id="test-dialog"
+        isOpen={true}
+        onClose={jest.fn()}
         insight={mockInsight}
         setServerFunctionInput={mockSetServerFunctionInput}
         setActiveServerFunction={mockSetActiveServerFunction}
@@ -227,6 +237,8 @@ describe("AddLinksAsEvidenceDialog", () => {
     render(
       <AddLinksAsEvidenceDialog
         id="test-dialog"
+        isOpen={true}
+        onClose={jest.fn()}
         insight={mockInsight}
         setServerFunctionInput={mockSetServerFunctionInput}
         setActiveServerFunction={mockSetActiveServerFunction}
@@ -269,6 +281,8 @@ describe("AddLinksAsEvidenceDialog", () => {
     render(
       <AddLinksAsEvidenceDialog
         id="test-dialog"
+        isOpen={true}
+        onClose={jest.fn()}
         insight={mockInsight}
         setServerFunctionInput={mockSetServerFunctionInput}
         setActiveServerFunction={mockSetActiveServerFunction}

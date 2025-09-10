@@ -34,6 +34,8 @@ describe("InsertLinkDialog", () => {
 
   it("renders the dialog with default state", () => {
     render(<InsertLinkDialog html="" setHtml={setHtmlMock} />);
+    const dialog = document.getElementById(INSERT_LINK_DIALOG_ID) as HTMLDialogElement;
+    dialog.dispatchEvent(new Event("show"));
     expect(screen.getByText("Insert a Link into Comment")).toBeInTheDocument();
     expect(screen.getByText("Specify an external link")).toBeInTheDocument();
     expect(
@@ -43,6 +45,8 @@ describe("InsertLinkDialog", () => {
 
   it("updates link URL input and fetches title", async () => {
     render(<InsertLinkDialog html="" setHtml={setHtmlMock} />);
+    const dialog = document.getElementById(INSERT_LINK_DIALOG_ID) as HTMLDialogElement;
+    dialog.dispatchEvent(new Event("show"));
     const input = screen.getByPlaceholderText("Paste URL");
 
     fireEvent.change(input, { target: { value: "https://example.com" } });
@@ -59,6 +63,8 @@ describe("InsertLinkDialog", () => {
     );
 
     render(<InsertLinkDialog html="" setHtml={setHtmlMock} />);
+    const dialog = document.getElementById(INSERT_LINK_DIALOG_ID) as HTMLDialogElement;
+    dialog.dispatchEvent(new Event("show"));
     const input = screen.getByPlaceholderText("Paste URL");
 
     fireEvent.change(input, { target: { value: "https://example.com" } });
@@ -73,18 +79,22 @@ describe("InsertLinkDialog", () => {
 
   it("closes the dialog when cancel is clicked", () => {
     render(<InsertLinkDialog html="" setHtml={setHtmlMock} />);
+    const dialog = document.getElementById(INSERT_LINK_DIALOG_ID) as HTMLDialogElement;
+    dialog.dispatchEvent(new Event("show"));
     const cancelButton = screen.getByText("Cancel");
 
     fireEvent.click(cancelButton);
 
-    const dialog = document.getElementById(
+    const dialogElement = document.getElementById(
       INSERT_LINK_DIALOG_ID,
     ) as HTMLDialogElement;
-    expect(dialog.open).toBe(false);
+    expect(dialogElement.open).toBe(false);
   });
 
   it("allows entering a link URL", async () => {
     render(<InsertLinkDialog html="" setHtml={setHtmlMock} />);
+    const dialog = document.getElementById(INSERT_LINK_DIALOG_ID) as HTMLDialogElement;
+    dialog.dispatchEvent(new Event("show"));
 
     const urlInput = screen.getByPlaceholderText("Paste URL");
     fireEvent.change(urlInput, { target: { value: "https://example.com" } });
@@ -117,6 +127,8 @@ describe("InsertLinkDialog", () => {
     });
 
     render(<InsertLinkDialog html="" setHtml={setHtmlMock} />);
+    const dialog = document.getElementById(INSERT_LINK_DIALOG_ID) as HTMLDialogElement;
+    dialog.dispatchEvent(new Event("show"));
     const insightRadio = screen.getByLabelText("Insight");
 
     fireEvent.click(insightRadio);
@@ -151,6 +163,8 @@ describe("InsertLinkDialog", () => {
     });
 
     render(<InsertLinkDialog html="" setHtml={setHtmlMock} />);
+    const dialog = document.getElementById(INSERT_LINK_DIALOG_ID) as HTMLDialogElement;
+    dialog.dispatchEvent(new Event("show"));
 
     const linkRadio = screen.getByLabelText("Link");
     fireEvent.click(linkRadio);

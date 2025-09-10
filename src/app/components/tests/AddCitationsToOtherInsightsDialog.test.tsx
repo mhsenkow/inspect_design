@@ -67,6 +67,8 @@ describe("AddCitationsToOtherInsightsDialog", () => {
     render(
       <AddCitationsToOtherInsightsDialog
         id={ADD_CITATIONS_TO_OTHER_INSIGHTS_DIALOG_ID}
+        isOpen={true}
+        onClose={jest.fn()}
         selectedCitations={
           mockSelectedCitations as unknown as InsightEvidence[]
         }
@@ -99,6 +101,8 @@ describe("AddCitationsToOtherInsightsDialog", () => {
     render(
       <AddCitationsToOtherInsightsDialog
         id={ADD_CITATIONS_TO_OTHER_INSIGHTS_DIALOG_ID}
+        isOpen={true}
+        onClose={jest.fn()}
         selectedCitations={
           mockSelectedCitations as unknown as InsightEvidence[]
         }
@@ -155,6 +159,8 @@ describe("AddCitationsToOtherInsightsDialog", () => {
     render(
       <AddCitationsToOtherInsightsDialog
         id={ADD_CITATIONS_TO_OTHER_INSIGHTS_DIALOG_ID}
+        isOpen={true}
+        onClose={jest.fn()}
         selectedCitations={
           mockSelectedCitations as unknown as InsightEvidence[]
         }
@@ -185,6 +191,8 @@ describe("AddCitationsToOtherInsightsDialog", () => {
     render(
       <AddCitationsToOtherInsightsDialog
         id={ADD_CITATIONS_TO_OTHER_INSIGHTS_DIALOG_ID}
+        isOpen={true}
+        onClose={jest.fn()}
         selectedCitations={
           mockSelectedCitations as unknown as InsightEvidence[]
         }
@@ -201,6 +209,8 @@ describe("AddCitationsToOtherInsightsDialog", () => {
     render(
       <AddCitationsToOtherInsightsDialog
         id={ADD_CITATIONS_TO_OTHER_INSIGHTS_DIALOG_ID}
+        isOpen={true}
+        onClose={jest.fn()}
         selectedCitations={
           mockSelectedCitations as unknown as InsightEvidence[]
         }
