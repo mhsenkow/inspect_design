@@ -16,6 +16,9 @@ jest.mock("../models/evidence", () => {
   const mockQueryBuilder = {
     insert: jest.fn().mockReturnThis(),
     withGraphFetched: jest.fn().mockReturnThis(),
+    where: jest.fn().mockReturnThis(),
+    andWhere: jest.fn().mockReturnThis(),
+    orWhere: jest.fn().mockReturnThis(),
     then: jest.fn(),
   };
 
@@ -42,11 +45,28 @@ describe("POST /api/evidence", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (EvidenceModel.query().insert as jest.Mock).mockReturnThis();
-    (EvidenceModel.query().withGraphFetched as jest.Mock).mockReturnThis();
-    (EvidenceModel.query().then as jest.Mock).mockImplementation((callback) =>
-      Promise.resolve(callback(mockEvidence)),
-    );
+    
+    // Mock the first query (checking for existing evidence) to return empty array
+    const mockFirstQueryBuilder = {
+      where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      orWhere: jest.fn().mockReturnThis(),
+      withGraphFetched: jest.fn().mockResolvedValue([]), // No existing evidence
+    };
+    
+    // Mock the second query (inserting new evidence) to return the mock evidence
+    const mockSecondQueryBuilder = {
+      insert: jest.fn().mockReturnThis(),
+      withGraphFetched: jest.fn().mockResolvedValue(mockEvidence),
+    };
+    
+    // Mock EvidenceModel.query to return different builders based on call count
+    let callCount = 0;
+    (EvidenceModel.query as jest.Mock).mockImplementation(() => {
+      callCount++;
+      return callCount === 1 ? mockFirstQueryBuilder : mockSecondQueryBuilder;
+    });
+    
     (getAuthUser as jest.Mock).mockResolvedValue(mockAuthUser);
   });
 
@@ -116,10 +136,17 @@ describe("POST /api/evidence", () => {
   });
 
   it("throws error for other database errors", async () => {
-    (EvidenceModel.query().then as jest.Mock).mockReset();
-    (EvidenceModel.query().then as jest.Mock).mockImplementationOnce(() => {
-      throw new Error("DB error");
+    // Reset the mock to throw an error on the first query
+    (EvidenceModel.query as jest.Mock).mockImplementationOnce(() => {
+      const mockQueryBuilder = {
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        orWhere: jest.fn().mockReturnThis(),
+        withGraphFetched: jest.fn().mockRejectedValue(new Error("DB error")),
+      };
+      return mockQueryBuilder;
     });
+    
     const req = {
       json: jest.fn().mockResolvedValue({ evidence: mockEvidence }),
     } as any;
