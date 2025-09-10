@@ -113,7 +113,7 @@ The database includes the following tables:
 ## Features
 
 - User authentication and registration
-- Create and manage insights (factual statements)
+- Create and manage insights (subjective claims)
 - Link insights to source content
 - Add comments and reactions
 - Hierarchical organization of insights
