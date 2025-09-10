@@ -133,25 +133,29 @@ const ClientSidePage = ({
                     : "No insights yet"}
                 </p>
               </div>
+              {loggedIn && (
+                <div style={{ display: 'flex', gap: 'var(--spacing-2)' }}>
+                  <button
+                    onClick={promptForNewInsightName}
+                    className={cardStyles.addButton}
+                    aria-label="Create New Insight"
+                    title="Create New Insight"
+                  >
+                    <span className={cardStyles.addButtonIcon}>+</span>
+                    <span className={cardStyles.addButtonText}>Create New Insight</span>
+                  </button>
+                  <button
+                    onClick={() => setIsSaveLinkDialogOpen(true)}
+                    className={cardStyles.addButton}
+                    aria-label="Save Link"
+                    title="Save Link"
+                  >
+                    <span className={cardStyles.addButtonIcon}>🔗</span>
+                    <span className={cardStyles.addButtonText}>Save Link</span>
+                  </button>
+                </div>
+              )}
             </div>
-
-            {/* Big Actions */}
-            {loggedIn && (
-              <div className={`${cardStyles.actionsSection} ${cardStyles.actionsSectionCenter}`}>
-                <button
-                  className={`${cardStyles.actionButton} ${cardStyles.actionButtonPrimary}`}
-                  onClick={promptForNewInsightName}
-                >
-                  Create New Insight
-                </button>
-                <button
-                  className={`${cardStyles.actionButton} ${cardStyles.actionButtonSecondary}`}
-                  onClick={() => setIsSaveLinkDialogOpen(true)}
-                >
-                  Save Link
-                </button>
-              </div>
-            )}
           </div>
         </div>
 
@@ -169,48 +173,77 @@ const ClientSidePage = ({
                 </h3>
                 {loggedIn && (
                   <div className={cardStyles.sectionActions}>
-                    <button
-                      className={`${cardStyles.actionButton} ${cardStyles.actionButtonPrimary}`}
-                      onClick={() => {
-                        setServerFunctionInputForInsightsList({
-                          insights: selectedInsights,
-                        });
-                        setActiveServerFunctionForInsightsList({
-                          function: async (input: InsightsAPISchema, token: string) => {
-                            if (token) {
-                              return publishInsights(input, token);
+                    {selectedInsights.length === 0 ? (
+                      <>
+                        <button
+                          onClick={promptForNewInsightName}
+                          className={cardStyles.addButton}
+                          aria-label="Create New Insight"
+                          title="Create New Insight"
+                        >
+                          <span className={cardStyles.addButtonIcon}>+</span>
+                          <span className={cardStyles.addButtonText}>Create</span>
+                        </button>
+                        <button
+                          onClick={() => setIsSaveLinkDialogOpen(true)}
+                          className={cardStyles.addButton}
+                          aria-label="Save Link"
+                          title="Save Link"
+                        >
+                          <span className={cardStyles.addButtonIcon}>🔗</span>
+                          <span className={cardStyles.addButtonText}>Save Link</span>
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => {
+                            setServerFunctionInputForInsightsList({
+                              insights: selectedInsights,
+                            });
+                            setActiveServerFunctionForInsightsList({
+                              function: async (input: InsightsAPISchema, token: string) => {
+                                if (token) {
+                                  return publishInsights(input, token);
+                                }
+                                return Promise.resolve([]);
+                              },
+                            });
+                          }}
+                          className={cardStyles.addButton}
+                          aria-label="Publish Selected"
+                          title="Publish Selected"
+                        >
+                          <span className={cardStyles.addButtonIcon}>📢</span>
+                          <span className={cardStyles.addButtonText}>Publish</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (
+                              selectedInsights &&
+                              selectedInsights.length > 0 &&
+                              confirm("Are you sure?")
+                            ) {
+                              setServerFunctionInputForInsightsList({ insights: selectedInsights });
+                              setActiveServerFunctionForInsightsList({
+                                function: async (input: InsightsAPISchema, token: string) => {
+                                  if (token) {
+                                    return deleteInsights(input, token);
+                                  }
+                                  return Promise.resolve([]);
+                                },
+                              });
                             }
-                            return Promise.resolve([]);
-                          },
-                        });
-                      }}
-                      disabled={selectedInsights.length === 0}
-                    >
-                      Publish Selected
-                    </button>
-                    <button
-                      className={`${cardStyles.actionButton} ${cardStyles.actionButtonSecondary}`}
-                      onClick={() => {
-                        if (
-                          selectedInsights &&
-                          selectedInsights.length > 0 &&
-                          confirm("Are you sure?")
-                        ) {
-                          setServerFunctionInputForInsightsList({ insights: selectedInsights });
-                          setActiveServerFunctionForInsightsList({
-                            function: async (input: InsightsAPISchema, token: string) => {
-                              if (token) {
-                                return deleteInsights(input, token);
-                              }
-                              return Promise.resolve([]);
-                            },
-                          });
-                        }
-                      }}
-                      disabled={selectedInsights.length === 0}
-                    >
-                      Delete Selected
-                    </button>
+                          }}
+                          className={cardStyles.addButton}
+                          aria-label="Delete Selected"
+                          title="Delete Selected"
+                        >
+                          <span className={cardStyles.addButtonIcon}>🗑️</span>
+                          <span className={cardStyles.addButtonText}>Delete</span>
+                        </button>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
