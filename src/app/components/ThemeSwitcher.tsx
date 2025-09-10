@@ -8,10 +8,10 @@ interface ThemeSwitcherProps {
 }
 
 const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ className = "" }) => {
-  const [currentTheme, setCurrentTheme] = useState("");
-  const [currentSpacing, setCurrentSpacing] = useState("");
-  const [currentRadius, setCurrentRadius] = useState("");
-  const [currentShadow, setCurrentShadow] = useState("");
+  const [currentTheme, setCurrentTheme] = useState<string>("");
+  const [currentSpacing, setCurrentSpacing] = useState<string>("");
+  const [currentRadius, setCurrentRadius] = useState<string>("");
+  const [currentShadow, setCurrentShadow] = useState<string>("");
   const [isOpen, setIsOpen] = useState(false);
 
   const themes = [

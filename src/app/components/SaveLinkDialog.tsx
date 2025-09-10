@@ -42,12 +42,12 @@ const SaveLinkDialog = ({
   ) => void;
   setActiveServerFunction: (value: undefined) => void;
 }): React.JSX.Element => {
-  const [linkUrl, setLinkUrl] = useState("");
-  const [linkUrlError, setLinkUrlError] = useState("");
-  const [dataFilter, setDataFilter] = useState("");
+  const [linkUrl, setLinkUrl] = useState<string>("");
+  const [linkUrlError, setLinkUrlError] = useState<string>("");
+  const [dataFilter, setDataFilter] = useState<string>("");
   const [selectedInsights, setSelectedInsights] = useState<Insight[]>([]);
-  const [newInsightName, setNewInsightName] = useState("");
-  const [pageTitle, setPageTitle] = useState("");
+  const [newInsightName, setNewInsightName] = useState<string>("");
+  const [pageTitle, setPageTitle] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [potentialInsights, setPotentialInsights] = useState<Insight[]>(
     potentialInsightsFromServer,

@@ -59,7 +59,7 @@ const FactsListView = ({
 }): React.JSX.Element => {
   const { data, setData } = useContext(FactsDataContext);
   const [flvResponses, setFLVResponses] = useState<FLVResponse[]>([]);
-  const [dataFilter, setDataFilter] = useState("");
+  const [dataFilter, setDataFilter] = useState<string>("");
 
   const { token, loggedIn } = useUser();
 

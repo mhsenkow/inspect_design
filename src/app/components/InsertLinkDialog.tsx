@@ -21,17 +21,17 @@ interface Props {
 }
 
 const InsertLinkDialog = ({ html, setHtml }: Props) => {
-  const [existingItemType, setExistingItemType] = useState("");
+  const [existingItemType, setExistingItemType] = useState<string>("");
   const [existingInsights, setExistingInsights] = useState<Insight[]>();
   const [existingLinks, setExistingLinks] = useState<Link[]>();
-  const [linkUrlInput, setLinkUrlInput] = useState("");
-  const [linkTitle, setLinkTitle] = useState("");
+  const [linkUrlInput, setLinkUrlInput] = useState<string>("");
+  const [linkTitle, setLinkTitle] = useState<string>("");
   const [linkTitleLoading, setLinkTitleLoading] = useState(false);
-  const [linkUrlError, setLinkUrlError] = useState("");
+  const [linkUrlError, setLinkUrlError] = useState<string>("");
   const [chosenInsights, setChosenInsights] = useState<Insight[]>([]);
   const [chosenLinks, setChosenLinks] = useState<Link[]>([]);
-  const [insightFilter, setInsightFilter] = useState("");
-  const [linkFilter, setLinkFilter] = useState("");
+  const [insightFilter, setInsightFilter] = useState<string>("");
+  const [linkFilter, setLinkFilter] = useState<string>("");
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {

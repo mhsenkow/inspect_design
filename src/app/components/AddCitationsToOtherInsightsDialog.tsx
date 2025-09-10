@@ -38,12 +38,12 @@ const AddCitationsToOtherInsightsDialog = ({
   >;
 }): React.JSX.Element => {
   const [selectedInsights, setSelectedInsights] = useState([]);
-  const [dataFilter, setDataFilter] = useState("");
+  const [dataFilter, setDataFilter] = useState<string>("");
   const [citationsToRemove, setCitationsToRemove] = useState([]);
-  const [newInsightName, setNewInsightName] = useState("");
+  const [newInsightName, setNewInsightName] = useState<string>("");
   const [newInsightIsCategory, setNewInsightIsCategory] = useState(false);
   const [potentialInsights, setPotentialInsights] = useState<Insight[]>();
-  const [citationsToRemoveDataFilter, setCitationsToRemoveDataFilter] = useState("");
+  const [citationsToRemoveDataFilter, setCitationsToRemoveDataFilter] = useState<string>("");
   const [disabledInsightIds, setDisabledInsightIds] = useState<number[]>();
   const [selectedCitations, setSelectedCitations] = useState<InsightEvidence[]>(
     selectedCitationsInput,

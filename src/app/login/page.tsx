@@ -5,7 +5,7 @@ import { handleLogin } from "./LoginPageFunctions";
 import useUser from "../hooks/useUser";
 
 const LoginPage = (): React.JSX.Element => {
-  const [returnParam, setReturnParm] = useState("");
+  const [returnParam, setReturnParm] = useState<string>("");
   useEffect(() => {
     const ret = new URLSearchParams(document.location.search).get("return");
     if (ret) {

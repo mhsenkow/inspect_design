@@ -49,10 +49,10 @@ const AddChildInsightsDialog = ({
   setServerFunctionInput,
   setActiveServerFunction,
 }: Props): React.JSX.Element => {
-  const [dataFilter, setDataFilter] = useState("");
+  const [dataFilter, setDataFilter] = useState<string>("");
   const [childInsights, setChildInsights] = useState<Insight[] | undefined>();
   const [selectedChildInsights, setSelectedChildInsights] = useState<Insight[]>([]);
-  const [newInsightName, setNewInsightName] = useState("");
+  const [newInsightName, setNewInsightName] = useState<string>("");
   const [activeTab, setActiveTab] = useState("existing");
 
   useEffect(() => {

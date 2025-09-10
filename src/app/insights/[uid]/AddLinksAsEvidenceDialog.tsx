@@ -48,12 +48,12 @@ const AddLinksAsEvidenceDialog = ({
   setServerFunctionInput,
   setActiveServerFunction,
 }: Props): React.JSX.Element => {
-  const [dataFilter, setDataFilter] = useState("");
+  const [dataFilter, setDataFilter] = useState<string>("");
   const [selectedCitations, setSelectedCitations] = useState<InsightEvidence[]>([]);
-  const [newLinkUrl, setNewLinkUrl] = useState("");
-  const [pageTitle, setPageTitle] = useState("");
+  const [newLinkUrl, setNewLinkUrl] = useState<string>("");
+  const [pageTitle, setPageTitle] = useState<string>("");
   const [loading, setLoading] = useState(false);
-  const [linkUrlError, setLinkUrlError] = useState("");
+  const [linkUrlError, setLinkUrlError] = useState<string>("");
   const [activeTab, setActiveTab] = useState("existing");
 
   const { token } = useUser();
