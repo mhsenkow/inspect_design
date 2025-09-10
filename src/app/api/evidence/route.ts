@@ -70,9 +70,8 @@ export async function POST(
               .withGraphFetched("summary.source");
           }
 
-          // Return both existing and newly inserted evidence
-          const allEvidence = [...existingEvidence, ...insertedEvidence];
-          return NextResponse.json(allEvidence);
+          // Return only the newly created evidence
+          return NextResponse.json(insertedEvidence);
         } catch (err) {
           if (err instanceof ForeignKeyViolationError) {
             console.error("Foreign key violation:", err.message);
