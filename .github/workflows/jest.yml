@@ -5,7 +5,7 @@ on:
     branches: [main]
 
 jobs:
-  jest:
+  typescript:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/setup-node@v4
