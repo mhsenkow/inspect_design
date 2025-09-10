@@ -6,20 +6,23 @@ import { decryptToken } from "../../middleware/functions";
 const useUser = () => {
   // Initialize state with parsed cookie data to avoid re-parsing on every mount
   const [token, setToken] = useState<string | undefined>(() => {
-    if (typeof window === 'undefined') return undefined;
+    if (typeof window === "undefined") return undefined;
     const cookieToken = document.cookie
       .split(";")
       .find((row) => row.trim().startsWith("token="))
       ?.split("=")[1];
     return cookieToken;
   });
-  
-  const [userDetails, setUserDetails] = useState<{
-    user_id: number;
-    email: string;
-    username: string;
-  } | undefined>(() => {
-    if (typeof window === 'undefined') return undefined;
+
+  const [userDetails, setUserDetails] = useState<
+    | {
+        user_id: number;
+        email: string;
+        username: string;
+      }
+    | undefined
+  >(() => {
+    if (typeof window === "undefined") return undefined;
     const cookieToken = document.cookie
       .split(";")
       .find((row) => row.trim().startsWith("token="))
@@ -34,24 +37,24 @@ const useUser = () => {
     }
     return undefined;
   });
-  
+
   const [loggedIn, setLoggedIn] = useState(() => {
-    if (typeof window === 'undefined') return false;
+    if (typeof window === "undefined") return false;
     const cookieToken = document.cookie
       .split(";")
       .find((row) => row.trim().startsWith("token="))
       ?.split("=")[1];
     return !!cookieToken;
   });
-  
+
   useEffect(() => {
     // Initialize state on client side after hydration
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       const cookieToken = document.cookie
         .split(";")
         .find((row) => row.trim().startsWith("token="))
         ?.split("=")[1];
-      
+
       if (cookieToken && !token) {
         setToken(cookieToken);
         const details = decryptToken(
@@ -74,7 +77,7 @@ const useUser = () => {
         setUserDetails(undefined);
       }
     }
-  }, []);
+  }, [token]);
 
   useEffect(() => {
     // Only run effect if token exists but userDetails is missing (edge case)
@@ -103,7 +106,6 @@ const useUser = () => {
     date.setDate(date.getDate() + 400);
     document.cookie = `token=${encodedToken}; path=/; expires=${date.toUTCString()}`;
   };
-
 
   const logout = () => {
     document.cookie = `token=; path=/; expires=${new Date(0)}`;

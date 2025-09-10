@@ -43,7 +43,8 @@ const AddCitationsToOtherInsightsDialog = ({
   const [newInsightName, setNewInsightName] = useState<string>("");
   const [newInsightIsCategory, setNewInsightIsCategory] = useState(false);
   const [potentialInsights, setPotentialInsights] = useState<Insight[]>();
-  const [citationsToRemoveDataFilter, setCitationsToRemoveDataFilter] = useState<string>("");
+  const [citationsToRemoveDataFilter, setCitationsToRemoveDataFilter] =
+    useState<string>("");
   const [disabledInsightIds, setDisabledInsightIds] = useState<number[]>();
   const [selectedCitations, setSelectedCitations] = useState<InsightEvidence[]>(
     selectedCitationsInput,
@@ -97,7 +98,14 @@ const AddCitationsToOtherInsightsDialog = ({
     });
     resetStateValues();
     onClose();
-  }, [selectedCitations, citationsToRemove, selectedInsights, newInsightName, setServerFunctionInput, onClose]);
+  }, [
+    selectedCitations,
+    citationsToRemove,
+    selectedInsights,
+    newInsightName,
+    setServerFunctionInput,
+    onClose,
+  ]);
 
   const snippetQueryFunction = (query: string) =>
     fetch(`/api/links?offset=0&limit=10&query=${query}`).then(
@@ -117,92 +125,114 @@ const AddCitationsToOtherInsightsDialog = ({
       onClose={handleClose}
       size="large"
     >
-        <ModalBody>
-          <ModalContentSection title="First: select citations to remove from this insight">
-            <FactsTable
-              factName="snippet"
-              data={selectedCitations}
-              setData={setSelectedCitations as React.Dispatch<React.SetStateAction<Fact[] | undefined>>}
-              selectedFacts={citationsToRemove}
-              setSelectedFacts={setCitationsToRemove as React.Dispatch<React.SetStateAction<Fact[]>>}
-              selectRows={true}
-              hideHead={true}
-              dataFilter={citationsToRemoveDataFilter}
-              setDataFilter={setCitationsToRemoveDataFilter}
-              queryFunction={snippetQueryFunction}
-            />
-          </ModalContentSection>
+      <ModalBody>
+        <ModalContentSection title="First: select citations to remove from this insight">
+          <FactsTable
+            factName="snippet"
+            data={selectedCitations}
+            setData={
+              setSelectedCitations as React.Dispatch<
+                React.SetStateAction<Fact[] | undefined>
+              >
+            }
+            selectedFacts={citationsToRemove}
+            setSelectedFacts={
+              setCitationsToRemove as React.Dispatch<
+                React.SetStateAction<Fact[]>
+              >
+            }
+            selectRows={true}
+            hideHead={true}
+            dataFilter={citationsToRemoveDataFilter}
+            setDataFilter={setCitationsToRemoveDataFilter}
+            queryFunction={snippetQueryFunction}
+          />
+        </ModalContentSection>
 
-          <div style={{ display: "flex", gap: "var(--spacing-4)" }}>
-            <div style={{ flex: "50%" }}>
-              <ModalContentSection title="Then: select other insights to add them to">
-                <FactsTable
-                  factName="potentialInsight"
-                  data={potentialInsights}
-                  setData={setPotentialInsights as React.Dispatch<React.SetStateAction<Fact[] | undefined>>}
-                  selectedFacts={selectedInsights}
-                  setSelectedFacts={setSelectedInsights as React.Dispatch<React.SetStateAction<Fact[]>>}
-                  dataFilter={dataFilter}
-                  setDataFilter={setDataFilter}
-                  disabledIds={disabledInsightIds}
-                  selectRows={true}
-                  columns={[
-                    {
-                      name: "Citations",
-                      display: (insight: Fact | Insight): React.JSX.Element => (
-                        <span className="badge text-bg-danger">
-                          {insight.evidence?.length || 0}
-                        </span>
-                      ),
-                    },
-                  ]}
-                />
-              </ModalContentSection>
-            </div>
-            <div style={{ flex: "50%" }}>
-              <ModalContentSection title="Or: create a new insight to contain them">
-                <FormGroup>
-                  <FormInput
-                    type="text"
-                    placeholder="New insight name"
-                    value={newInsightName}
-                    onChange={(event) => setNewInsightName(event.target.value)}
-                  />
-                </FormGroup>
-                <FormGroup>
-                  <label style={{ display: "flex", alignItems: "center", gap: "var(--spacing-2)" }}>
-                    <input
-                      type="checkbox"
-                      checked={newInsightIsCategory}
-                      onChange={(event) => {
-                        setNewInsightIsCategory(event.target.checked);
-                        if (event.target.checked) {
-                          setNewInsightName(`Category: ${newInsightName}`);
-                        } else {
-                          setNewInsightName(newInsightName.slice(10));
-                        }
-                      }}
-                    />
-                    Category
-                  </label>
-                </FormGroup>
-              </ModalContentSection>
-            </div>
+        <div style={{ display: "flex", gap: "var(--spacing-4)" }}>
+          <div style={{ flex: "50%" }}>
+            <ModalContentSection title="Then: select other insights to add them to">
+              <FactsTable
+                factName="potentialInsight"
+                data={potentialInsights}
+                setData={
+                  setPotentialInsights as React.Dispatch<
+                    React.SetStateAction<Fact[] | undefined>
+                  >
+                }
+                selectedFacts={selectedInsights}
+                setSelectedFacts={
+                  setSelectedInsights as React.Dispatch<
+                    React.SetStateAction<Fact[]>
+                  >
+                }
+                dataFilter={dataFilter}
+                setDataFilter={setDataFilter}
+                disabledIds={disabledInsightIds}
+                selectRows={true}
+                columns={[
+                  {
+                    name: "Citations",
+                    display: (insight: Fact | Insight): React.JSX.Element => (
+                      <span className="badge text-bg-danger">
+                        {insight.evidence?.length || 0}
+                      </span>
+                    ),
+                  },
+                ]}
+              />
+            </ModalContentSection>
           </div>
-        </ModalBody>
-        <ModalFooter>
-          <ModalButton variant="secondary" onClick={handleClose}>
-            Cancel
-          </ModalButton>
-          <ModalButton
-            variant="primary"
-            onClick={handleSubmit}
-            disabled={selectedInsights.length === 0 && !newInsightName}
-          >
-            Submit
-          </ModalButton>
-        </ModalFooter>
-      </Modal>
+          <div style={{ flex: "50%" }}>
+            <ModalContentSection title="Or: create a new insight to contain them">
+              <FormGroup>
+                <FormInput
+                  type="text"
+                  placeholder="New insight name"
+                  value={newInsightName}
+                  onChange={(event) => setNewInsightName(event.target.value)}
+                />
+              </FormGroup>
+              <FormGroup>
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "var(--spacing-2)",
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={newInsightIsCategory}
+                    onChange={(event) => {
+                      setNewInsightIsCategory(event.target.checked);
+                      if (event.target.checked) {
+                        setNewInsightName(`Category: ${newInsightName}`);
+                      } else {
+                        setNewInsightName(newInsightName.slice(10));
+                      }
+                    }}
+                  />
+                  Category
+                </label>
+              </FormGroup>
+            </ModalContentSection>
+          </div>
+        </div>
+      </ModalBody>
+      <ModalFooter>
+        <ModalButton variant="secondary" onClick={handleClose}>
+          Cancel
+        </ModalButton>
+        <ModalButton
+          variant="primary"
+          onClick={handleSubmit}
+          disabled={selectedInsights.length === 0 && !newInsightName}
+        >
+          Submit
+        </ModalButton>
+      </ModalFooter>
+    </Modal>
   );
 };
 

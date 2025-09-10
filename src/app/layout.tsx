@@ -46,7 +46,7 @@ const Dashboard = async ({ children }: Props): Promise<React.JSX.Element> => {
 
               {/* Center Brand */}
               <div className="flex items-center">
-                <Link 
+                <Link
                   href="/"
                   className="text-2xl font-bold text-inverse flex items-center tracking-tight hover:text-primary transition-colors duration-200"
                 >

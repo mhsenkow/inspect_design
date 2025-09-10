@@ -37,7 +37,7 @@ const FactsTable = ({
   disabledIds,
   selectRows = false,
   hideHead = false,
-  theadTopCSS = "0px",
+  // theadTopCSS = "0px",
   enableFeedback = false,
   cellActions,
 }: {
@@ -100,13 +100,7 @@ const FactsTable = ({
         wait: 500, // Longer debounce for better UX
       });
     }
-  }, [
-    dataFilter,
-    fetchedDataFilter,
-    loading,
-    queryFunction,
-    setData,
-  ]);
+  }, [dataFilter, fetchedDataFilter, loading, queryFunction, setData]);
 
   const [filteredData, setFilteredData] = useState<Fact[]>();
   useEffect(() => {
@@ -116,7 +110,11 @@ const FactsTable = ({
         const filtered = data.filter((fact) => {
           if (dataFilter && dataFilter.trim() !== "") {
             // Check multiple possible title fields for complex data structures
-            const title = fact.title || fact.childInsight?.title || fact.parentInsight?.title || "";
+            const title =
+              fact.title ||
+              fact.childInsight?.title ||
+              fact.parentInsight?.title ||
+              "";
             if (title) {
               return title
                 .toLowerCase()
@@ -253,30 +251,35 @@ const FactsTable = ({
                   <div className="relative">
                     <input
                       type="text"
-                      placeholder={loading ? "Searching..." : "Search the titles..."}
+                      placeholder={
+                        loading ? "Searching..." : "Search the titles..."
+                      }
                       style={{
-                        backgroundColor: 'var(--color-background-primary)',
-                        borderColor: 'var(--color-border-primary)',
-                        color: 'var(--color-text-primary)',
+                        backgroundColor: "var(--color-background-primary)",
+                        borderColor: "var(--color-border-primary)",
+                        color: "var(--color-text-primary)",
                       }}
                       onFocus={(event) => {
                         const target = event.target as HTMLInputElement;
-                        target.style.borderColor = 'var(--color-border-focus)';
-                        target.style.boxShadow = '0 0 0 2px rgba(24, 119, 242, 0.2)';
+                        target.style.borderColor = "var(--color-border-focus)";
+                        target.style.boxShadow =
+                          "0 0 0 2px rgba(24, 119, 242, 0.2)";
                         // TODO: can I get the ClientSidePage itself or something other than the button title?
                         if (
                           event.relatedTarget &&
-                          (event.relatedTarget as HTMLElement).textContent == "Add Evidence"
+                          (event.relatedTarget as HTMLElement).textContent ==
+                            "Add Evidence"
                         ) {
                           target.blur();
                         }
                       }}
                       onBlur={(event) => {
                         const target = event.target as HTMLInputElement;
-                        target.style.borderColor = 'var(--color-border-primary)';
-                        target.style.boxShadow = 'none';
+                        target.style.borderColor =
+                          "var(--color-border-primary)";
+                        target.style.boxShadow = "none";
                       }}
-                      className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 text-sm transition-all duration-200 ${loading ? 'pr-16 opacity-75' : (dataFilter ? 'pr-8' : '')}`}
+                      className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 text-sm transition-all duration-200 ${loading ? "pr-16 opacity-75" : dataFilter ? "pr-8" : ""}`}
                       value={dataFilter || ""}
                       onChange={(event) => {
                         const value = event.target.value;
@@ -290,28 +293,43 @@ const FactsTable = ({
                         onClick={() => setDataFilter("")}
                         className="absolute right-3 top-half transform-center w-6 h-6 flex items-center justify-center rounded-full transition-all duration-200"
                         style={{
-                          color: 'var(--color-text-tertiary)',
-                          backgroundColor: 'transparent',
+                          color: "var(--color-text-tertiary)",
+                          backgroundColor: "transparent",
                         }}
                         onMouseEnter={(e) => {
                           const target = e.target as HTMLElement;
-                          target.style.backgroundColor = 'var(--color-background-secondary)';
-                          target.style.color = 'var(--color-text-primary)';
+                          target.style.backgroundColor =
+                            "var(--color-background-secondary)";
+                          target.style.color = "var(--color-text-primary)";
                         }}
                         onMouseLeave={(e) => {
                           const target = e.target as HTMLElement;
-                          target.style.backgroundColor = 'transparent';
-                          target.style.color = 'var(--color-text-tertiary)';
+                          target.style.backgroundColor = "transparent";
+                          target.style.color = "var(--color-text-tertiary)";
                         }}
                         aria-label="Clear search"
                         title="Clear search"
                       >
-                        <span style={{ fontSize: '16px', fontWeight: 'normal', lineHeight: '1' }}>×</span>
+                        <span
+                          style={{
+                            fontSize: "16px",
+                            fontWeight: "normal",
+                            lineHeight: "1",
+                          }}
+                        >
+                          ×
+                        </span>
                       </button>
                     )}
                     {loading && (
                       <div className="absolute right-3 top-half transform-center">
-                        <div className="animate-spin h-4 w-4 border-2 border-t-transparent rounded-full" style={{ borderColor: 'var(--color-base-500)', borderTopColor: 'transparent' }}></div>
+                        <div
+                          className="animate-spin h-4 w-4 border-2 border-t-transparent rounded-full"
+                          style={{
+                            borderColor: "var(--color-base-500)",
+                            borderTopColor: "transparent",
+                          }}
+                        ></div>
                       </div>
                     )}
                   </div>
@@ -632,38 +650,62 @@ const FactsTable = ({
         {!filteredData && !loading && (
           <tbody>
             <tr>
-              <td colSpan={columns ? columns.length + 3 : 4} className="px-8 py-12 text-center text-text-tertiary">
+              <td
+                colSpan={columns ? columns.length + 3 : 4}
+                className="px-8 py-12 text-center text-text-tertiary"
+              >
                 <strong>Loading data...</strong>
               </td>
             </tr>
           </tbody>
         )}
-        {filteredData && filteredData.length === 0 && dataFilter && dataFilter.trim() !== "" && (
-          <tbody>
-            <tr>
-              <td colSpan={columns ? columns.length + 3 : 4} className="px-8 py-12 text-center text-text-tertiary">
-                <div>
-                  <div className="text-lg mb-2">🔍</div>
-                  <div><strong>No results found for "{dataFilter}"</strong></div>
-                  <div className="text-sm mt-1">Try a different search term</div>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        )}
-        {filteredData && filteredData.length === 0 && (!dataFilter || dataFilter.trim() === "") && (
-          <tbody>
-            <tr>
-              <td colSpan={columns ? columns.length + 3 : 4} className="px-8 py-12 text-center text-text-tertiary">
-                <div>
-                  <div className="text-lg mb-2">📝</div>
-                  <div><strong>No items yet</strong></div>
-                  <div className="text-sm mt-1">Add some items to get started</div>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        )}
+        {filteredData &&
+          filteredData.length === 0 &&
+          dataFilter &&
+          dataFilter.trim() !== "" && (
+            <tbody>
+              <tr>
+                <td
+                  colSpan={columns ? columns.length + 3 : 4}
+                  className="px-8 py-12 text-center text-text-tertiary"
+                >
+                  <div>
+                    <div className="text-lg mb-2">🔍</div>
+                    <div>
+                      <strong>
+                        No results found for &quot;{dataFilter}&quot;
+                      </strong>
+                    </div>
+                    <div className="text-sm mt-1">
+                      Try a different search term
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          )}
+        {filteredData &&
+          filteredData.length === 0 &&
+          (!dataFilter || dataFilter.trim() === "") && (
+            <tbody>
+              <tr>
+                <td
+                  colSpan={columns ? columns.length + 3 : 4}
+                  className="px-8 py-12 text-center text-text-tertiary"
+                >
+                  <div>
+                    <div className="text-lg mb-2">📝</div>
+                    <div>
+                      <strong>No items yet</strong>
+                    </div>
+                    <div className="text-sm mt-1">
+                      Add some items to get started
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          )}
       </table>
     </div>
   );

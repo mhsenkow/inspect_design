@@ -25,9 +25,7 @@ const LoginPage = (): React.JSX.Element => {
       const user = await handleLogin(email, password);
       console.log("Login response:", user);
       if (user?.token) {
-        console.log(
-          "Login successful, setting token and redirecting",
-        );
+        console.log("Login successful, setting token and redirecting");
         setToken(user.token);
         setLoggedIn(true);
 

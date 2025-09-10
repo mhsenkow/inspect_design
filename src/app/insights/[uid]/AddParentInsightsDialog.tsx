@@ -50,7 +50,9 @@ const AddParentInsightsDialog = ({
 }: Props): React.JSX.Element => {
   const [dataFilter, setDataFilter] = useState<string>("");
   const [insights, setInsights] = useState<Insight[] | undefined>();
-  const [selectedParentInsights, setSelectedParentInsights] = useState<Insight[]>([]);
+  const [selectedParentInsights, setSelectedParentInsights] = useState<
+    Insight[]
+  >([]);
   const [newInsightName, setNewInsightName] = useState<string>("");
   const [activeTab, setActiveTab] = useState("existing");
 
@@ -89,7 +91,13 @@ const AddParentInsightsDialog = ({
     });
     resetStateValues();
     onClose();
-  }, [insight, selectedParentInsights, newInsightName, setServerFunctionInput, onClose]);
+  }, [
+    insight,
+    selectedParentInsights,
+    newInsightName,
+    setServerFunctionInput,
+    onClose,
+  ]);
 
   const queryFunctionForAddParentInsightsDialog = async (search: string) => {
     const response = await fetch(
@@ -110,10 +118,18 @@ const AddParentInsightsDialog = ({
         <ModalContentSection>
           <FactsTable
             data={insights}
-            setData={setInsights as React.Dispatch<React.SetStateAction<Fact[] | undefined>>}
+            setData={
+              setInsights as React.Dispatch<
+                React.SetStateAction<Fact[] | undefined>
+              >
+            }
             factName="insight"
             selectedFacts={selectedParentInsights}
-            setSelectedFacts={setSelectedParentInsights as React.Dispatch<React.SetStateAction<Fact[]>>}
+            setSelectedFacts={
+              setSelectedParentInsights as React.Dispatch<
+                React.SetStateAction<Fact[]>
+              >
+            }
             queryFunction={queryFunctionForAddParentInsightsDialog}
             dataFilter={dataFilter}
             setDataFilter={setDataFilter}
@@ -148,35 +164,27 @@ const AddParentInsightsDialog = ({
       onClose={handleClose}
       size="large"
     >
-        <ModalBody>
-          <TabNav
-            tabs={tabs}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-          />
-          {tabs.map((tab) => (
-            <TabContent
-              key={tab.id}
-              tabId={tab.id}
-              activeTab={activeTab}
-            >
-              {tab.content}
-            </TabContent>
-          ))}
-        </ModalBody>
-        <ModalFooter>
-          <ModalButton variant="secondary" onClick={handleClose}>
-            Cancel
-          </ModalButton>
-          <ModalButton
-            variant="primary"
-            onClick={handleSubmit}
-            disabled={!newInsightName && selectedParentInsights.length === 0}
-          >
-            Submit
-          </ModalButton>
-        </ModalFooter>
-      </Modal>
+      <ModalBody>
+        <TabNav tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+        {tabs.map((tab) => (
+          <TabContent key={tab.id} tabId={tab.id} activeTab={activeTab}>
+            {tab.content}
+          </TabContent>
+        ))}
+      </ModalBody>
+      <ModalFooter>
+        <ModalButton variant="secondary" onClick={handleClose}>
+          Cancel
+        </ModalButton>
+        <ModalButton
+          variant="primary"
+          onClick={handleSubmit}
+          disabled={!newInsightName && selectedParentInsights.length === 0}
+        >
+          Submit
+        </ModalButton>
+      </ModalFooter>
+    </Modal>
   );
 };
 

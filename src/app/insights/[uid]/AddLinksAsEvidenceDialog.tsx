@@ -49,7 +49,9 @@ const AddLinksAsEvidenceDialog = ({
   setActiveServerFunction,
 }: Props): React.JSX.Element => {
   const [dataFilter, setDataFilter] = useState<string>("");
-  const [selectedCitations, setSelectedCitations] = useState<InsightEvidence[]>([]);
+  const [selectedCitations, setSelectedCitations] = useState<InsightEvidence[]>(
+    [],
+  );
   const [newLinkUrl, setNewLinkUrl] = useState<string>("");
   const [pageTitle, setPageTitle] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -157,10 +159,18 @@ const AddLinksAsEvidenceDialog = ({
                 updated_at: link.updated_at,
               })) ?? []) as unknown as InsightEvidence[]
             }
-            setData={setLinksToShow as React.Dispatch<React.SetStateAction<Fact[] | undefined>>}
+            setData={
+              setLinksToShow as React.Dispatch<
+                React.SetStateAction<Fact[] | undefined>
+              >
+            }
             factName="snippet"
             selectedFacts={selectedCitations}
-            setSelectedFacts={setSelectedCitations as React.Dispatch<React.SetStateAction<Fact[]>>}
+            setSelectedFacts={
+              setSelectedCitations as React.Dispatch<
+                React.SetStateAction<Fact[]>
+              >
+            }
             queryFunction={queryFunctionForAddLinksAsEvidenceDialog}
             dataFilter={dataFilter}
             setDataFilter={setDataFilter}
@@ -212,35 +222,27 @@ const AddLinksAsEvidenceDialog = ({
       onClose={handleClose}
       size="large"
     >
-        <ModalBody>
-          <TabNav
-            tabs={tabs}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-          />
-          {tabs.map((tab) => (
-            <TabContent
-              key={tab.id}
-              tabId={tab.id}
-              activeTab={activeTab}
-            >
-              {tab.content}
-            </TabContent>
-          ))}
-        </ModalBody>
-        <ModalFooter>
-          <ModalButton variant="secondary" onClick={handleClose}>
-            Cancel
-          </ModalButton>
-          <ModalButton
-            variant="primary"
-            onClick={handleSubmit}
-            disabled={!newLinkUrl && selectedCitations.length === 0}
-          >
-            Add
-          </ModalButton>
-        </ModalFooter>
-      </Modal>
+      <ModalBody>
+        <TabNav tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+        {tabs.map((tab) => (
+          <TabContent key={tab.id} tabId={tab.id} activeTab={activeTab}>
+            {tab.content}
+          </TabContent>
+        ))}
+      </ModalBody>
+      <ModalFooter>
+        <ModalButton variant="secondary" onClick={handleClose}>
+          Cancel
+        </ModalButton>
+        <ModalButton
+          variant="primary"
+          onClick={handleSubmit}
+          disabled={!newLinkUrl && selectedCitations.length === 0}
+        >
+          Add
+        </ModalButton>
+      </ModalFooter>
+    </Modal>
   );
 };
 

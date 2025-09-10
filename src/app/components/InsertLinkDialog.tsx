@@ -113,11 +113,21 @@ const InsertLinkDialog = ({ html, setHtml }: Props) => {
       setHtml(newHtml);
       handleClose();
     }
-  }, [html, setHtml, linkUrlInput, linkTitle, chosenInsights, chosenLinks, handleClose]);
+  }, [
+    html,
+    setHtml,
+    linkUrlInput,
+    linkTitle,
+    chosenInsights,
+    chosenLinks,
+    handleClose,
+  ]);
 
   // Listen for dialog open events
   useEffect(() => {
-    const dialog = document.getElementById(INSERT_LINK_DIALOG_ID) as HTMLDialogElement;
+    const dialog = document.getElementById(
+      INSERT_LINK_DIALOG_ID,
+    ) as HTMLDialogElement;
     if (dialog) {
       const handleOpen = () => setIsOpen(true);
       dialog.addEventListener("show", handleOpen);
@@ -155,9 +165,13 @@ const InsertLinkDialog = ({ html, setHtml }: Props) => {
                 error={linkUrlError}
               />
             </FormGroup>
-            {linkTitleLoading && <ModalLoadingState message="Loading link title..." />}
+            {linkTitleLoading && (
+              <ModalLoadingState message="Loading link title..." />
+            )}
             {!linkTitleLoading && linkTitle && (
-              <div style={{ fontWeight: "bold", marginTop: "var(--spacing-2)" }}>
+              <div
+                style={{ fontWeight: "bold", marginTop: "var(--spacing-2)" }}
+              >
                 {linkTitle}
               </div>
             )}
@@ -165,8 +179,20 @@ const InsertLinkDialog = ({ html, setHtml }: Props) => {
 
           <ModalContentSection title="Or: Choose an existing link or insight">
             <div style={{ marginBottom: "var(--spacing-4)" }}>
-              <label style={{ display: "flex", gap: "var(--spacing-4)", marginBottom: "var(--spacing-3)" }}>
-                <label style={{ display: "flex", alignItems: "center", gap: "var(--spacing-2)" }}>
+              <label
+                style={{
+                  display: "flex",
+                  gap: "var(--spacing-4)",
+                  marginBottom: "var(--spacing-3)",
+                }}
+              >
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "var(--spacing-2)",
+                  }}
+                >
                   <input
                     type="radio"
                     name="existingItemType"
@@ -176,7 +202,13 @@ const InsertLinkDialog = ({ html, setHtml }: Props) => {
                   />
                   Insight
                 </label>
-                <label style={{ display: "flex", alignItems: "center", gap: "var(--spacing-2)" }}>
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "var(--spacing-2)",
+                  }}
+                >
                   <input
                     type="radio"
                     name="existingItemType"
@@ -196,9 +228,17 @@ const InsertLinkDialog = ({ html, setHtml }: Props) => {
                 <FactsTable
                   data={existingInsights}
                   factName="insight"
-                  setData={setExistingInsights as React.Dispatch<React.SetStateAction<Fact[] | undefined>>}
+                  setData={
+                    setExistingInsights as React.Dispatch<
+                      React.SetStateAction<Fact[] | undefined>
+                    >
+                  }
                   selectedFacts={chosenInsights}
-                  setSelectedFacts={setChosenInsights as React.Dispatch<React.SetStateAction<Fact[]>>}
+                  setSelectedFacts={
+                    setChosenInsights as React.Dispatch<
+                      React.SetStateAction<Fact[]>
+                    >
+                  }
                   dataFilter={insightFilter}
                   setDataFilter={setInsightFilter}
                 />
@@ -210,9 +250,17 @@ const InsertLinkDialog = ({ html, setHtml }: Props) => {
                 <FactsTable
                   data={existingLinks}
                   factName="link"
-                  setData={setExistingLinks as React.Dispatch<React.SetStateAction<Fact[] | undefined>>}
+                  setData={
+                    setExistingLinks as React.Dispatch<
+                      React.SetStateAction<Fact[] | undefined>
+                    >
+                  }
                   selectedFacts={chosenLinks}
-                  setSelectedFacts={setChosenLinks as React.Dispatch<React.SetStateAction<Fact[]>>}
+                  setSelectedFacts={
+                    setChosenLinks as React.Dispatch<
+                      React.SetStateAction<Fact[]>
+                    >
+                  }
                   dataFilter={linkFilter}
                   setDataFilter={setLinkFilter}
                 />

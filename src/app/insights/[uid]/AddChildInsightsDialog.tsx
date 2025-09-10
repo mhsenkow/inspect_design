@@ -51,12 +51,16 @@ const AddChildInsightsDialog = ({
 }: Props): React.JSX.Element => {
   const [dataFilter, setDataFilter] = useState<string>("");
   const [childInsights, setChildInsights] = useState<Insight[] | undefined>();
-  const [selectedChildInsights, setSelectedChildInsights] = useState<Insight[]>([]);
+  const [selectedChildInsights, setSelectedChildInsights] = useState<Insight[]>(
+    [],
+  );
   const [newInsightName, setNewInsightName] = useState<string>("");
   const [activeTab, setActiveTab] = useState("existing");
 
   useEffect(() => {
-    fetch("/api/insights?offset=0&limit=20&children=true&parents=true&evidence=true")
+    fetch(
+      "/api/insights?offset=0&limit=20&children=true&parents=true&evidence=true",
+    )
       .then(async (response: Response | GetInsightsRouteResponse) => {
         if (!response.ok) {
           throw new Error(response.statusText);
@@ -90,7 +94,13 @@ const AddChildInsightsDialog = ({
     });
     resetStateValues();
     onClose();
-  }, [insight, selectedChildInsights, newInsightName, setServerFunctionInput, onClose]);
+  }, [
+    insight,
+    selectedChildInsights,
+    newInsightName,
+    setServerFunctionInput,
+    onClose,
+  ]);
 
   const queryFunctionForAddChildInsightDialog = async (search: string) => {
     const response = await fetch(
@@ -111,10 +121,18 @@ const AddChildInsightsDialog = ({
         <ModalContentSection>
           <FactsTable
             data={childInsights}
-            setData={setChildInsights as React.Dispatch<React.SetStateAction<Fact[] | undefined>>}
+            setData={
+              setChildInsights as React.Dispatch<
+                React.SetStateAction<Fact[] | undefined>
+              >
+            }
             factName="insight"
             selectedFacts={selectedChildInsights}
-            setSelectedFacts={setSelectedChildInsights as React.Dispatch<React.SetStateAction<Fact[]>>}
+            setSelectedFacts={
+              setSelectedChildInsights as React.Dispatch<
+                React.SetStateAction<Fact[]>
+              >
+            }
             queryFunction={queryFunctionForAddChildInsightDialog}
             dataFilter={dataFilter}
             setDataFilter={setDataFilter}
@@ -160,35 +178,29 @@ const AddChildInsightsDialog = ({
       onClose={handleClose}
       size="large"
     >
-        <ModalBody>
-          <TabNav
-            tabs={tabs}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-          />
-          {tabs.map((tab) => (
-            <TabContent
-              key={tab.id}
-              tabId={tab.id}
-              activeTab={activeTab}
-            >
-              {tab.content}
-            </TabContent>
-          ))}
-        </ModalBody>
-        <ModalFooter>
-          <ModalButton variant="secondary" onClick={handleClose}>
-            Cancel
-          </ModalButton>
-          <ModalButton
-            variant="primary"
-            onClick={handleSubmit}
-            disabled={selectedChildInsights.length === 0 && !newInsightName.trim()}
-          >
-            Add
-          </ModalButton>
-        </ModalFooter>
-      </Modal>
+      <ModalBody>
+        <TabNav tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+        {tabs.map((tab) => (
+          <TabContent key={tab.id} tabId={tab.id} activeTab={activeTab}>
+            {tab.content}
+          </TabContent>
+        ))}
+      </ModalBody>
+      <ModalFooter>
+        <ModalButton variant="secondary" onClick={handleClose}>
+          Cancel
+        </ModalButton>
+        <ModalButton
+          variant="primary"
+          onClick={handleSubmit}
+          disabled={
+            selectedChildInsights.length === 0 && !newInsightName.trim()
+          }
+        >
+          Add
+        </ModalButton>
+      </ModalFooter>
+    </Modal>
   );
 };
 

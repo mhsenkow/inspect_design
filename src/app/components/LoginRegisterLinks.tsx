@@ -2,7 +2,7 @@
 import styles from "../../styles/components/login-register-links.module.css";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+// import { usePathname } from "next/navigation";
 
 import useUser from "../hooks/useUser";
 
@@ -15,7 +15,7 @@ const LoginRegisterLinks = ({
   useEffect(() => setReturnPath(window.location.pathname), []);
 
   const { logout } = useUser();
-  const path = usePathname();
+  // const path = usePathname();
 
   if (loggedIn) {
     return (

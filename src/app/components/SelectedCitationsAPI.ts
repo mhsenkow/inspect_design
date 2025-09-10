@@ -61,14 +61,16 @@ export const addCitationsToInsight = async (
   const result = await response.json();
 
   // Transform evidence data to flatten the summary relationship for display
-  const transformedEvidence = result.map((evidence: any) => ({
-    ...evidence,
-    title: evidence.summary?.title || "Untitled",
-    uid: evidence.summary?.uid,
-    updated_at: evidence.summary?.updated_at,
-    logo_uri: evidence.summary?.source?.logo_uri,
-    source_baseurl: evidence.summary?.source?.baseurl,
-  }));
+  const transformedEvidence = result.map(
+    (evidence: Record<string, unknown>) => ({
+      ...evidence,
+      title: evidence.summary?.title || "Untitled",
+      uid: evidence.summary?.uid,
+      updated_at: evidence.summary?.updated_at,
+      logo_uri: evidence.summary?.source?.logo_uri,
+      source_baseurl: evidence.summary?.source?.baseurl,
+    }),
+  );
 
   return { action: 1, facts: transformedEvidence };
 };

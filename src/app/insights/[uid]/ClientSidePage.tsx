@@ -2,21 +2,13 @@
 
 import styles from "../../../styles/components/client-side-page.module.css";
 import cardStyles from "../../../styles/components/card.module.css";
-import React, {
-  Dispatch,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import moment from "moment";
 
 import {
   Fact,
   FactComment,
   FactReaction,
-  FLVResponse,
   Insight,
   InsightEvidence,
   InsightLink,
@@ -49,7 +41,6 @@ import {
   doDeleteInsightCitations,
   doDeleteInsightCitationsSchema,
   doDeleteParentInsights,
-  getShowConfirmationFunction,
 } from "./functions";
 import {
   addChildrenToInsight,
@@ -133,10 +124,16 @@ const ClientSidePage = ({
   const [isEditingComment, setIsEditingComment] = useState(false);
 
   // Modal states
-  const [isAddLinksAsEvidenceDialogOpen, setIsAddLinksAsEvidenceDialogOpen] = useState(false);
-  const [isAddCitationsToOtherInsightsDialogOpen, setIsAddCitationsToOtherInsightsDialogOpen] = useState(false);
-  const [isAddChildInsightsDialogOpen, setIsAddChildInsightsDialogOpen] = useState(false);
-  const [isAddParentInsightsDialogOpen, setIsAddParentInsightsDialogOpen] = useState(false);
+  const [isAddLinksAsEvidenceDialogOpen, setIsAddLinksAsEvidenceDialogOpen] =
+    useState(false);
+  const [
+    isAddCitationsToOtherInsightsDialogOpen,
+    setIsAddCitationsToOtherInsightsDialogOpen,
+  ] = useState(false);
+  const [isAddChildInsightsDialogOpen, setIsAddChildInsightsDialogOpen] =
+    useState(false);
+  const [isAddParentInsightsDialogOpen, setIsAddParentInsightsDialogOpen] =
+    useState(false);
 
   // shared functions for child insights
   const [
@@ -325,12 +322,24 @@ const ClientSidePage = ({
                       {selectedParentInsights.length > 0 && (
                         <button
                           onClick={() => {
-                            if (confirm("Are you sure you want to remove these parent relationships?")) {
-                              setServerFunctionInputForParentInsights(selectedParentInsights);
+                            if (
+                              confirm(
+                                "Are you sure you want to remove these parent relationships?",
+                              )
+                            ) {
+                              setServerFunctionInputForParentInsights(
+                                selectedParentInsights,
+                              );
                               setActiveServerFunctionForParentInsights({
-                                function: async (parentLinksToDelete: InsightLink[], token: string) => {
+                                function: async (
+                                  parentLinksToDelete: InsightLink[],
+                                  token: string,
+                                ) => {
                                   if (token) {
-                                    return doDeleteParentInsights(parentLinksToDelete, token);
+                                    return doDeleteParentInsights(
+                                      parentLinksToDelete,
+                                      token,
+                                    );
                                   }
                                   return Promise.resolve();
                                 },
@@ -342,7 +351,9 @@ const ClientSidePage = ({
                           title="Remove Selected Parent Insights"
                         >
                           <span className={cardStyles.addButtonIcon}>🗑️</span>
-                          <span className={cardStyles.addButtonText}>Remove</span>
+                          <span className={cardStyles.addButtonText}>
+                            Remove
+                          </span>
                         </button>
                       )}
                     </div>
@@ -468,12 +479,24 @@ const ClientSidePage = ({
                     {selectedChildInsights.length > 0 && (
                       <button
                         onClick={() => {
-                          if (confirm("Are you sure you want to remove these child relationships?")) {
-                            setServerFunctionInputForChildInsights(selectedChildInsights);
+                          if (
+                            confirm(
+                              "Are you sure you want to remove these child relationships?",
+                            )
+                          ) {
+                            setServerFunctionInputForChildInsights(
+                              selectedChildInsights,
+                            );
                             setActiveServerFunctionForChildInsights({
-                              function: async (childLinksToDelete: InsightLink[], token: string) => {
+                              function: async (
+                                childLinksToDelete: InsightLink[],
+                                token: string,
+                              ) => {
                                 if (token) {
-                                  return doDeleteInsightChildren(childLinksToDelete, token);
+                                  return doDeleteInsightChildren(
+                                    childLinksToDelete,
+                                    token,
+                                  );
                                 }
                                 return Promise.resolve();
                               },
@@ -629,10 +652,19 @@ const ClientSidePage = ({
                     {selectedCitations.length > 0 && (
                       <button
                         onClick={() => {
-                          if (confirm("Are you sure you want to remove these citations?")) {
-                            setServerFunctionInputForSnippets({ citations: selectedCitations });
+                          if (
+                            confirm(
+                              "Are you sure you want to remove these citations?",
+                            )
+                          ) {
+                            setServerFunctionInputForSnippets({
+                              citations: selectedCitations,
+                            });
                             setActiveServerFunctionForSnippets({
-                              function: async (input: doDeleteInsightCitationsSchema, token: string) => {
+                              function: async (
+                                input: doDeleteInsightCitationsSchema,
+                                token: string,
+                              ) => {
                                 if (token) {
                                   return doDeleteInsightCitations(input, token);
                                 }
@@ -854,7 +886,9 @@ const ClientSidePage = ({
               <AddCitationsToOtherInsightsDialog
                 id={ADD_CITATIONS_TO_OTHER_INSIGHTS_DIALOG_ID}
                 isOpen={isAddCitationsToOtherInsightsDialogOpen}
-                onClose={() => setIsAddCitationsToOtherInsightsDialogOpen(false)}
+                onClose={() =>
+                  setIsAddCitationsToOtherInsightsDialogOpen(false)
+                }
                 selectedCitations={liveSnippetData}
                 setServerFunctionInput={
                   setServerFunctionInputForSnippets as React.Dispatch<

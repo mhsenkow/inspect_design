@@ -76,7 +76,6 @@ const ClientSidePage = ({
     }
   };
 
-
   const createLinkAndAddToInsights = async ({
     url,
     selectedInsights,
@@ -124,9 +123,7 @@ const ClientSidePage = ({
           <div className={styles.pageHeaderContent}>
             <div className={styles.headerTop}>
               <div className={styles.headerInfo}>
-                <h1 className={styles.headerTitle}>
-                  My Insights
-                </h1>
+                <h1 className={styles.headerTitle}>My Insights</h1>
                 <p className={styles.headerSubtitle}>
                   {liveData.length > 0
                     ? `${liveData.length} insight${liveData.length !== 1 ? "s" : ""}`
@@ -134,7 +131,7 @@ const ClientSidePage = ({
                 </p>
               </div>
               {loggedIn && (
-                <div style={{ display: 'flex', gap: 'var(--spacing-2)' }}>
+                <div style={{ display: "flex", gap: "var(--spacing-2)" }}>
                   <button
                     onClick={promptForNewInsightName}
                     className={cardStyles.addButton}
@@ -142,7 +139,9 @@ const ClientSidePage = ({
                     title="Create New Insight"
                   >
                     <span className={cardStyles.addButtonIcon}>+</span>
-                    <span className={cardStyles.addButtonText}>Create New Insight</span>
+                    <span className={cardStyles.addButtonText}>
+                      Create New Insight
+                    </span>
                   </button>
                   <button
                     onClick={() => setIsSaveLinkDialogOpen(true)}
@@ -182,7 +181,9 @@ const ClientSidePage = ({
                           title="Create New Insight"
                         >
                           <span className={cardStyles.addButtonIcon}>+</span>
-                          <span className={cardStyles.addButtonText}>Create</span>
+                          <span className={cardStyles.addButtonText}>
+                            Create
+                          </span>
                         </button>
                         <button
                           onClick={() => setIsSaveLinkDialogOpen(true)}
@@ -191,7 +192,9 @@ const ClientSidePage = ({
                           title="Save Link"
                         >
                           <span className={cardStyles.addButtonIcon}>🔗</span>
-                          <span className={cardStyles.addButtonText}>Save Link</span>
+                          <span className={cardStyles.addButtonText}>
+                            Save Link
+                          </span>
                         </button>
                       </>
                     ) : (
@@ -202,7 +205,10 @@ const ClientSidePage = ({
                               insights: selectedInsights,
                             });
                             setActiveServerFunctionForInsightsList({
-                              function: async (input: InsightsAPISchema, token: string) => {
+                              function: async (
+                                input: InsightsAPISchema,
+                                token: string,
+                              ) => {
                                 if (token) {
                                   return publishInsights(input, token);
                                 }
@@ -215,7 +221,9 @@ const ClientSidePage = ({
                           title="Publish Selected"
                         >
                           <span className={cardStyles.addButtonIcon}>📢</span>
-                          <span className={cardStyles.addButtonText}>Publish</span>
+                          <span className={cardStyles.addButtonText}>
+                            Publish
+                          </span>
                         </button>
                         <button
                           onClick={() => {
@@ -224,9 +232,14 @@ const ClientSidePage = ({
                               selectedInsights.length > 0 &&
                               confirm("Are you sure?")
                             ) {
-                              setServerFunctionInputForInsightsList({ insights: selectedInsights });
+                              setServerFunctionInputForInsightsList({
+                                insights: selectedInsights,
+                              });
                               setActiveServerFunctionForInsightsList({
-                                function: async (input: InsightsAPISchema, token: string) => {
+                                function: async (
+                                  input: InsightsAPISchema,
+                                  token: string,
+                                ) => {
                                   if (token) {
                                     return deleteInsights(input, token);
                                   }
@@ -240,7 +253,9 @@ const ClientSidePage = ({
                           title="Delete Selected"
                         >
                           <span className={cardStyles.addButtonIcon}>🗑️</span>
-                          <span className={cardStyles.addButtonText}>Delete</span>
+                          <span className={cardStyles.addButtonText}>
+                            Delete
+                          </span>
                         </button>
                       </>
                     )}
@@ -336,12 +351,19 @@ const ClientSidePage = ({
                   // Update the live data with the responses
                   responses.forEach((response) => {
                     if (response.action === 1) {
-                      setLiveData([...(response.facts as Insight[]), ...liveData]);
+                      setLiveData([
+                        ...(response.facts as Insight[]),
+                        ...liveData,
+                      ]);
                     } else if (response.action === 0) {
                       // Update existing insights
-                      const updatedData = liveData.map(insight => {
-                        const updatedInsight = response.facts.find(f => f.uid === insight.uid) as Insight;
-                        return updatedInsight ? { ...insight, ...updatedInsight } : insight;
+                      const updatedData = liveData.map((insight) => {
+                        const updatedInsight = response.facts.find(
+                          (f) => f.uid === insight.uid,
+                        ) as Insight;
+                        return updatedInsight
+                          ? { ...insight, ...updatedInsight }
+                          : insight;
                       });
                       setLiveData(updatedData);
                     }

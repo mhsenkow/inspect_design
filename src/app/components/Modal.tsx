@@ -61,7 +61,8 @@ interface FormInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   className?: string;
 }
 
-interface FormTextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+interface FormTextareaProps
+  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   error?: string;
   success?: string;
   className?: string;
@@ -95,17 +96,23 @@ export const Modal: React.FC<ModalProps> = ({
     }
   }, [isOpen]);
 
-  const handleBackdropClick = useCallback((event: React.MouseEvent) => {
-    if (closeOnBackdropClick && event.target === event.currentTarget) {
-      onClose();
-    }
-  }, [closeOnBackdropClick, onClose]);
+  const handleBackdropClick = useCallback(
+    (event: React.MouseEvent) => {
+      if (closeOnBackdropClick && event.target === event.currentTarget) {
+        onClose();
+      }
+    },
+    [closeOnBackdropClick, onClose],
+  );
 
-  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
-    if (closeOnEscape && event.key === "Escape") {
-      onClose();
-    }
-  }, [closeOnEscape, onClose]);
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent) => {
+      if (closeOnEscape && event.key === "Escape") {
+        onClose();
+      }
+    },
+    [closeOnEscape, onClose],
+  );
 
   const handleCloseClick = useCallback(() => {
     onClose();
@@ -155,26 +162,27 @@ export const Modal: React.FC<ModalProps> = ({
 };
 
 // Modal Sub-components
-export const ModalHeader: React.FC<ModalHeaderProps> = ({ children, className = "" }) => (
-  <div className={`${styles.modalHeader} ${className}`}>
-    {children}
-  </div>
-);
+export const ModalHeader: React.FC<ModalHeaderProps> = ({
+  children,
+  className = "",
+}) => <div className={`${styles.modalHeader} ${className}`}>{children}</div>;
 
-export const ModalBody: React.FC<ModalBodyProps> = ({ 
-  children, 
-  className = "", 
-  scrollable = false 
+export const ModalBody: React.FC<ModalBodyProps> = ({
+  children,
+  className = "",
+  scrollable = false,
 }) => (
-  <div className={`${styles.modalBody} ${scrollable ? styles.modalScrollable : ""} ${className}`}>
+  <div
+    className={`${styles.modalBody} ${scrollable ? styles.modalScrollable : ""} ${className}`}
+  >
     {children}
   </div>
 );
 
-export const ModalFooter: React.FC<ModalFooterProps> = ({ 
-  children, 
-  className = "", 
-  alignment = "right" 
+export const ModalFooter: React.FC<ModalFooterProps> = ({
+  children,
+  className = "",
+  alignment = "right",
 }) => {
   const alignmentClass = {
     left: styles.modalFooterLeft,
@@ -190,11 +198,11 @@ export const ModalFooter: React.FC<ModalFooterProps> = ({
 };
 
 // Tab Navigation Component
-export const TabNav: React.FC<TabNavProps> = ({ 
-  tabs, 
-  activeTab, 
-  onTabChange, 
-  className = "" 
+export const TabNav: React.FC<TabNavProps> = ({
+  tabs,
+  activeTab,
+  onTabChange,
+  className = "",
 }) => (
   <div className={`${styles.tabNav} ${className}`}>
     {tabs.map((tab) => (
@@ -214,9 +222,9 @@ export const TabNav: React.FC<TabNavProps> = ({
   </div>
 );
 
-export const TabContent: React.FC<{ 
-  tabId: string; 
-  activeTab: string; 
+export const TabContent: React.FC<{
+  tabId: string;
+  activeTab: string;
   children: React.ReactNode;
   className?: string;
 }> = ({ tabId, activeTab, children, className = "" }) => (
@@ -231,43 +239,39 @@ export const TabContent: React.FC<{
 );
 
 // Form Components
-export const FormGroup: React.FC<FormGroupProps> = ({ children, className = "" }) => (
-  <div className={`${styles.formGroup} ${className}`}>
-    {children}
-  </div>
-);
+export const FormGroup: React.FC<FormGroupProps> = ({
+  children,
+  className = "",
+}) => <div className={`${styles.formGroup} ${className}`}>{children}</div>;
 
-export const FormLabel: React.FC<FormLabelProps> = ({ 
-  children, 
-  htmlFor, 
-  className = "" 
+export const FormLabel: React.FC<FormLabelProps> = ({
+  children,
+  htmlFor,
+  className = "",
 }) => (
   <label htmlFor={htmlFor} className={`${styles.formLabel} ${className}`}>
     {children}
   </label>
 );
 
-export const FormInput: React.FC<FormInputProps> = ({ 
-  error, 
-  success, 
-  className = "", 
-  ...props 
+export const FormInput: React.FC<FormInputProps> = ({
+  error,
+  success,
+  className = "",
+  ...props
 }) => (
   <div>
-    <input
-      className={`${styles.formInput} ${className}`}
-      {...props}
-    />
+    <input className={`${styles.formInput} ${className}`} {...props} />
     {error && <div className={styles.formError}>{error}</div>}
     {success && <div className={styles.formSuccess}>{success}</div>}
   </div>
 );
 
-export const FormTextarea: React.FC<FormTextareaProps> = ({ 
-  error, 
-  success, 
-  className = "", 
-  ...props 
+export const FormTextarea: React.FC<FormTextareaProps> = ({
+  error,
+  success,
+  className = "",
+  ...props
 }) => (
   <div>
     <textarea
@@ -287,13 +291,13 @@ export const ModalButton: React.FC<{
   disabled?: boolean;
   type?: "button" | "submit" | "reset";
   className?: string;
-}> = ({ 
-  children, 
-  variant = "primary", 
-  onClick, 
+}> = ({
+  children,
+  variant = "primary",
+  onClick,
   disabled = false,
   type = "button",
-  className = "" 
+  className = "",
 }) => {
   const variantClass = {
     primary: styles.modalButtonPrimary,
@@ -314,13 +318,10 @@ export const ModalButton: React.FC<{
 };
 
 // Loading State Component
-export const ModalLoadingState: React.FC<{ 
-  message?: string; 
-  className?: string; 
-}> = ({ 
-  message = "Loading...", 
-  className = "" 
-}) => (
+export const ModalLoadingState: React.FC<{
+  message?: string;
+  className?: string;
+}> = ({ message = "Loading...", className = "" }) => (
   <div className={`${styles.modalLoadingState} ${className}`}>
     <div className={styles.modalLoadingSpinner} />
     {message}

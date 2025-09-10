@@ -9,7 +9,7 @@ import {
   addReactionFromFeedbackInputElement,
   // getInsightUid,
   getLinkUid,
-  insightPageHasCitation,
+  // insightPageHasCitation,
   selectCitationToRemove,
   // selectFirstEnabledPotentialInsight,
   selectTableRow,
@@ -474,12 +474,12 @@ test.describe("Insight page", () => {
         });
 
         test.describe("Selecting from potential insights", () => {
-          let selectedInsight: Insight;
+          // let selectedInsight: Insight;
 
           test.beforeEach(async () => {
             await expect(dialog.getByRole("table")).toHaveCount(2);
             // the 1st one is citations to remove
-            const dialogTableOfOtherInsights = dialog.getByRole("table").nth(1);
+            // const dialogTableOfOtherInsights = dialog.getByRole("table").nth(1);
             // FIXME: duplicate key value violates unique constraint "u_sid_iid"
             // selectedInsight = await selectFirstEnabledPotentialInsight(
             //   dialogTableOfOtherInsights,

@@ -6,7 +6,6 @@ import "../../../api/db";
 import { InsightModel } from "../../models/insights";
 import { Insight, InsightEvidence } from "../../../types";
 import { getAuthUser } from "../../../functions";
-import { EvidenceModel } from "../../models/evidence";
 
 export interface InsightRouteProps {
   params: Promise<{ uid?: string }>;
@@ -41,8 +40,8 @@ export async function GET(
     );
   }
 
-  const evidenceOffset = Number(req.nextUrl.searchParams.get("offset") || 0);
-  const evidenceLimit = Number(req.nextUrl.searchParams.get("limit") || 20);
+  // const evidenceOffset = Number(req.nextUrl.searchParams.get("offset") || 0);
+  // const evidenceLimit = Number(req.nextUrl.searchParams.get("limit") || 20);
   const includeNestedEvidenceTotals = Boolean(
     req.nextUrl.searchParams.get("nestedEvidenceTotals"),
   );

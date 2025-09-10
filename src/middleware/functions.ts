@@ -74,7 +74,7 @@ export const decryptToken = (
     }
 
     return parsed;
-  } catch (error) {
+  } catch {
     // Silently fail for any decryption errors
     return null;
   }
