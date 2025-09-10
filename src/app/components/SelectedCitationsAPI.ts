@@ -64,11 +64,11 @@ export const addCitationsToInsight = async (
   const transformedEvidence = result.map(
     (evidence: Record<string, unknown>) => ({
       ...evidence,
-      title: evidence.summary?.title || "Untitled",
-      uid: evidence.summary?.uid,
-      updated_at: evidence.summary?.updated_at,
-      logo_uri: evidence.summary?.source?.logo_uri,
-      source_baseurl: evidence.summary?.source?.baseurl,
+      title: (evidence.summary as any)?.title || "Untitled",
+      uid: (evidence.summary as any)?.uid,
+      updated_at: (evidence.summary as any)?.updated_at,
+      logo_uri: (evidence.summary as any)?.source?.logo_uri,
+      source_baseurl: (evidence.summary as any)?.source?.baseurl,
     }),
   );
 

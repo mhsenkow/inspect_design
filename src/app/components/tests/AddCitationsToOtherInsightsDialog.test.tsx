@@ -75,7 +75,7 @@ describe("AddCitationsToOtherInsightsDialog", () => {
         setServerFunctionInput={setServerFunctionInput}
         setActiveServerFunction={jest.fn()}
       />,
-      { container: document.getElementById("root") },
+      { container: document.getElementById("root")! },
     );
 
     expect(
@@ -109,7 +109,7 @@ describe("AddCitationsToOtherInsightsDialog", () => {
         setServerFunctionInput={setServerFunctionInput}
         setActiveServerFunction={setActiveServerFunction}
       />,
-      { container: document.getElementById("root") },
+      { container: document.getElementById("root")! },
     );
 
     await waitFor(() =>
@@ -167,7 +167,7 @@ describe("AddCitationsToOtherInsightsDialog", () => {
         setActiveServerFunction={jest.fn()}
         setServerFunctionInput={jest.fn()}
       />,
-      { container: document.getElementById("root") },
+      { container: document.getElementById("root")! },
     );
 
     await waitFor(() =>
@@ -199,7 +199,7 @@ describe("AddCitationsToOtherInsightsDialog", () => {
         setServerFunctionInput={jest.fn()}
         setActiveServerFunction={jest.fn()}
       />,
-      { container: document.getElementById("root") },
+      { container: document.getElementById("root")! },
     );
 
     expect(screen.queryByText("X")).not.toBeInTheDocument();
@@ -217,7 +217,7 @@ describe("AddCitationsToOtherInsightsDialog", () => {
         setActiveServerFunction={jest.fn()}
         setServerFunctionInput={jest.fn()}
       />,
-      { container: document.getElementById("root") },
+      { container: document.getElementById("root")! },
     );
 
     const citationCountHeader = screen.getByText("Citations");

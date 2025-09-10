@@ -79,7 +79,7 @@ describe("SaveLinkDialog", () => {
         setServerFunctionInput={mockSetServerFunctionInput}
         setActiveServerFunction={jest.fn()}
       />,
-      { container: document.getElementById("root") },
+      { container: document.getElementById("root")! },
     );
     expect(screen.getByText("Save Link to Inspect")).toBeInTheDocument();
   });
@@ -95,7 +95,7 @@ describe("SaveLinkDialog", () => {
           setServerFunctionInput={mockSetServerFunctionInput}
           setActiveServerFunction={jest.fn()}
         />,
-        { container: document.getElementById("root") },
+        { container: document.getElementById("root")! },
       );
 
       const input = screen.getByPlaceholderText("Link URL...");
@@ -121,7 +121,7 @@ describe("SaveLinkDialog", () => {
           setServerFunctionInput={mockSetServerFunctionInput}
           setActiveServerFunction={jest.fn()}
         />,
-        { container: document.getElementById("root") },
+        { container: document.getElementById("root")! },
       );
 
       const input = screen.getByPlaceholderText("Link URL...");
@@ -153,7 +153,7 @@ describe("SaveLinkDialog", () => {
           setServerFunctionInput={mockSetServerFunctionInput}
           setActiveServerFunction={jest.fn()}
         />,
-        { container: document.getElementById("root") },
+        { container: document.getElementById("root")! },
       );
 
       const input = screen.getByPlaceholderText("Link URL...");
@@ -181,7 +181,7 @@ describe("SaveLinkDialog", () => {
         setServerFunctionInput={mockSetServerFunctionInput}
         setActiveServerFunction={jest.fn()}
       />,
-      { container: document.getElementById("root") },
+      { container: document.getElementById("root")! },
     );
 
     const title = "Example Page Title";
@@ -209,7 +209,7 @@ describe("SaveLinkDialog", () => {
         setServerFunctionInput={mockSetServerFunctionInput}
         setActiveServerFunction={mockSetActiveServerFunction}
       />,
-      { container: document.getElementById("root") },
+      { container: document.getElementById("root")! },
     );
 
     const input = getByPlaceholderText("Link URL...");
@@ -231,7 +231,7 @@ describe("SaveLinkDialog", () => {
         setServerFunctionInput={mockSetServerFunctionInput}
         setActiveServerFunction={jest.fn()}
       />,
-      { container: document.getElementById("root") },
+      { container: document.getElementById("root")! },
     );
 
     const input = screen.getByPlaceholderText("Link URL...");
@@ -254,7 +254,7 @@ describe("SaveLinkDialog", () => {
           setServerFunctionInput={mockSetServerFunctionInput}
           setActiveServerFunction={jest.fn()}
         />,
-        { container: document.getElementById("root") },
+        { container: document.getElementById("root")! },
       );
 
       (useLinks as jest.Mock).mockReturnValueOnce([[{}], jest.fn()]);
@@ -280,7 +280,7 @@ describe("SaveLinkDialog", () => {
         setServerFunctionInput={mockSetServerFunctionInput}
         setActiveServerFunction={jest.fn()}
       />,
-      { container: document.getElementById("root") },
+      { container: document.getElementById("root")! },
     );
 
     const input = screen.getByPlaceholderText("Link URL...");
@@ -315,7 +315,7 @@ describe("SaveLinkDialog", () => {
         setServerFunctionInput={mockSetServerFunctionInput}
         setActiveServerFunction={mockSetActiveServerFunction}
       />,
-      { container: document.getElementById("root") },
+      { container: document.getElementById("root")! },
     );
 
     const input = screen.getByPlaceholderText("Link URL...");
@@ -357,7 +357,7 @@ describe("SaveLinkDialog", () => {
         setServerFunctionInput={mockSetServerFunctionInput}
         setActiveServerFunction={jest.fn()}
       />,
-      { container: document.getElementById("root") },
+      { container: document.getElementById("root")! },
     );
 
     const input = screen.getByPlaceholderText("Link URL...");
@@ -386,7 +386,7 @@ describe("SaveLinkDialog", () => {
         setServerFunctionInput={mockSetServerFunctionInput}
         setActiveServerFunction={jest.fn()}
       />,
-      { container: document.getElementById("root") },
+      { container: document.getElementById("root")! },
     );
 
     let table: HTMLTableElement | undefined = undefined;

@@ -75,7 +75,7 @@ describe("LoginPageFunctions", () => {
         status: 200,
       });
 
-      const user = await handleLogin();
+      const user = await handleLogin("test@example.com", "password123");
 
       expect(fetch).toHaveBeenCalledWith("/api/login", {
         method: "POST",
@@ -108,7 +108,7 @@ describe("LoginPageFunctions", () => {
         json: () => Promise.resolve({ message: "Invalid credentials" }),
       });
 
-      await expect(handleLogin()).rejects.toThrow("Invalid credentials");
+      await expect(handleLogin("test@example.com", "wrongpassword")).rejects.toThrow("Invalid credentials");
     });
 
     it("should alert when fields are not filled", async () => {
@@ -126,7 +126,7 @@ describe("LoginPageFunctions", () => {
       form!.password = form!.elements[1];
       window.alert = jest.fn();
 
-      await handleLogin();
+      await handleLogin("", "");
 
       expect(window.alert).toHaveBeenCalledWith("Please fill out all fields");
     });
