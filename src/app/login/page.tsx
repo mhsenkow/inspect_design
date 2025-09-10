@@ -18,6 +18,38 @@ const LoginPage = (): React.JSX.Element => {
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      console.log("Attempting login with:", email);
+      const user = await handleLogin(email, password);
+      console.log("Login response:", user);
+      if (user?.token) {
+        console.log(
+          "Login successful, setting token and redirecting",
+        );
+        setToken(user.token);
+        setLoggedIn(true);
+
+        // Redirect to the return URL or default to insights
+        const redirectUrl = returnParam || "/insights";
+        console.log("Redirecting to:", redirectUrl);
+        if (window) {
+          window.location.href = `${window.location.origin}${redirectUrl}`;
+        }
+      } else {
+        console.log("No token in response");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unknown error occurred.");
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-neutral-100 flex items-center justify-center p-6">
       <div className="card w-full max-w-lg">
@@ -25,7 +57,7 @@ const LoginPage = (): React.JSX.Element => {
           <h2 className="text-3xl font-bold text-center mb-8">
             Login to Inspect
           </h2>
-          <form name="loginInfo" onSubmit={(e) => e.preventDefault()}>
+          <form name="loginInfo" onSubmit={handleSubmit}>
             <div className="mb-4">
               <label className="form-label">Email:</label>
               <input
@@ -47,38 +79,7 @@ const LoginPage = (): React.JSX.Element => {
               />
             </div>
             <button
-              type="button"
-              onClick={async (e) => {
-                e.preventDefault();
-                try {
-                  console.log("Attempting login with:", email);
-                  const user = await handleLogin(email, password);
-                  console.log("Login response:", user);
-                  if (user?.token) {
-                    console.log(
-                      "Login successful, setting token and redirecting",
-                    );
-                    setToken(user.token);
-                    setLoggedIn(true);
-
-                    // Redirect to the return URL or default to insights
-                    const redirectUrl = returnParam || "/insights";
-                    console.log("Redirecting to:", redirectUrl);
-                    if (window) {
-                      window.location.href = `${window.location.origin}${redirectUrl}`;
-                    }
-                  } else {
-                    console.log("No token in response");
-                  }
-                } catch (err) {
-                  console.error("Login error:", err);
-                  if (err instanceof Error) {
-                    setError(err.message);
-                  } else {
-                    setError("An unknown error occurred.");
-                  }
-                }
-              }}
+              type="submit"
               disabled={!(email && password)}
               className="btn btn-primary w-full py-4 text-lg font-medium"
             >

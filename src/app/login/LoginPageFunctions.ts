@@ -15,8 +15,8 @@ export async function handleLogin(
 ): Promise<User | undefined> {
   if (email && password) {
     const formObject: Awaited<PostLoginSessionRequestBody> = {
-      email: email,
-      password: password,
+      email,
+      password,
     };
     const bodyString = JSON.stringify(formObject);
 
