@@ -1,5 +1,7 @@
 import React from "react";
 
+export const INSERT_LINK_DIALOG_ID = "insertLinkDialog";
+
 export const TRASH_ICON = (
   <svg
     xmlns="http://www.w3.org/2000/svg"

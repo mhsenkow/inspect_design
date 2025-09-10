@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
 import InsertLinkDialog from "../InsertLinkDialog";
+import { INSERT_LINK_DIALOG_ID } from "../../constants";
 import { getPageTitle } from "../../hooks/functions";
 
 jest.mock("../../hooks/functions");
@@ -77,7 +78,7 @@ describe("InsertLinkDialog", () => {
     fireEvent.click(cancelButton);
 
     const dialog = document.getElementById(
-      "insertLinkDialog",
+      INSERT_LINK_DIALOG_ID,
     ) as HTMLDialogElement;
     expect(dialog.open).toBe(false);
   });

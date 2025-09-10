@@ -3,6 +3,7 @@ import { render, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
 import RichTextEditor from "../RichTextEditor";
+import { INSERT_LINK_DIALOG_ID } from "../../constants";
 
 describe("RichTextEditor", () => {
   let setHtmlMock: jest.Mock;
@@ -43,7 +44,7 @@ describe("RichTextEditor", () => {
     const linkButton = getByAltText("Insert Link");
     fireEvent.click(linkButton);
 
-    const dialog = document.getElementById("insertLinkDialog");
+    const dialog = document.getElementById(INSERT_LINK_DIALOG_ID);
     expect(dialog).toBeVisible();
   });
 

@@ -4,6 +4,7 @@ import { Fact, Insight, Link } from "../types";
 import { GetInsightsRouteResponse } from "../api/insights/route";
 import { GetLinksResponse } from "../api/links/route";
 import { getPageTitle } from "../hooks/functions";
+import { INSERT_LINK_DIALOG_ID } from "../constants";
 import {
   Modal,
   ModalBody,
@@ -116,7 +117,7 @@ const InsertLinkDialog = ({ html, setHtml }: Props) => {
 
   // Listen for dialog open events
   useEffect(() => {
-    const dialog = document.getElementById("insertLinkDialog") as HTMLDialogElement;
+    const dialog = document.getElementById(INSERT_LINK_DIALOG_ID) as HTMLDialogElement;
     if (dialog) {
       const handleOpen = () => setIsOpen(true);
       dialog.addEventListener("show", handleOpen);
@@ -126,9 +127,9 @@ const InsertLinkDialog = ({ html, setHtml }: Props) => {
 
   return (
     <>
-      <dialog id="insertLinkDialog" style={{ display: "none" }} />
+      <dialog id={INSERT_LINK_DIALOG_ID} style={{ display: "none" }} />
       <Modal
-        id="insertLinkDialog"
+        id={INSERT_LINK_DIALOG_ID}
         title="Insert a Link into Comment"
         isOpen={isOpen}
         onClose={handleClose}
