@@ -4,27 +4,54 @@ import { encodeStringURI } from "./functions";
 import { decryptToken } from "../../middleware/functions";
 
 const useUser = () => {
-  const [token, setToken] = useState<string>();
+  // Initialize state with parsed cookie data to avoid re-parsing on every mount
+  const [token, setToken] = useState<string | undefined>(() => {
+    const cookieToken = document.cookie
+      .split(";")
+      .find((row) => row.trim().startsWith("token="))
+      ?.split("=")[1];
+    return cookieToken;
+  });
+  
   const [userDetails, setUserDetails] = useState<{
     user_id: number;
     email: string;
     username: string;
-  }>();
-  useEffect(() => {
-    const token = document.cookie
+  } | undefined>(() => {
+    const cookieToken = document.cookie
       .split(";")
       .find((row) => row.trim().startsWith("token="))
       ?.split("=")[1];
-    if (token) {
-      setToken(token);
-      setLoggedIn(true);
-      const userDetails = decryptToken(
-        token!,
+    if (cookieToken) {
+      const details = decryptToken(
+        cookieToken,
         process.env.NEXT_PUBLIC_TOKEN_KEY ||
           "your-secret-jwt-key-change-this-in-production",
       );
-      if (userDetails) {
-        setUserDetails(userDetails);
+      return details || undefined;
+    }
+    return undefined;
+  });
+  
+  const [loggedIn, setLoggedIn] = useState(() => {
+    const cookieToken = document.cookie
+      .split(";")
+      .find((row) => row.trim().startsWith("token="))
+      ?.split("=")[1];
+    return !!cookieToken;
+  });
+  
+  useEffect(() => {
+    // Only run effect if token exists but userDetails is missing (edge case)
+    if (token && !userDetails) {
+      const details = decryptToken(
+        token,
+        process.env.NEXT_PUBLIC_TOKEN_KEY ||
+          "your-secret-jwt-key-change-this-in-production",
+      );
+      if (details) {
+        setUserDetails(details);
+        setLoggedIn(true);
       } else {
         // If token is invalid, clear it
         setLoggedIn(false);
@@ -32,7 +59,7 @@ const useUser = () => {
         document.cookie = `token=; path=/; expires=${new Date(0)}`;
       }
     }
-  }, []);
+  }, [token, userDetails]);
 
   const exportedSetToken = (token: string) => {
     const encodedToken = encodeStringURI(token);
@@ -42,7 +69,6 @@ const useUser = () => {
     document.cookie = `token=${encodedToken}; path=/; expires=${date.toUTCString()}`;
   };
 
-  const [loggedIn, setLoggedIn] = useState(false);
 
   const logout = () => {
     document.cookie = `token=; path=/; expires=${new Date(0)}`;
