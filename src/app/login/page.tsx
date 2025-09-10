@@ -57,8 +57,9 @@ const LoginPage = (): React.JSX.Element => {
           </h2>
           <form name="loginInfo" onSubmit={handleSubmit}>
             <div className="mb-4">
-              <label className="form-label">Email:</label>
+              <label htmlFor="email" className="form-label">Email:</label>
               <input
+                id="email"
                 type="text"
                 name="email"
                 value={email}
@@ -67,8 +68,9 @@ const LoginPage = (): React.JSX.Element => {
               />
             </div>
             <div className="mb-6">
-              <label className="form-label">Password:</label>
+              <label htmlFor="password" className="form-label">Password:</label>
               <input
+                id="password"
                 type="password"
                 name="password"
                 value={password}
