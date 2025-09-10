@@ -228,9 +228,7 @@ describe("FactsTable", () => {
       />,
     );
 
-    expect(screen.getByText("Fact 1").closest("tr")).toHaveClass(
-      "bg-tertiary",
-    );
+    expect(screen.getByText("Fact 1").closest("tr")).toHaveClass("bg-tertiary");
   });
 
   it("enables reacting to a fact, showing the resulting reaction to the right of the title", async () => {

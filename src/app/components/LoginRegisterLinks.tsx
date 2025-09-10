@@ -39,8 +39,8 @@ const LoginRegisterLinks = ({
   return (
     <div className={styles.loginRegisterContainer}>
       <li className={path === "/login" ? "active" : ""}>
-        <Link 
-          href={`/login?return=${returnPath}`} 
+        <Link
+          href={`/login?return=${returnPath}`}
           className={styles.loginButton}
         >
           Login

@@ -108,7 +108,9 @@ describe("LoginPageFunctions", () => {
         json: () => Promise.resolve({ message: "Invalid credentials" }),
       });
 
-      await expect(handleLogin("test@example.com", "wrongpassword")).rejects.toThrow("Invalid credentials");
+      await expect(
+        handleLogin("test@example.com", "wrongpassword"),
+      ).rejects.toThrow("Invalid credentials");
     });
 
     it("should alert when fields are not filled", async () => {

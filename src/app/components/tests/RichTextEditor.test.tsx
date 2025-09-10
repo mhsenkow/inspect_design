@@ -3,7 +3,6 @@ import { render, fireEvent, waitFor, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
 import RichTextEditor from "../RichTextEditor";
-import { INSERT_LINK_DIALOG_ID } from "../../constants";
 
 describe("RichTextEditor", () => {
   let setHtmlMock: jest.Mock;
@@ -46,7 +45,9 @@ describe("RichTextEditor", () => {
     fireEvent.click(linkButton);
 
     await waitFor(() => {
-      expect(screen.getByText("Insert a Link into Comment")).toBeInTheDocument();
+      expect(
+        screen.getByText("Insert a Link into Comment"),
+      ).toBeInTheDocument();
     });
   });
 
