@@ -38,9 +38,11 @@ describe("InsertLinkDialog", () => {
       INSERT_LINK_DIALOG_ID,
     ) as HTMLDialogElement;
     dialog.dispatchEvent(new Event("show"));
-    
+
     await waitFor(() => {
-      expect(screen.getByText("Insert a Link into Comment")).toBeInTheDocument();
+      expect(
+        screen.getByText("Insert a Link into Comment"),
+      ).toBeInTheDocument();
     });
     expect(screen.getByText("Specify an external link")).toBeInTheDocument();
     expect(
@@ -54,11 +56,13 @@ describe("InsertLinkDialog", () => {
       INSERT_LINK_DIALOG_ID,
     ) as HTMLDialogElement;
     dialog.dispatchEvent(new Event("show"));
-    
+
     await waitFor(() => {
-      expect(screen.getByText("Insert a Link into Comment")).toBeInTheDocument();
+      expect(
+        screen.getByText("Insert a Link into Comment"),
+      ).toBeInTheDocument();
     });
-    
+
     const input = screen.getByPlaceholderText("Paste URL");
 
     fireEvent.change(input, { target: { value: "https://example.com" } });
@@ -79,11 +83,13 @@ describe("InsertLinkDialog", () => {
       INSERT_LINK_DIALOG_ID,
     ) as HTMLDialogElement;
     dialog.dispatchEvent(new Event("show"));
-    
+
     await waitFor(() => {
-      expect(screen.getByText("Insert a Link into Comment")).toBeInTheDocument();
+      expect(
+        screen.getByText("Insert a Link into Comment"),
+      ).toBeInTheDocument();
     });
-    
+
     const input = screen.getByPlaceholderText("Paste URL");
 
     fireEvent.change(input, { target: { value: "https://example.com" } });
@@ -102,11 +108,13 @@ describe("InsertLinkDialog", () => {
       INSERT_LINK_DIALOG_ID,
     ) as HTMLDialogElement;
     dialog.dispatchEvent(new Event("show"));
-    
+
     await waitFor(() => {
-      expect(screen.getByText("Insert a Link into Comment")).toBeInTheDocument();
+      expect(
+        screen.getByText("Insert a Link into Comment"),
+      ).toBeInTheDocument();
     });
-    
+
     const cancelButton = screen.getByText("Cancel");
 
     fireEvent.click(cancelButton);
@@ -125,7 +133,9 @@ describe("InsertLinkDialog", () => {
     dialog.dispatchEvent(new Event("show"));
 
     await waitFor(() => {
-      expect(screen.getByText("Insert a Link into Comment")).toBeInTheDocument();
+      expect(
+        screen.getByText("Insert a Link into Comment"),
+      ).toBeInTheDocument();
     });
 
     const urlInput = screen.getByPlaceholderText("Paste URL");
@@ -163,11 +173,13 @@ describe("InsertLinkDialog", () => {
       INSERT_LINK_DIALOG_ID,
     ) as HTMLDialogElement;
     dialog.dispatchEvent(new Event("show"));
-    
+
     await waitFor(() => {
-      expect(screen.getByText("Insert a Link into Comment")).toBeInTheDocument();
+      expect(
+        screen.getByText("Insert a Link into Comment"),
+      ).toBeInTheDocument();
     });
-    
+
     const insightRadio = screen.getByLabelText("Insight");
 
     fireEvent.click(insightRadio);
@@ -208,7 +220,9 @@ describe("InsertLinkDialog", () => {
     dialog.dispatchEvent(new Event("show"));
 
     await waitFor(() => {
-      expect(screen.getByText("Insert a Link into Comment")).toBeInTheDocument();
+      expect(
+        screen.getByText("Insert a Link into Comment"),
+      ).toBeInTheDocument();
     });
 
     const linkRadio = screen.getByLabelText("Link");

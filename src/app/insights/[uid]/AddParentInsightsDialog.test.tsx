@@ -58,7 +58,7 @@ describe("AddParentInsightsDialog", () => {
       setServerFunctionInput(undefined);
       setActiveServerFunction(undefined);
     };
-    
+
     return render(
       <AddParentInsightsDialog
         id="test-dialog"

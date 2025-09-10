@@ -131,7 +131,9 @@ describe("SaveLinkDialog", () => {
         expect(screen.queryByText("Insight 1")).toBeInTheDocument(),
       );
       const insight1 = screen.getByText("Insight 1");
-      const checkbox = insight1.closest("tr")!.querySelector("input[type='checkbox']");
+      const checkbox = insight1
+        .closest("tr")!
+        .querySelector("input[type='checkbox']");
       await userEvent.click(insight1);
       expect((checkbox as HTMLInputElement).checked).toBe(true);
 
@@ -290,7 +292,9 @@ describe("SaveLinkDialog", () => {
       expect(screen.queryByText("Insight 1")).toBeInTheDocument(),
     );
     const insight1 = screen.getByText("Insight 1");
-    const checkbox = insight1.closest("tr")!.querySelector("input[type='checkbox']");
+    const checkbox = insight1
+      .closest("tr")!
+      .querySelector("input[type='checkbox']");
     await userEvent.click(insight1);
     expect((checkbox as HTMLInputElement).checked).toBeTruthy();
 
@@ -325,12 +329,16 @@ describe("SaveLinkDialog", () => {
       expect(screen.queryByText("Insight 1")).toBeInTheDocument(),
     );
     const insight1 = screen.getByText("Insight 1");
-    const checkbox1 = insight1.closest("tr")!.querySelector("input[type='checkbox']");
+    const checkbox1 = insight1
+      .closest("tr")!
+      .querySelector("input[type='checkbox']");
     await userEvent.click(insight1);
     expect((checkbox1 as HTMLInputElement).checked).toBeTruthy();
 
     const insight2 = screen.getByText("Insight 2");
-    const checkbox2 = insight2.closest("tr")!.querySelector("input[type='checkbox']");
+    const checkbox2 = insight2
+      .closest("tr")!
+      .querySelector("input[type='checkbox']");
     await userEvent.click(insight2);
     expect((checkbox2 as HTMLInputElement).checked).toBeTruthy();
 
@@ -403,9 +411,9 @@ describe("SaveLinkDialog", () => {
     });
     const tableTbody = table!.getElementsByTagName("tbody")[0];
     mockPotentialInsights.forEach((mockPotentialInsight) => {
-      const insightRow = within(tableTbody).getByText(
-        mockPotentialInsight.title!,
-      ).closest("tr");
+      const insightRow = within(tableTbody)
+        .getByText(mockPotentialInsight.title!)
+        .closest("tr");
       const citationTd = insightRow!.querySelector("td:last-child");
       const span = citationTd!.querySelector("span");
       expect(span!.tagName.toLowerCase()).toBe("span");

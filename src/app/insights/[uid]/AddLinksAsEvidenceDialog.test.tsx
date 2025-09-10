@@ -164,7 +164,9 @@ describe("AddLinksAsEvidenceDialog", () => {
     });
 
     const link1 = screen.getByText("Link 1");
-    const checkbox = link1.closest("tr")!.querySelector("input[type='checkbox']");
+    const checkbox = link1
+      .closest("tr")!
+      .querySelector("input[type='checkbox']");
     await userEvent.click(link1);
     expect((checkbox as HTMLInputElement).checked).toBe(true);
 
@@ -201,7 +203,9 @@ describe("AddLinksAsEvidenceDialog", () => {
     });
 
     const link1 = screen.getByText("Link 1");
-    const checkbox = link1.closest("tr")!.querySelector("input[type='checkbox']");
+    const checkbox = link1
+      .closest("tr")!
+      .querySelector("input[type='checkbox']");
     await userEvent.click(link1);
     expect((checkbox as HTMLInputElement).checked).toBe(true);
 
@@ -244,7 +248,9 @@ describe("AddLinksAsEvidenceDialog", () => {
 
     await waitFor(() => expect(screen.getByText("Link 1")).toBeInTheDocument());
     const link1 = screen.getByText("Link 1");
-    const checkbox = link1.closest("tr")!.querySelector("input[type='checkbox']") as HTMLInputElement;
+    const checkbox = link1
+      .closest("tr")!
+      .querySelector("input[type='checkbox']") as HTMLInputElement;
     expect(checkbox.tagName.toLowerCase()).toBe("input");
     expect(checkbox.type).toBe("checkbox");
 
@@ -262,7 +268,9 @@ describe("AddLinksAsEvidenceDialog", () => {
     await waitFor(() => {
       const link1b = screen.getByText("Link 1");
       expect(link1b).toBeInTheDocument();
-      const checkboxAfterReset = link1b.closest("tr")!.querySelector("input[type='checkbox']") as HTMLInputElement;
+      const checkboxAfterReset = link1b
+        .closest("tr")!
+        .querySelector("input[type='checkbox']") as HTMLInputElement;
       expect(checkboxAfterReset).not.toBeChecked();
     });
     expect(mockSetServerFunctionInput).toHaveBeenCalledWith(undefined);

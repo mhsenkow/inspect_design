@@ -45,7 +45,7 @@ describe("POST /api/evidence", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     // Mock the first query (checking for existing evidence) to return empty array
     const mockFirstQueryBuilder = {
       where: jest.fn().mockReturnThis(),
@@ -53,20 +53,20 @@ describe("POST /api/evidence", () => {
       orWhere: jest.fn().mockReturnThis(),
       withGraphFetched: jest.fn().mockResolvedValue([]), // No existing evidence
     };
-    
+
     // Mock the second query (inserting new evidence) to return the mock evidence
     const mockSecondQueryBuilder = {
       insert: jest.fn().mockReturnThis(),
       withGraphFetched: jest.fn().mockResolvedValue(mockEvidence),
     };
-    
+
     // Mock EvidenceModel.query to return different builders based on call count
     let callCount = 0;
     (EvidenceModel.query as jest.Mock).mockImplementation(() => {
       callCount++;
       return callCount === 1 ? mockFirstQueryBuilder : mockSecondQueryBuilder;
     });
-    
+
     (getAuthUser as jest.Mock).mockResolvedValue(mockAuthUser);
   });
 
@@ -146,7 +146,7 @@ describe("POST /api/evidence", () => {
       };
       return mockQueryBuilder;
     });
-    
+
     const req = {
       json: jest.fn().mockResolvedValue({ evidence: mockEvidence }),
     } as any;

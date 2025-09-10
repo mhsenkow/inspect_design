@@ -35,7 +35,10 @@ describe("LoginPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "Login" }));
 
     expect(mockHandleLogin).toHaveBeenCalledTimes(1);
-    expect(mockHandleLogin).toHaveBeenCalledWith("test@example.com", "password");
+    expect(mockHandleLogin).toHaveBeenCalledWith(
+      "test@example.com",
+      "password",
+    );
   });
 
   // // when rean with other tests: InvalidCharacterError: The string to be decoded contains invalid characters
