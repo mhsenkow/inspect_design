@@ -1,4 +1,4 @@
-import { Model, QueryBuilder, fn } from "objection";
+import { Model, QueryBuilder } from "objection";
 import { InsightLink } from "../../types";
 import { InsightModel } from "./insights";
 

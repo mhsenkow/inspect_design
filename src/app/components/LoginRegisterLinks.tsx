@@ -1,4 +1,5 @@
 "use client";
+import styles from "../../styles/components/login-register-links.module.css";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -18,41 +19,42 @@ const LoginRegisterLinks = ({
 
   if (loggedIn) {
     return (
-      <>
-        <li className={`nav-item ${path == "/login" ? "active" : ""}`}>
-          <span
-            className="nav-link"
-            style={{ cursor: "pointer" }}
-            onClick={() => {
-              logout();
-              window.location.href = returnPath || "/";
-            }}
-          >
-            Log Out
-          </span>
-        </li>
-        <li className={`nav-item ${path == "/login" ? "active" : ""}`}>
-          <Link className="nav-link cta" href="/insights">
-            My Insights
-          </Link>
-        </li>
-      </>
+      <div className={styles.loginRegisterContainer}>
+        <button
+          onClick={() => {
+            logout();
+            window.location.href = returnPath || "/";
+          }}
+          className={styles.logoutButton}
+        >
+          Log Out
+        </button>
+        <Link href="/insights" className={styles.myInsightsButton}>
+          My Insights
+        </Link>
+      </div>
     );
   }
 
   return (
-    <>
-      <li className={`nav-item ${path == "/login" ? "active" : ""}`}>
-        <Link className="nav-link" href={`/login?return=${returnPath}`}>
+    <div className={styles.loginRegisterContainer}>
+      <li className={path === "/login" ? "active" : ""}>
+        <Link
+          href={`/login?return=${returnPath}`}
+          className={styles.loginButton}
+        >
           Login
         </Link>
       </li>
-      <li className={`nav-item ${path == "/register" ? "active" : ""}`}>
-        <Link className="nav-link cta" href={`/register?return=${returnPath}`}>
+      <li className={path === "/register" ? "active" : ""}>
+        <Link
+          href={`/register?return=${returnPath}`}
+          className={styles.registerButton}
+        >
           Register
         </Link>
       </li>
-    </>
+    </div>
   );
 };
 

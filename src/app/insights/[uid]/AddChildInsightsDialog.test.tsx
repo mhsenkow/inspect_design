@@ -62,9 +62,16 @@ describe("AddChildInsightsDialog", () => {
   });
 
   function renderDialog() {
+    const handleClose = () => {
+      setServerFunctionInput(undefined);
+      setActiveServerFunction(undefined);
+    };
+
     return render(
       <AddChildInsightsDialog
         id="dialog1"
+        isOpen={true}
+        onClose={handleClose}
         insight={mockInsight as any}
         setServerFunctionInput={setServerFunctionInput}
         setActiveServerFunction={setActiveServerFunction}
@@ -121,16 +128,16 @@ describe("AddChildInsightsDialog", () => {
 
   it("calls cancelDialog on Escape keydown", () => {
     renderDialog();
-    const dialog = document.getElementById("dialog1") as HTMLDialogElement;
-    fireEvent.keyDown(dialog, { key: "Escape" });
+    const modal = screen.getByRole("dialog");
+    fireEvent.keyDown(modal, { key: "Escape" });
     expect(setServerFunctionInput).toHaveBeenCalledWith(undefined);
     expect(setActiveServerFunction).toHaveBeenCalledWith(undefined);
   });
 
   it("calls cancelDialog on dialog background click", () => {
     renderDialog();
-    const dialog = document.getElementById("dialog1") as HTMLDialogElement;
-    fireEvent.click(dialog, { target: dialog, currentTarget: dialog });
+    const modal = screen.getByRole("dialog");
+    fireEvent.click(modal, { target: modal, currentTarget: modal });
     expect(setServerFunctionInput).toHaveBeenCalledWith(undefined);
     expect(setActiveServerFunction).toHaveBeenCalledWith(undefined);
   });

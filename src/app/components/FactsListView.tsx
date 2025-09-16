@@ -26,6 +26,7 @@ const FactsListView = ({
   activeServerFunction,
   hideHead,
   enableFeedback,
+  cellActions,
 }: {
   factName: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -34,8 +35,8 @@ const FactsListView = ({
   setServerFunctionInput: React.Dispatch<React.SetStateAction<any | undefined>>;
   selectedFacts: Fact[];
   setSelectedFacts: React.Dispatch<React.SetStateAction<Fact[]>>;
-  unselectedActions: FactsListViewAction[];
-  selectedActions: FactsListViewAction[];
+  unselectedActions?: FactsListViewAction[];
+  selectedActions?: FactsListViewAction[];
   columns?: {
     name: string;
     dataColumn?: string;
@@ -49,10 +50,16 @@ const FactsListView = ({
   activeServerFunction: { function: ServerFunction<any> } | undefined;
   hideHead?: boolean;
   enableFeedback?: boolean;
+  cellActions?: {
+    icon: string;
+    label: string;
+    onClick: (fact: Fact) => void;
+    enabled?: (fact: Fact) => boolean;
+  }[];
 }): React.JSX.Element => {
   const { data, setData } = useContext(FactsDataContext);
   const [flvResponses, setFLVResponses] = useState<FLVResponse[]>([]);
-  const [dataFilter, setDataFilter] = useState("");
+  const [dataFilter, setDataFilter] = useState<string>("");
 
   const { token, loggedIn } = useUser();
 
@@ -152,99 +159,91 @@ const FactsListView = ({
   const HEADER_ELEMENT_ID = "factsLisActionstHeader";
   return (
     <>
-      <div
-        id={HEADER_ELEMENT_ID}
-        style={{
-          padding: "5px",
-          margin: "5px 0",
-        }}
-      >
-        {(!selectedFacts || selectedFacts.length == 0) && (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "space-around",
-            }}
-          >
-            {loggedIn &&
-              unselectedActions &&
-              unselectedActions
-                .filter((a) => a.enabled)
-                .map((unselectedAction, i) => (
-                  <div
-                    style={{ padding: "2px" }}
-                    key={`${factName} unselectedAction #${i}`}
-                  >
-                    <SelectedFactsButton
-                      classNames={unselectedAction.className}
-                      text={unselectedAction.text}
-                      handleOnClick={() => {
-                        unselectedAction.handleOnClick();
-                        if (unselectedAction.serverFunction) {
-                          // saving the function directly calls it, so wrapping it in an object
-                          setActiveServerFunction({
-                            function: unselectedAction.serverFunction,
-                          });
-                        }
-                      }}
-                    />
-                  </div>
-                ))}
-          </div>
-        )}
-        {selectedFacts && selectedFacts.length > 0 && (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "space-around",
-            }}
-          >
-            {loggedIn &&
-              selectedActions &&
-              selectedActions
-                .filter((a) => a.enabled)
-                .map((selectedAction, i) => (
-                  <div
-                    style={{ padding: "2px" }}
-                    key={`${factName} selectedAction #${i}`}
-                  >
-                    <SelectedFactsButton
-                      classNames={selectedAction.className}
-                      text={selectedAction.text}
-                      handleOnClick={() => {
-                        selectedAction.handleOnClick(selectedFacts);
-                        if (selectedAction.serverFunction) {
-                          // saving the function directly calls it, so wrapping it in an object
-                          setActiveServerFunction({
-                            function: selectedAction.serverFunction,
-                          });
-                        }
-                        setSelectedFacts([]);
-                      }}
-                    />
-                  </div>
-                ))}
+      <div id={HEADER_ELEMENT_ID} className="content-card space-main">
+        {(!selectedFacts || selectedFacts.length == 0) &&
+          unselectedActions &&
+          unselectedActions.length > 0 && (
+            <div className="content-card-header">
+              <div className="flex gap-4">
+                {loggedIn &&
+                  unselectedActions &&
+                  unselectedActions
+                    .filter((a) => a.enabled)
+                    .map((unselectedAction, i) => (
+                      <div key={`${factName} unselectedAction #${i}`}>
+                        <SelectedFactsButton
+                          classNames="btn btn-primary"
+                          text={unselectedAction.text}
+                          handleOnClick={() => {
+                            unselectedAction.handleOnClick();
+                            if (unselectedAction.serverFunction) {
+                              // saving the function directly calls it, so wrapping it in an object
+                              setActiveServerFunction({
+                                function: unselectedAction.serverFunction,
+                              });
+                            }
+                          }}
+                        />
+                      </div>
+                    ))}
+              </div>
+            </div>
+          )}
+        {selectedFacts &&
+          selectedFacts.length > 0 &&
+          selectedActions &&
+          selectedActions.length > 0 && (
+            <div className="content-card-header">
+              <div className="flex gap-4">
+                {loggedIn &&
+                  selectedActions &&
+                  selectedActions
+                    .filter((a) => a.enabled)
+                    .map((selectedAction, i) => (
+                      <div key={`${factName} selectedAction #${i}`}>
+                        <SelectedFactsButton
+                          classNames={
+                            selectedAction.className === "btn bg-danger"
+                              ? "btn btn-danger"
+                              : "btn btn-primary"
+                          }
+                          text={selectedAction.text}
+                          handleOnClick={() => {
+                            selectedAction.handleOnClick(selectedFacts);
+                            if (selectedAction.serverFunction) {
+                              // saving the function directly calls it, so wrapping it in an object
+                              setActiveServerFunction({
+                                function: selectedAction.serverFunction,
+                              });
+                            }
+                            setSelectedFacts([]);
+                          }}
+                        />
+                      </div>
+                    ))}
+              </div>
+            </div>
+          )}
+        {data && data.length > 0 && (
+          <div className="content-card-body">
+            <FactsTable
+              factName={factName}
+              data={data}
+              setData={setData}
+              selectedFacts={selectedFacts}
+              setSelectedFacts={setSelectedFacts}
+              columns={columns}
+              dataFilter={dataFilter}
+              setDataFilter={setDataFilter}
+              allowFeedback={true}
+              theadTopCSS="100px"
+              hideHead={hideHead}
+              enableFeedback={enableFeedback}
+              cellActions={cellActions}
+            />
           </div>
         )}
       </div>
-      {data && data.length > 0 && (
-        <FactsTable
-          factName={factName}
-          data={data}
-          setData={setData}
-          selectedFacts={selectedFacts}
-          setSelectedFacts={setSelectedFacts}
-          columns={columns}
-          dataFilter={dataFilter}
-          setDataFilter={setDataFilter}
-          allowFeedback={true}
-          theadTopCSS="100px"
-          hideHead={hideHead}
-          enableFeedback={enableFeedback}
-        />
-      )}
     </>
   );
 };

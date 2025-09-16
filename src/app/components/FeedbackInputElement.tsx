@@ -16,7 +16,7 @@ const FeedbackInputElement = ({
   directions: string;
   afterSubmit: (response?: FactComment | FactReaction | void) => void;
 }): React.JSX.Element => {
-  const [html, setHtml] = useState("");
+  const [html, setHtml] = useState<string>("");
 
   const firstEmojiCode = "😀".codePointAt(0);
   const reactOptions = Array.from({ length: 80 }, (_, i) => i)

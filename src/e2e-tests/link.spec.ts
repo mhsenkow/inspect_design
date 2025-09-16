@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { INSERT_LINK_DIALOG_ID } from "../app/constants";
 import dotenv from "dotenv";
 import pg from "pg";
 const Client = pg.Client;
@@ -120,7 +121,7 @@ test.describe("Link page", () => {
       await expect(linkImage).toBeVisible();
       await linkImage.click();
 
-      const dialog = page.locator("#insertLinkDialog");
+      const dialog = page.locator(`#${INSERT_LINK_DIALOG_ID}`);
       await expect(dialog).toBeVisible();
       const submitLinkButton = page.getByRole("button", {
         name: "Submit Dialog",
@@ -164,7 +165,7 @@ test.describe("Link page", () => {
       const linkImage = page.getByAltText("Insert Link");
       await expect(linkImage).toBeVisible();
       await expect(linkImage).toBeEnabled();
-      const dialog = page.locator("#insertLinkDialog");
+      const dialog = page.locator(`#${INSERT_LINK_DIALOG_ID}`);
       await expect(dialog).toBeHidden();
       const dialogSubmitButton = dialog.getByRole("button", {
         name: "Submit Dialog",
@@ -206,7 +207,7 @@ test.describe("Link page", () => {
       const linkImage = page.getByAltText("Insert Link");
       await expect(linkImage).toBeVisible();
       await expect(linkImage).toBeEnabled();
-      const dialog = page.locator("#insertLinkDialog");
+      const dialog = page.locator(`#${INSERT_LINK_DIALOG_ID}`);
       await expect(dialog).toBeHidden();
       const dialogSubmitButton = dialog.getByRole("button", {
         name: "Submit Dialog",
@@ -248,7 +249,7 @@ test.describe("Link page", () => {
       const linkImage = page.getByAltText("Insert Link");
       await expect(linkImage).toBeVisible();
       await expect(linkImage).toBeEnabled();
-      const dialog = page.locator("#insertLinkDialog");
+      const dialog = page.locator(`#${INSERT_LINK_DIALOG_ID}`);
       await expect(dialog).toBeHidden();
       const dialogSubmitButton = dialog.getByRole("button", {
         name: "Submit Dialog",

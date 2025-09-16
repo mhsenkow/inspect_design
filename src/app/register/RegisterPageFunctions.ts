@@ -22,18 +22,31 @@ export async function handleRegister(): Promise<User | undefined> {
       password: formData.get("password") as string,
     };
     const bodyString = JSON.stringify(formObject);
-    const response = (await fetch("/api/register", {
-      method: "POST",
-      body: bodyString,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })) as RegisterPostRouteResponse;
-    if (response.status == 201) {
-      return await response.json();
-    } else {
-      const textObject = await response.json();
-      throw new Error(textObject.message || response.statusText);
+
+    try {
+      const response = (await fetch("/api/register", {
+        method: "POST",
+        body: bodyString,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })) as RegisterPostRouteResponse;
+
+      if (response.status === 201) {
+        return await response.json();
+      } else {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.message ||
+            `Registration failed: ${response.status} ${response.statusText}`,
+        );
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      } else {
+        throw new Error("Network error during registration");
+      }
     }
   } else {
     alert("Please fill out all fields");

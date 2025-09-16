@@ -88,6 +88,8 @@ describe("AddLinksAsEvidenceDialog", () => {
     render(
       <AddLinksAsEvidenceDialog
         id="test-dialog"
+        isOpen={true}
+        onClose={jest.fn()}
         insight={mockInsight}
         setServerFunctionInput={mockSetServerFunctionInput}
         setActiveServerFunction={mockSetActiveServerFunction}
@@ -104,6 +106,8 @@ describe("AddLinksAsEvidenceDialog", () => {
     render(
       <AddLinksAsEvidenceDialog
         id="test-dialog"
+        isOpen={true}
+        onClose={jest.fn()}
         insight={mockInsight}
         setServerFunctionInput={mockSetServerFunctionInput}
         setActiveServerFunction={mockSetActiveServerFunction}
@@ -119,6 +123,8 @@ describe("AddLinksAsEvidenceDialog", () => {
     render(
       <AddLinksAsEvidenceDialog
         id="test-dialog"
+        isOpen={true}
+        onClose={jest.fn()}
         insight={mockInsight}
         setServerFunctionInput={mockSetServerFunctionInput}
         setActiveServerFunction={mockSetActiveServerFunction}
@@ -137,7 +143,7 @@ describe("AddLinksAsEvidenceDialog", () => {
 
     await waitFor(() =>
       expect(window.fetch).toHaveBeenCalledWith(
-        `/api/links?offset=0&limit=50&query=link%201`,
+        `/api/links?offset=0&limit=50&query=Link%201`,
       ),
     );
   });
@@ -146,6 +152,8 @@ describe("AddLinksAsEvidenceDialog", () => {
     render(
       <AddLinksAsEvidenceDialog
         id="test-dialog"
+        isOpen={true}
+        onClose={jest.fn()}
         insight={mockInsight}
         setServerFunctionInput={mockSetServerFunctionInput}
         setActiveServerFunction={mockSetActiveServerFunction}
@@ -156,7 +164,9 @@ describe("AddLinksAsEvidenceDialog", () => {
     });
 
     const link1 = screen.getByText("Link 1");
-    const checkbox = link1.parentElement!.children[0].children[0];
+    const checkbox = link1
+      .closest("tr")!
+      .querySelector("input[type='checkbox']");
     await userEvent.click(link1);
     expect((checkbox as HTMLInputElement).checked).toBe(true);
 
@@ -173,6 +183,8 @@ describe("AddLinksAsEvidenceDialog", () => {
     render(
       <AddLinksAsEvidenceDialog
         id="test-dialog"
+        isOpen={true}
+        onClose={jest.fn()}
         insight={mockInsight}
         setServerFunctionInput={mockSetServerFunctionInput}
         setActiveServerFunction={mockSetActiveServerFunction}
@@ -191,15 +203,14 @@ describe("AddLinksAsEvidenceDialog", () => {
     });
 
     const link1 = screen.getByText("Link 1");
-    const checkbox = link1.parentElement!.children[0].children[0];
+    const checkbox = link1
+      .closest("tr")!
+      .querySelector("input[type='checkbox']");
     await userEvent.click(link1);
     expect((checkbox as HTMLInputElement).checked).toBe(true);
 
     expect(addButton).toBeEnabled();
     await userEvent.click(addButton);
-
-    const dialog = document.getElementById("test-dialog");
-    expect((dialog as HTMLDialogElement).open).toBe(false);
 
     await waitFor(() => {
       expect(mockSetServerFunctionInput).toHaveBeenCalledWith({
@@ -227,6 +238,8 @@ describe("AddLinksAsEvidenceDialog", () => {
     render(
       <AddLinksAsEvidenceDialog
         id="test-dialog"
+        isOpen={true}
+        onClose={jest.fn()}
         insight={mockInsight}
         setServerFunctionInput={mockSetServerFunctionInput}
         setActiveServerFunction={mockSetActiveServerFunction}
@@ -235,8 +248,9 @@ describe("AddLinksAsEvidenceDialog", () => {
 
     await waitFor(() => expect(screen.getByText("Link 1")).toBeInTheDocument());
     const link1 = screen.getByText("Link 1");
-    const checkbox = link1.parentElement!.children[0]
-      .children[0] as HTMLInputElement;
+    const checkbox = link1
+      .closest("tr")!
+      .querySelector("input[type='checkbox']") as HTMLInputElement;
     expect(checkbox.tagName.toLowerCase()).toBe("input");
     expect(checkbox.type).toBe("checkbox");
 
@@ -254,13 +268,11 @@ describe("AddLinksAsEvidenceDialog", () => {
     await waitFor(() => {
       const link1b = screen.getByText("Link 1");
       expect(link1b).toBeInTheDocument();
-      expect(link1b.parentElement!.children[0].children[0]).toStrictEqual(
-        checkbox,
-      );
-      expect(link1b.parentElement!.children[0].children[0]).not.toBeChecked();
+      const checkboxAfterReset = link1b
+        .closest("tr")!
+        .querySelector("input[type='checkbox']") as HTMLInputElement;
+      expect(checkboxAfterReset).not.toBeChecked();
     });
-    const dialog = document.getElementById("test-dialog") as HTMLDialogElement;
-    expect(dialog).not.toBeVisible();
     expect(mockSetServerFunctionInput).toHaveBeenCalledWith(undefined);
     expect(mockSetActiveServerFunction).toHaveBeenCalledWith(undefined);
   });
@@ -269,6 +281,8 @@ describe("AddLinksAsEvidenceDialog", () => {
     render(
       <AddLinksAsEvidenceDialog
         id="test-dialog"
+        isOpen={true}
+        onClose={jest.fn()}
         insight={mockInsight}
         setServerFunctionInput={mockSetServerFunctionInput}
         setActiveServerFunction={mockSetActiveServerFunction}

@@ -64,6 +64,7 @@ export async function POST(
       );
     }
     console.error("Error during user registration:", error);
+
     return NextResponse.json(
       { message: "An unexpected error occurred during registration." },
       { status: 500 },

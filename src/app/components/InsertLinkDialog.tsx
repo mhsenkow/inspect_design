@@ -4,6 +4,17 @@ import { Fact, Insight, Link } from "../types";
 import { GetInsightsRouteResponse } from "../api/insights/route";
 import { GetLinksResponse } from "../api/links/route";
 import { getPageTitle } from "../hooks/functions";
+import { INSERT_LINK_DIALOG_ID } from "../constants";
+import {
+  Modal,
+  ModalBody,
+  ModalFooter,
+  FormGroup,
+  FormInput,
+  ModalButton,
+  ModalContentSection,
+  ModalLoadingState,
+} from "./Modal";
 
 interface Props {
   html: string;
@@ -11,17 +22,18 @@ interface Props {
 }
 
 const InsertLinkDialog = ({ html, setHtml }: Props) => {
-  const [existingItemType, setExistingItemType] = useState("");
+  const [existingItemType, setExistingItemType] = useState<string>("");
   const [existingInsights, setExistingInsights] = useState<Insight[]>();
   const [existingLinks, setExistingLinks] = useState<Link[]>();
-  const [linkUrlInput, setLinkUrlInput] = useState("");
-  const [linkTitle, setLinkTitle] = useState("");
+  const [linkUrlInput, setLinkUrlInput] = useState<string>("");
+  const [linkTitle, setLinkTitle] = useState<string>("");
   const [linkTitleLoading, setLinkTitleLoading] = useState(false);
-  const [linkUrlError, setLinkUrlError] = useState("");
+  const [linkUrlError, setLinkUrlError] = useState<string>("");
   const [chosenInsights, setChosenInsights] = useState<Insight[]>([]);
   const [chosenLinks, setChosenLinks] = useState<Link[]>([]);
-  const [insightFilter, setInsightFilter] = useState("");
-  const [linkFilter, setLinkFilter] = useState("");
+  const [insightFilter, setInsightFilter] = useState<string>("");
+  const [linkFilter, setLinkFilter] = useState<string>("");
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     if (existingItemType == "insight" && !existingInsights) {
@@ -74,189 +86,206 @@ const InsertLinkDialog = ({ html, setHtml }: Props) => {
     setLinkTitle("");
     setChosenInsights([]);
     setChosenLinks([]);
+    setLinkUrlError("");
+    setLinkTitleLoading(false);
   };
 
-  const resetAndCloseDialog = useCallback(() => {
+  const handleClose = useCallback(() => {
     resetStateValues();
-    (document.getElementById("insertLinkDialog") as HTMLDialogElement).close();
+    setIsOpen(false);
   }, []);
 
-  const cancelDialog = useCallback(() => {
-    resetAndCloseDialog();
-  }, [resetAndCloseDialog]);
-
-  useEffect(() => {
-    const id = "insertLinkDialog";
-    const d = document.getElementById(id);
-    if (d) {
-      d.addEventListener("click", (event) => {
-        if (event.target == event.currentTarget) {
-          cancelDialog();
-        }
-      });
-      d.addEventListener("keydown", (event) => {
-        if (event.key == "Escape") {
-          cancelDialog();
-        }
-      });
-    } else {
-      throw new Error(`Dialog not found with id: ${id}`);
+  const handleSubmit = useCallback(() => {
+    if (linkUrlInput && linkTitle) {
+      const newHtml = `${html}<a href="${linkUrlInput}" target="_blank">${linkTitle}</a>`;
+      setHtml(newHtml);
+      handleClose();
+    } else if (chosenInsights.length > 0) {
+      const newHtml = chosenInsights.reduce((html, insight) => {
+        return `${html}Insight: <a href="/insights/${insight.uid}" target="_blank">${insight.title}</a>`;
+      }, "");
+      setHtml(newHtml);
+      handleClose();
+    } else if (chosenLinks.length > 0) {
+      const newHtml = chosenLinks.reduce((html, link) => {
+        return `${html}Link: <a href="/links/${link.uid}" target="_blank">${link.title}</a>`;
+      }, "");
+      setHtml(newHtml);
+      handleClose();
     }
-  }, [cancelDialog]);
+  }, [
+    html,
+    setHtml,
+    linkUrlInput,
+    linkTitle,
+    chosenInsights,
+    chosenLinks,
+    handleClose,
+  ]);
+
+  // Listen for dialog open events
+  useEffect(() => {
+    const dialog = document.getElementById(
+      INSERT_LINK_DIALOG_ID,
+    ) as HTMLDialogElement;
+    if (dialog) {
+      const handleOpen = () => setIsOpen(true);
+      dialog.addEventListener("show", handleOpen);
+      return () => dialog.removeEventListener("show", handleOpen);
+    }
+  }, []);
 
   return (
-    <dialog id="insertLinkDialog" style={{ width: "80%", height: "80%" }}>
-      <h1>Insert a Link into Comment</h1>
-      <div
-        style={{ display: "flex", flexDirection: "column", padding: "10px" }}
+    <>
+      <dialog id={INSERT_LINK_DIALOG_ID} style={{ display: "none" }} />
+      <Modal
+        id={INSERT_LINK_DIALOG_ID}
+        title="Insert a Link into Comment"
+        isOpen={isOpen}
+        onClose={handleClose}
+        size="large"
       >
-        <h2>Specify an external link</h2>
-        <label htmlFor="linkUrlInput" style={{ marginBottom: "5px" }}>
-          Link URL:
-        </label>
-        <input
-          id="linkUrlInput"
-          type="text"
-          placeholder="Paste URL"
-          style={{ marginBottom: "10px", padding: "5px", width: "100%" }}
-          value={linkUrlInput}
-          onChange={(event) => {
-            const text = event.target.value;
-            if (text && text.match(/https?:\/\/[^ ]+/)) {
-              setLinkUrlInput(text);
-              setLinkTitleLoading(true);
-            } else {
-              setLinkTitle("");
-              setLinkTitleLoading(false);
+        <ModalBody>
+          <ModalContentSection title="Specify an external link">
+            <FormGroup>
+              <FormInput
+                type="text"
+                placeholder="Paste URL"
+                value={linkUrlInput}
+                onChange={(event) => {
+                  const text = event.target.value;
+                  if (text && text.match(/https?:\/\/[^ ]+/)) {
+                    setLinkUrlInput(text);
+                    setLinkTitleLoading(true);
+                  } else {
+                    setLinkTitle("");
+                    setLinkTitleLoading(false);
+                  }
+                }}
+                error={linkUrlError}
+              />
+            </FormGroup>
+            {linkTitleLoading && (
+              <ModalLoadingState message="Loading link title..." />
+            )}
+            {!linkTitleLoading && linkTitle && (
+              <div
+                style={{ fontWeight: "bold", marginTop: "var(--spacing-2)" }}
+              >
+                {linkTitle}
+              </div>
+            )}
+          </ModalContentSection>
+
+          <ModalContentSection title="Or: Choose an existing link or insight">
+            <div style={{ marginBottom: "var(--spacing-4)" }}>
+              <label
+                style={{
+                  display: "flex",
+                  gap: "var(--spacing-4)",
+                  marginBottom: "var(--spacing-3)",
+                }}
+              >
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "var(--spacing-2)",
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name="existingItemType"
+                    value="insight"
+                    checked={existingItemType == "insight"}
+                    onChange={() => setExistingItemType("insight")}
+                  />
+                  Insight
+                </label>
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "var(--spacing-2)",
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name="existingItemType"
+                    value="link"
+                    checked={existingItemType == "link"}
+                    onChange={() => setExistingItemType("link")}
+                  />
+                  Link
+                </label>
+              </label>
+            </div>
+            <div style={{ height: "200px", overflow: "scroll" }}>
+              {existingItemType == "insight" && !existingInsights && (
+                <ModalLoadingState message="Loading insights..." />
+              )}
+              {existingItemType == "insight" && existingInsights && (
+                <FactsTable
+                  data={existingInsights}
+                  factName="insight"
+                  setData={
+                    setExistingInsights as React.Dispatch<
+                      React.SetStateAction<Fact[] | undefined>
+                    >
+                  }
+                  selectedFacts={chosenInsights}
+                  setSelectedFacts={
+                    setChosenInsights as React.Dispatch<
+                      React.SetStateAction<Fact[]>
+                    >
+                  }
+                  dataFilter={insightFilter}
+                  setDataFilter={setInsightFilter}
+                />
+              )}
+              {existingItemType == "link" && !existingLinks && (
+                <ModalLoadingState message="Loading links..." />
+              )}
+              {existingItemType == "link" && existingLinks && (
+                <FactsTable
+                  data={existingLinks}
+                  factName="link"
+                  setData={
+                    setExistingLinks as React.Dispatch<
+                      React.SetStateAction<Fact[] | undefined>
+                    >
+                  }
+                  selectedFacts={chosenLinks}
+                  setSelectedFacts={
+                    setChosenLinks as React.Dispatch<
+                      React.SetStateAction<Fact[]>
+                    >
+                  }
+                  dataFilter={linkFilter}
+                  setDataFilter={setLinkFilter}
+                />
+              )}
+            </div>
+          </ModalContentSection>
+        </ModalBody>
+        <ModalFooter>
+          <ModalButton variant="secondary" onClick={handleClose}>
+            Cancel
+          </ModalButton>
+          <ModalButton
+            variant="primary"
+            onClick={handleSubmit}
+            disabled={
+              !linkUrlInput &&
+              chosenInsights.length == 0 &&
+              chosenLinks.length == 0
             }
-          }}
-        />
-        <p>
-          {linkTitleLoading && <span>Loading link title...</span>}
-          {linkUrlError && <span style={{ color: "red" }}>{linkUrlError}</span>}
-          {linkTitle && <strong>{linkTitle}</strong>}
-        </p>
-      </div>
-      <div>
-        <h2>Or: Choose an existing link or insight</h2>
-        <p>
-          <label>
-            <input
-              type="radio"
-              name="existingItemType"
-              value="insight"
-              checked={existingItemType == "insight"}
-              onChange={() => setExistingItemType("insight")}
-            />{" "}
-            Insight
-          </label>{" "}
-          <label>
-            <input
-              type="radio"
-              name="existingItemType"
-              value="link"
-              checked={existingItemType == "link"}
-              onChange={() => setExistingItemType("link")}
-            />{" "}
-            Link
-          </label>
-        </p>
-        <div style={{ height: "200px", overflow: "scroll" }}>
-          {existingItemType == "insight" && !existingInsights && (
-            <span>Loading insights...</span>
-          )}
-          {existingItemType == "insight" && existingInsights && (
-            <FactsTable
-              data={existingInsights}
-              factName="insight"
-              setData={
-                setExistingInsights as React.Dispatch<
-                  React.SetStateAction<Fact[] | undefined>
-                >
-              }
-              selectedFacts={chosenInsights}
-              setSelectedFacts={
-                setChosenInsights as React.Dispatch<
-                  React.SetStateAction<Fact[]>
-                >
-              }
-              dataFilter={insightFilter}
-              setDataFilter={setInsightFilter}
-            />
-          )}
-          {existingItemType == "link" && !existingLinks && (
-            <span>Loading links...</span>
-          )}
-          {existingItemType == "link" && existingLinks && (
-            <FactsTable
-              data={existingLinks}
-              factName="link"
-              setData={
-                setExistingLinks as React.Dispatch<
-                  React.SetStateAction<Fact[] | undefined>
-                >
-              }
-              selectedFacts={chosenLinks}
-              setSelectedFacts={
-                setChosenLinks as React.Dispatch<React.SetStateAction<Fact[]>>
-              }
-              dataFilter={linkFilter}
-              setDataFilter={setLinkFilter}
-            />
-          )}
-        </div>
-      </div>
-      <div
-        id="dialogFooter"
-        style={{
-          position: "sticky",
-          bottom: 0,
-          float: "right",
-          display: "inline",
-        }}
-      >
-        <button
-          className="btn bg-danger"
-          onClick={() => {
-            cancelDialog();
-          }}
-          style={{ padding: "5px 10px" }}
-        >
-          Cancel
-        </button>
-        <button
-          className="btn btn-primary"
-          aria-label="Submit Dialog"
-          onClick={() => {
-            if (linkUrlInput && linkTitle) {
-              const newHtml = `${html}<a href="${linkUrlInput}" target="_blank">${linkTitle}</a>`;
-              setHtml(newHtml);
-              resetAndCloseDialog();
-            } else if (chosenInsights.length > 0) {
-              const newHtml = chosenInsights.reduce((html, insight) => {
-                return `${html}Insight: <a href="/insights/${insight.uid}" target="_blank">${insight.title}</a>`;
-              }, "");
-              setHtml(newHtml);
-              resetAndCloseDialog();
-            } else if (chosenLinks.length > 0) {
-              const newHtml = chosenLinks.reduce((html, link) => {
-                return `${html}Link: <a href="/links/${link.uid}" target="_blank">${link.title}</a>`;
-              }, "");
-              setHtml(newHtml);
-              resetAndCloseDialog();
-            }
-          }}
-          style={{ padding: "5px 10px" }}
-          disabled={
-            !linkUrlInput &&
-            chosenInsights.length == 0 &&
-            chosenLinks.length == 0
-          }
-        >
-          Submit
-        </button>
-      </div>
-    </dialog>
+          >
+            Submit
+          </ModalButton>
+        </ModalFooter>
+      </Modal>
+    </>
   );
 };
 

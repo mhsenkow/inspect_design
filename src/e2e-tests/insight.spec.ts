@@ -1,4 +1,5 @@
 import { test, expect, Locator } from "@playwright/test";
+import { INSERT_LINK_DIALOG_ID } from "../app/constants";
 import dotenv from "dotenv";
 import pg from "pg";
 const Client = pg.Client;
@@ -8,7 +9,7 @@ import {
   addReactionFromFeedbackInputElement,
   // getInsightUid,
   getLinkUid,
-  insightPageHasCitation,
+  // insightPageHasCitation,
   selectCitationToRemove,
   // selectFirstEnabledPotentialInsight,
   selectTableRow,
@@ -473,12 +474,12 @@ test.describe("Insight page", () => {
         });
 
         test.describe("Selecting from potential insights", () => {
-          let selectedInsight: Insight;
+          // let selectedInsight: Insight;
 
           test.beforeEach(async () => {
             await expect(dialog.getByRole("table")).toHaveCount(2);
             // the 1st one is citations to remove
-            const dialogTableOfOtherInsights = dialog.getByRole("table").nth(1);
+            // const dialogTableOfOtherInsights = dialog.getByRole("table").nth(1);
             // FIXME: duplicate key value violates unique constraint "u_sid_iid"
             // selectedInsight = await selectFirstEnabledPotentialInsight(
             //   dialogTableOfOtherInsights,
@@ -726,7 +727,7 @@ test.describe("Insight page", () => {
         const linkButton = page.getByRole("button", { name: "Insert Link" });
         await expect(linkButton).toBeVisible();
         await linkButton.click();
-        const dialog = page.locator("#insertLinkDialog");
+        const dialog = page.locator(`#${INSERT_LINK_DIALOG_ID}`);
         await expect(dialog).toBeVisible();
         const linkInput = dialog.getByPlaceholder("Paste URL");
         await expect(linkInput).toBeVisible();
@@ -796,7 +797,7 @@ test.describe("Insight page", () => {
         });
         await expect(insightButton).toBeVisible();
         await insightButton.click();
-        const dialog = page.locator("#insertLinkDialog");
+        const dialog = page.locator(`#${INSERT_LINK_DIALOG_ID}`);
         await expect(dialog).toBeVisible();
         const insightRadioButton = dialog.getByRole("radio", {
           name: "insight",
@@ -883,7 +884,7 @@ test.describe("Insight page", () => {
         const linkButton = page.getByRole("button", { name: "Insert Link" });
         await expect(linkButton).toBeVisible();
         await linkButton.click();
-        const dialog = page.locator("#insertLinkDialog");
+        const dialog = page.locator(`#${INSERT_LINK_DIALOG_ID}`);
         await expect(dialog).toBeVisible();
         const linkRadioButton = dialog.getByRole("radio", { name: "link" });
         await expect(linkRadioButton).toBeVisible();

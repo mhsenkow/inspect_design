@@ -4,27 +4,100 @@ import { encodeStringURI } from "./functions";
 import { decryptToken } from "../../middleware/functions";
 
 const useUser = () => {
-  const [token, setToken] = useState<string>();
-  const [userDetails, setUserDetails] = useState<{
-    user_id: number;
-    email: string;
-    username: string;
-  }>();
-  useEffect(() => {
-    const token = document.cookie
+  // Initialize state with parsed cookie data to avoid re-parsing on every mount
+  const [token, setToken] = useState<string | undefined>(() => {
+    if (typeof window === "undefined") return undefined;
+    const cookieToken = document.cookie
       .split(";")
       .find((row) => row.trim().startsWith("token="))
       ?.split("=")[1];
-    if (token) {
-      setToken(token);
-      setLoggedIn(true);
-      const { user_id, email, username } = decryptToken(
-        token!,
-        "secret", // TODO: get from .env
+    return cookieToken;
+  });
+
+  const [userDetails, setUserDetails] = useState<
+    | {
+        user_id: number;
+        email: string;
+        username: string;
+      }
+    | undefined
+  >(() => {
+    if (typeof window === "undefined") return undefined;
+    const cookieToken = document.cookie
+      .split(";")
+      .find((row) => row.trim().startsWith("token="))
+      ?.split("=")[1];
+    if (cookieToken) {
+      const details = decryptToken(
+        cookieToken,
+        process.env.NEXT_PUBLIC_TOKEN_KEY ||
+          "your-secret-jwt-key-change-this-in-production",
       );
-      setUserDetails({ user_id, email, username });
+      return details || undefined;
     }
-  }, []);
+    return undefined;
+  });
+
+  const [loggedIn, setLoggedIn] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const cookieToken = document.cookie
+      .split(";")
+      .find((row) => row.trim().startsWith("token="))
+      ?.split("=")[1];
+    return !!cookieToken;
+  });
+
+  useEffect(() => {
+    // Initialize state on client side after hydration
+    if (typeof window !== "undefined") {
+      const cookieToken = document.cookie
+        .split(";")
+        .find((row) => row.trim().startsWith("token="))
+        ?.split("=")[1];
+
+      if (cookieToken && !token) {
+        setToken(cookieToken);
+        const details = decryptToken(
+          cookieToken,
+          process.env.NEXT_PUBLIC_TOKEN_KEY ||
+            "your-secret-jwt-key-change-this-in-production",
+        );
+        if (details) {
+          setUserDetails(details);
+          setLoggedIn(true);
+        } else {
+          // If token is invalid, clear it
+          setLoggedIn(false);
+          setToken(undefined);
+          document.cookie = `token=; path=/; expires=${new Date(0)}`;
+        }
+      } else if (!cookieToken) {
+        setLoggedIn(false);
+        setToken(undefined);
+        setUserDetails(undefined);
+      }
+    }
+  }, [token]);
+
+  useEffect(() => {
+    // Only run effect if token exists but userDetails is missing (edge case)
+    if (token && !userDetails) {
+      const details = decryptToken(
+        token,
+        process.env.NEXT_PUBLIC_TOKEN_KEY ||
+          "your-secret-jwt-key-change-this-in-production",
+      );
+      if (details) {
+        setUserDetails(details);
+        setLoggedIn(true);
+      } else {
+        // If token is invalid, clear it
+        setLoggedIn(false);
+        setToken(undefined);
+        document.cookie = `token=; path=/; expires=${new Date(0)}`;
+      }
+    }
+  }, [token, userDetails]);
 
   const exportedSetToken = (token: string) => {
     const encodedToken = encodeStringURI(token);
@@ -33,8 +106,6 @@ const useUser = () => {
     date.setDate(date.getDate() + 400);
     document.cookie = `token=${encodedToken}; path=/; expires=${date.toUTCString()}`;
   };
-
-  const [loggedIn, setLoggedIn] = useState(false);
 
   const logout = () => {
     document.cookie = `token=; path=/; expires=${new Date(0)}`;

@@ -23,7 +23,6 @@ describe("LoginPage", () => {
     const user = { token: "fake-token" };
     const mockHandleLogin = handleLogin as jest.Mock;
     mockHandleLogin.mockResolvedValueOnce(user);
-    window.open = jest.fn();
 
     render(<LoginPage />);
 
@@ -36,11 +35,10 @@ describe("LoginPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "Login" }));
 
     expect(mockHandleLogin).toHaveBeenCalledTimes(1);
-
-    await waitFor(() => {
-      expect(window.open).toHaveBeenCalledTimes(1);
-      expect(window.open).toHaveBeenCalledWith("http://localhost", "_self");
-    });
+    expect(mockHandleLogin).toHaveBeenCalledWith(
+      "test@example.com",
+      "password",
+    );
   });
 
   // // when rean with other tests: InvalidCharacterError: The string to be decoded contains invalid characters

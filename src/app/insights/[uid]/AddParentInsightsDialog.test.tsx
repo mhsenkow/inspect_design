@@ -54,9 +54,16 @@ describe("AddParentInsightsDialog", () => {
   });
 
   function renderDialog() {
+    const handleClose = () => {
+      setServerFunctionInput(undefined);
+      setActiveServerFunction(undefined);
+    };
+
     return render(
       <AddParentInsightsDialog
         id="test-dialog"
+        isOpen={true}
+        onClose={handleClose}
         insight={mockInsight}
         setServerFunctionInput={setServerFunctionInput}
         setActiveServerFunction={setActiveServerFunction}
@@ -88,8 +95,7 @@ describe("AddParentInsightsDialog", () => {
   it("disables Submit button when nothing is selected or entered", () => {
     renderDialog();
     const submitBtn = screen.getByRole("button", {
-      name: /Add parent insights/i,
-      hidden: true,
+      name: /Submit/i,
     });
     expect(submitBtn).toBeDisabled();
   });
@@ -99,8 +105,7 @@ describe("AddParentInsightsDialog", () => {
     const input = screen.getByPlaceholderText("New insight name");
     fireEvent.change(input, { target: { value: "My New Insight" } });
     const submitBtn = screen.getByRole("button", {
-      name: /Add parent insights/i,
-      hidden: true,
+      name: /Submit/i,
     });
     expect(submitBtn).not.toBeDisabled();
   });
@@ -110,8 +115,7 @@ describe("AddParentInsightsDialog", () => {
     const input = screen.getByPlaceholderText("New insight name");
     fireEvent.change(input, { target: { value: "My New Insight" } });
     const submitBtn = screen.getByRole("button", {
-      name: /Add parent insights/i,
-      hidden: true,
+      name: /Submit/i,
     });
     fireEvent.click(submitBtn);
     expect(setServerFunctionInput).toHaveBeenCalledWith({
@@ -123,16 +127,16 @@ describe("AddParentInsightsDialog", () => {
 
   it("closes dialog on Escape keydown", () => {
     renderDialog();
-    const dialog = document.getElementById("test-dialog") as HTMLDialogElement;
-    fireEvent.keyDown(dialog, { key: "Escape" });
+    const modal = screen.getByRole("dialog");
+    fireEvent.keyDown(modal, { key: "Escape" });
     expect(setServerFunctionInput).toHaveBeenCalledWith(undefined);
     expect(setActiveServerFunction).toHaveBeenCalledWith(undefined);
   });
 
   it("closes dialog on click outside dialog content", () => {
     renderDialog();
-    const dialog = document.getElementById("test-dialog") as HTMLDialogElement;
-    fireEvent.click(dialog, { target: dialog, currentTarget: dialog });
+    const modal = screen.getByRole("dialog");
+    fireEvent.click(modal, { target: modal, currentTarget: modal });
     expect(setServerFunctionInput).toHaveBeenCalledWith(undefined);
     expect(setActiveServerFunction).toHaveBeenCalledWith(undefined);
   });

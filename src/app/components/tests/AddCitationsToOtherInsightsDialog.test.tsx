@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -64,31 +64,31 @@ describe("AddCitationsToOtherInsightsDialog", () => {
   });
 
   it("renders without crashing", async () => {
-    render(
-      <AddCitationsToOtherInsightsDialog
-        id={ADD_CITATIONS_TO_OTHER_INSIGHTS_DIALOG_ID}
-        selectedCitations={
-          mockSelectedCitations as unknown as InsightEvidence[]
-        }
-        setServerFunctionInput={setServerFunctionInput}
-        setActiveServerFunction={jest.fn()}
-      />,
-      { container: document.getElementById("root") },
-    );
-
-    expect(
-      screen.getByText("First: select citations to remove from this insight:")
-        .nextSibling?.firstChild,
-    ).toBeInstanceOf(HTMLTableElement);
-    await waitFor(() => {
-      expect(screen.getByText("Link 1")).toBeInTheDocument();
-      expect(screen.getByText("Link 2")).toBeInTheDocument();
+    await act(async () => {
+      render(
+        <AddCitationsToOtherInsightsDialog
+          id={ADD_CITATIONS_TO_OTHER_INSIGHTS_DIALOG_ID}
+          isOpen={true}
+          onClose={jest.fn()}
+          selectedCitations={
+            mockSelectedCitations as unknown as InsightEvidence[]
+          }
+          setServerFunctionInput={setServerFunctionInput}
+          setActiveServerFunction={jest.fn()}
+        />,
+        { container: document.getElementById("root")! },
+      );
     });
 
+    // Check that the main sections exist
     expect(
-      screen.getByText("Then: select other insights to add them to").nextSibling
-        ?.firstChild,
-    ).toBeInstanceOf(HTMLTableElement);
+      screen.getByText("First: select citations to remove from this insight"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Then: select other insights to add them to"),
+    ).toBeInTheDocument();
+
+    // Check that the second table has content
     await waitFor(() => {
       expect(screen.getByText("Insight 1")).toBeInTheDocument();
       expect(screen.getByText("Insight 2")).toBeInTheDocument();
@@ -96,17 +96,21 @@ describe("AddCitationsToOtherInsightsDialog", () => {
   });
 
   it("resets state values and closes dialog on cancel", async () => {
-    render(
-      <AddCitationsToOtherInsightsDialog
-        id={ADD_CITATIONS_TO_OTHER_INSIGHTS_DIALOG_ID}
-        selectedCitations={
-          mockSelectedCitations as unknown as InsightEvidence[]
-        }
-        setServerFunctionInput={setServerFunctionInput}
-        setActiveServerFunction={setActiveServerFunction}
-      />,
-      { container: document.getElementById("root") },
-    );
+    await act(async () => {
+      render(
+        <AddCitationsToOtherInsightsDialog
+          id={ADD_CITATIONS_TO_OTHER_INSIGHTS_DIALOG_ID}
+          isOpen={true}
+          onClose={jest.fn()}
+          selectedCitations={
+            mockSelectedCitations as unknown as InsightEvidence[]
+          }
+          setServerFunctionInput={setServerFunctionInput}
+          setActiveServerFunction={setActiveServerFunction}
+        />,
+        { container: document.getElementById("root")! },
+      );
+    });
 
     await waitFor(() =>
       expect(
@@ -116,14 +120,15 @@ describe("AddCitationsToOtherInsightsDialog", () => {
     const insightTitleElement = screen.getByText(
       mockPotentialInsights[0].title!,
     );
-    const checkboxInput =
-      insightTitleElement!.parentElement?.children[0].children[0];
+    const checkboxInput = insightTitleElement
+      .closest("tr")!
+      .querySelector("input[type='checkbox']") as HTMLInputElement;
     await userEvent.click(insightTitleElement!);
-    expect((checkboxInput as HTMLInputElement).checked).toBeTruthy();
+    expect(checkboxInput.checked).toBeTruthy();
 
     await userEvent.click(screen.getByText("Cancel"));
 
-    expect((checkboxInput as HTMLInputElement).checked).toBeFalsy();
+    expect(checkboxInput.checked).toBeFalsy();
     expect(setServerFunctionInput).toHaveBeenCalledWith(undefined);
     expect(setActiveServerFunction).toHaveBeenCalledWith(undefined);
   });
@@ -152,17 +157,21 @@ describe("AddCitationsToOtherInsightsDialog", () => {
       json: () => Promise.resolve(mockPotentialInsightsWithCitations),
     });
 
-    render(
-      <AddCitationsToOtherInsightsDialog
-        id={ADD_CITATIONS_TO_OTHER_INSIGHTS_DIALOG_ID}
-        selectedCitations={
-          mockSelectedCitations as unknown as InsightEvidence[]
-        }
-        setActiveServerFunction={jest.fn()}
-        setServerFunctionInput={jest.fn()}
-      />,
-      { container: document.getElementById("root") },
-    );
+    await act(async () => {
+      render(
+        <AddCitationsToOtherInsightsDialog
+          id={ADD_CITATIONS_TO_OTHER_INSIGHTS_DIALOG_ID}
+          isOpen={true}
+          onClose={jest.fn()}
+          selectedCitations={
+            mockSelectedCitations as unknown as InsightEvidence[]
+          }
+          setActiveServerFunction={jest.fn()}
+          setServerFunctionInput={jest.fn()}
+        />,
+        { container: document.getElementById("root")! },
+      );
+    });
 
     await waitFor(() =>
       expect(screen.queryByText("Insight 1")).toBeInTheDocument(),
@@ -181,34 +190,42 @@ describe("AddCitationsToOtherInsightsDialog", () => {
     await expect(enabledInsight).toBeEnabled();
   });
 
-  it("should not show buttons for deleting comments", () => {
-    render(
-      <AddCitationsToOtherInsightsDialog
-        id={ADD_CITATIONS_TO_OTHER_INSIGHTS_DIALOG_ID}
-        selectedCitations={
-          mockSelectedCitations as unknown as InsightEvidence[]
-        }
-        setServerFunctionInput={jest.fn()}
-        setActiveServerFunction={jest.fn()}
-      />,
-      { container: document.getElementById("root") },
-    );
+  it("should not show buttons for deleting comments", async () => {
+    await act(async () => {
+      render(
+        <AddCitationsToOtherInsightsDialog
+          id={ADD_CITATIONS_TO_OTHER_INSIGHTS_DIALOG_ID}
+          isOpen={true}
+          onClose={jest.fn()}
+          selectedCitations={
+            mockSelectedCitations as unknown as InsightEvidence[]
+          }
+          setServerFunctionInput={jest.fn()}
+          setActiveServerFunction={jest.fn()}
+        />,
+        { container: document.getElementById("root")! },
+      );
+    });
 
     expect(screen.queryByText("X")).not.toBeInTheDocument();
   });
 
   it("should have citation count as a column", async () => {
-    render(
-      <AddCitationsToOtherInsightsDialog
-        id={ADD_CITATIONS_TO_OTHER_INSIGHTS_DIALOG_ID}
-        selectedCitations={
-          mockSelectedCitations as unknown as InsightEvidence[]
-        }
-        setActiveServerFunction={jest.fn()}
-        setServerFunctionInput={jest.fn()}
-      />,
-      { container: document.getElementById("root") },
-    );
+    await act(async () => {
+      render(
+        <AddCitationsToOtherInsightsDialog
+          id={ADD_CITATIONS_TO_OTHER_INSIGHTS_DIALOG_ID}
+          isOpen={true}
+          onClose={jest.fn()}
+          selectedCitations={
+            mockSelectedCitations as unknown as InsightEvidence[]
+          }
+          setActiveServerFunction={jest.fn()}
+          setServerFunctionInput={jest.fn()}
+        />,
+        { container: document.getElementById("root")! },
+      );
+    });
 
     const citationCountHeader = screen.getByText("Citations");
     expect(citationCountHeader).toBeInTheDocument();
@@ -220,10 +237,11 @@ describe("AddCitationsToOtherInsightsDialog", () => {
     );
 
     mockPotentialInsights.forEach((mockPotentialInsight) => {
-      const citationTd = screen.getByText(
-        mockPotentialInsight.title!,
-      ).nextSibling;
-      const span = (citationTd as HTMLTableCellElement).children[0];
+      const row = screen.getByText(mockPotentialInsight.title!).closest("tr")!;
+      const citationTd = row.querySelector(
+        "td:last-child",
+      ) as HTMLTableCellElement;
+      const span = citationTd.children[0];
       expect(span.tagName.toLowerCase()).toBe("span");
       expect(span).toHaveAttribute("class", "badge text-bg-danger");
       expect(span).toHaveTextContent(

@@ -9,9 +9,22 @@ import {
   potentialInsightsWithoutLoops,
 } from "./functions";
 import { GetInsightsRouteResponse } from "../../api/insights/route";
+import {
+  Modal,
+  ModalBody,
+  ModalFooter,
+  TabNav,
+  TabContent,
+  FormGroup,
+  FormInput,
+  ModalButton,
+  ModalContentSection,
+} from "../../components/Modal";
 
 interface Props {
   id: string;
+  isOpen: boolean;
+  onClose: () => void;
   insight: Insight;
   setServerFunctionInput: (
     value: doAddParentInsightsSchema | undefined,
@@ -29,12 +42,20 @@ interface Props {
 
 const AddParentInsightsDialog = ({
   id,
+  isOpen,
+  onClose,
   insight,
   setServerFunctionInput,
   setActiveServerFunction,
 }: Props): React.JSX.Element => {
-  const [dataFilter, setDataFilter] = useState("");
+  const [dataFilter, setDataFilter] = useState<string>("");
   const [insights, setInsights] = useState<Insight[] | undefined>();
+  const [selectedParentInsights, setSelectedParentInsights] = useState<
+    Insight[]
+  >([]);
+  const [newInsightName, setNewInsightName] = useState<string>("");
+  const [activeTab, setActiveTab] = useState("existing");
+
   useEffect(() => {
     fetch("/api/insights?offset=0&limit=20&parents=true&children=true")
       .then(async (response: Response | GetInsightsRouteResponse) => {
@@ -47,52 +68,36 @@ const AddParentInsightsDialog = ({
         setInsights(potentialInsightsWithoutLoops(insight, insights));
       });
   }, [insight]);
-  const [selectedParentInsights, setSelectedParentInsights] = useState<
-    Insight[]
-  >([]);
-  const [newInsightName, setNewInsightName] = useState("");
-
-  const [existingInsightsPaneClasses, setExistingInsightsPaneClasses] =
-    useState("show active");
-  const [newInsightPaneClasses, setNewInsightPaneClasses] = useState("");
 
   const resetStateValues = () => {
     setSelectedParentInsights([]);
     setDataFilter("");
     setNewInsightName("");
+    setActiveTab("existing");
   };
 
-  const resetAndCloseDialog = useCallback(() => {
-    resetStateValues();
-    // don't use `dialog` bc a call to this function below is before it is set
-    (document.getElementById(id) as HTMLDialogElement).close();
-  }, [id]);
-
-  const cancelDialog = useCallback(() => {
+  const handleClose = useCallback(() => {
     setServerFunctionInput(undefined);
     setActiveServerFunction(undefined);
     resetStateValues();
-    const dialog = document.getElementById(id) as HTMLDialogElement;
-    dialog.close();
-  }, [id, setActiveServerFunction, setServerFunctionInput]);
+    onClose();
+  }, [setActiveServerFunction, setServerFunctionInput, onClose]);
 
-  useEffect(() => {
-    const d = document.getElementById(id);
-    if (d) {
-      d.addEventListener("click", (event) => {
-        if (event.target == event.currentTarget) {
-          cancelDialog();
-        }
-      });
-      d.addEventListener("keydown", (event) => {
-        if (event.key == "Escape") {
-          cancelDialog();
-        }
-      });
-    } else {
-      throw new Error(`Dialog not found with id: ${id}`);
-    }
-  }, [cancelDialog, id]);
+  const handleSubmit = useCallback(() => {
+    setServerFunctionInput({
+      childInsight: insight,
+      newParentInsights: selectedParentInsights,
+      newInsightName,
+    });
+    resetStateValues();
+    onClose();
+  }, [
+    insight,
+    selectedParentInsights,
+    newInsightName,
+    setServerFunctionInput,
+    onClose,
+  ]);
 
   const queryFunctionForAddParentInsightsDialog = async (search: string) => {
     const response = await fetch(
@@ -105,64 +110,12 @@ const AddParentInsightsDialog = ({
     return potentialInsightsWithoutLoops(insight, data);
   };
 
-  return (
-    <dialog id={id} className="large-dialog">
-      <h3>Add Parent Insights to Insight: {insight.title}</h3>
-      <ul className="nav nav-tabs">
-        <li className="nav-item">
-          <button
-            className="nav-link active"
-            type="button"
-            role="tab"
-            data-bs-toggle="tab"
-            data-bs-target="#existing-insights"
-            aria-controls="existing insights"
-            aria-selected="true"
-            onClick={() => {
-              // TODO: pressing this tab does not show its content
-              // -- does not set the tab-pane class to 'show active'
-              // -- and I did a `diff` with the add child dialog and don't see anything
-              // so, for now, manually change the tab here
-
-              // change classes state variables
-              setExistingInsightsPaneClasses("show active");
-              setNewInsightPaneClasses("");
-            }}
-          >
-            Existing insights
-          </button>
-        </li>
-        <li className="nav-item">
-          <button
-            className="nav-link"
-            type="button"
-            role="tab"
-            data-bs-toggle="tab"
-            data-bs-target="#new-insight"
-            aria-controls="new insight"
-            aria-selected="false"
-            onClick={() => {
-              // TODO: pressing this tab does not show its content
-              // -- does not set the tab-pane class to 'show active'
-              // -- and I did a `diff` with the add child dialog and don't see anything
-              // so, for now, manually change the tab here
-
-              // change classes state variables
-              setExistingInsightsPaneClasses("");
-              setNewInsightPaneClasses("show active");
-            }}
-          >
-            New insight
-          </button>
-        </li>
-      </ul>
-      <div className="tab-content">
-        <div
-          className={`tab-pane fade ${existingInsightsPaneClasses}`}
-          id="existing-insights"
-          role="tabpanel"
-          aria-labelledby="existing-insights-tab"
-        >
+  const tabs = [
+    {
+      id: "existing",
+      label: "Existing insights",
+      content: (
+        <ModalContentSection>
           <FactsTable
             data={insights}
             setData={
@@ -182,50 +135,56 @@ const AddParentInsightsDialog = ({
             setDataFilter={setDataFilter}
             selectRows={true}
           />
-        </div>
-        <div
-          className={`tab-pane fade ${newInsightPaneClasses}`}
-          id="new-insight"
-          role="tabpanel"
-          style={{ padding: "1rem" }}
-        >
-          <input
-            type="text"
-            placeholder="New insight name"
-            value={newInsightName}
-            onChange={(event) => {
-              setNewInsightName(event.target.value || "");
-            }}
-          />
-        </div>
-      </div>
-      <div className="sticky bottom right">
-        <button
-          className="btn bg-danger"
-          onClick={() => {
-            cancelDialog();
-          }}
-        >
+        </ModalContentSection>
+      ),
+    },
+    {
+      id: "new",
+      label: "New insight",
+      content: (
+        <ModalContentSection>
+          <FormGroup>
+            <FormInput
+              type="text"
+              placeholder="New insight name"
+              value={newInsightName}
+              onChange={(event) => setNewInsightName(event.target.value || "")}
+            />
+          </FormGroup>
+        </ModalContentSection>
+      ),
+    },
+  ];
+
+  return (
+    <Modal
+      id={id}
+      title={`Add Parent Insights to Insight: ${insight.title}`}
+      isOpen={isOpen}
+      onClose={handleClose}
+      size="large"
+    >
+      <ModalBody>
+        <TabNav tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+        {tabs.map((tab) => (
+          <TabContent key={tab.id} tabId={tab.id} activeTab={activeTab}>
+            {tab.content}
+          </TabContent>
+        ))}
+      </ModalBody>
+      <ModalFooter>
+        <ModalButton variant="secondary" onClick={handleClose}>
           Cancel
-        </button>
-        &nbsp;
-        <button
-          className="btn btn-primary"
-          aria-label="Add parent insights"
-          onClick={async () => {
-            setServerFunctionInput({
-              childInsight: insight,
-              newParentInsights: selectedParentInsights,
-              newInsightName,
-            });
-            resetAndCloseDialog();
-          }}
-          disabled={!newInsightName && selectedParentInsights.length == 0}
+        </ModalButton>
+        <ModalButton
+          variant="primary"
+          onClick={handleSubmit}
+          disabled={!newInsightName && selectedParentInsights.length === 0}
         >
           Submit
-        </button>
-      </div>
-    </dialog>
+        </ModalButton>
+      </ModalFooter>
+    </Modal>
   );
 };
 

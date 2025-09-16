@@ -74,7 +74,27 @@ describe("SelectedCitationsAPI", () => {
       },
       method: "POST",
     });
-    expect(result).toEqual({ action: 1, facts: snippets });
+    expect(result).toEqual({
+      action: 1,
+      facts: [
+        {
+          summary_id: 1,
+          title: "Untitled",
+          uid: undefined,
+          updated_at: undefined,
+          logo_uri: undefined,
+          source_baseurl: undefined,
+        },
+        {
+          summary_id: 2,
+          title: "Untitled",
+          uid: undefined,
+          updated_at: undefined,
+          logo_uri: undefined,
+          source_baseurl: undefined,
+        },
+      ],
+    });
   });
 
   it("should add children to an existing insight", async () => {

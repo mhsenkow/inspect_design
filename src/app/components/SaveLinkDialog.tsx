@@ -6,6 +6,16 @@ import { Fact, Insight } from "../types";
 import FactsTable from "./FactsTable";
 import { getPageTitle } from "../hooks/functions";
 import useLinks from "../hooks/useLinks";
+import {
+  Modal,
+  ModalBody,
+  ModalFooter,
+  FormGroup,
+  FormInput,
+  ModalButton,
+  ModalContentSection,
+  ModalLoadingState,
+} from "./Modal";
 
 // need to create a schema here
 // because processing of it to get the insights is necessary before createInsights() is called
@@ -17,30 +27,34 @@ export type ServerFunctionInputSchemaForSavedLinks = {
 
 const SaveLinkDialog = ({
   id,
+  isOpen,
+  onClose,
   potentialInsightsFromServer,
   setServerFunctionInput,
   setActiveServerFunction,
 }: {
   id: string;
+  isOpen: boolean;
+  onClose: () => void;
   potentialInsightsFromServer: Insight[];
   setServerFunctionInput: (
     value: ServerFunctionInputSchemaForSavedLinks | undefined,
   ) => void;
   setActiveServerFunction: (value: undefined) => void;
 }): React.JSX.Element => {
-  // TODO: put common dialog functions into an HOC or shared functions.js file
-  // TODO: consider changing output to use returnValue directly: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dialog
-
-  const [linkUrl, setLinkUrl] = useState("");
-  const [linkUrlError, setLinkUrlError] = useState("");
-  const [dataFilter, setDataFilter] = useState("");
+  const [linkUrl, setLinkUrl] = useState<string>("");
+  const [linkUrlError, setLinkUrlError] = useState<string>("");
+  const [dataFilter, setDataFilter] = useState<string>("");
   const [selectedInsights, setSelectedInsights] = useState<Insight[]>([]);
-  const [newInsightName, setNewInsightName] = useState("");
-  const [pageTitle, setPageTitle] = useState("");
+  const [newInsightName, setNewInsightName] = useState<string>("");
+  const [pageTitle, setPageTitle] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [potentialInsights, setPotentialInsights] = useState<Insight[]>(
     potentialInsightsFromServer,
   );
+  const [urlValidationTimeout, setUrlValidationTimeout] = useState<ReturnType<
+    typeof setTimeout
+  > | null>(null);
 
   // TODO: improve the logic here
   const useLinksReturn = useLinks({
@@ -55,7 +69,7 @@ const SaveLinkDialog = ({
     }
   }, [existingLinks, existingLinks?.length, linkUrlError]);
 
-  const resetStateValues = () => {
+  const resetStateValues = useCallback(() => {
     setSelectedInsights([]);
     setLinkUrl("");
     setNewInsightName("");
@@ -63,188 +77,223 @@ const SaveLinkDialog = ({
     setLinkUrlError("");
     setPageTitle("");
     setLoading(false);
-  };
+    if (urlValidationTimeout) {
+      clearTimeout(urlValidationTimeout);
+      setUrlValidationTimeout(null);
+    }
+  }, [urlValidationTimeout]);
 
-  const resetAndCloseDialog = useCallback(() => {
-    resetStateValues();
-    (document.getElementById("saveLinkDialog") as HTMLDialogElement).close();
-  }, []);
-
-  const cancelDialog = useCallback(() => {
+  const handleClose = useCallback(() => {
     setServerFunctionInput(undefined);
     setActiveServerFunction(undefined);
-    resetAndCloseDialog();
-  }, [resetAndCloseDialog, setActiveServerFunction, setServerFunctionInput]);
+    resetStateValues();
+    onClose();
+  }, [
+    setActiveServerFunction,
+    setServerFunctionInput,
+    resetStateValues,
+    onClose,
+  ]);
+
+  const handleSubmit = useCallback(() => {
+    // Validate URL before submitting
+    try {
+      new URL(linkUrl);
+    } catch {
+      setLinkUrlError("Invalid URL format");
+      return;
+    }
+
+    setServerFunctionInput({
+      url: linkUrl,
+      selectedInsights: [...selectedInsights],
+      newInsightName,
+    });
+    resetStateValues();
+    onClose();
+  }, [
+    linkUrl,
+    selectedInsights,
+    newInsightName,
+    setServerFunctionInput,
+    resetStateValues,
+    onClose,
+  ]);
 
   useEffect(() => {
-    const d = document.getElementById("saveLinkDialog");
-    if (d) {
-      d.addEventListener("click", (event) => {
-        if (event.target == event.currentTarget) {
-          cancelDialog();
-        }
-      });
-      d.addEventListener("keydown", (event) => {
-        if (event.key == "Escape") {
-          cancelDialog();
-        }
-      });
-    } else {
-      throw new Error(`Dialog not found with id: ${id}`);
-    }
-  }, [cancelDialog, id]);
+    if (linkUrl && !pageTitle && !loading && !linkUrlError) {
+      // Only fetch if URL looks valid and complete
+      const isValidCompleteUrl =
+        linkUrl.match(/^https?:\/\/[^\s]+$/) && linkUrl.length > 10;
 
-  useEffect(() => {
-    if (linkUrl && !pageTitle) {
-      getPageTitle(linkUrl)
-        .then((title) => {
-          setPageTitle(title);
-          setLoading(false);
-        })
-        .catch((error) => {
-          setLinkUrlError("Could not get page title");
-          setLoading(false);
-          console.error("Error fetching page title:", error);
-        });
+      if (isValidCompleteUrl) {
+        setLoading(true);
+        setLinkUrlError("");
+
+        getPageTitle(linkUrl)
+          .then((title) => {
+            setPageTitle(title);
+            setLoading(false);
+          })
+          .catch((error) => {
+            console.error("Error fetching page title:", error);
+            setLoading(false);
+
+            // Check if it's a blocking error (403, 429, etc.)
+            if (
+              error.message.includes("403") ||
+              error.message.includes("blocked") ||
+              error.message.includes("Forbidden")
+            ) {
+              setLinkUrlError(
+                "Website blocks automated access - you can still save the link",
+              );
+            } else {
+              setLinkUrlError(
+                "Could not get page title - you can still save the link",
+              );
+            }
+          });
+      }
     }
-  }, [pageTitle, linkUrl]);
+  }, [linkUrl, pageTitle, loading, linkUrlError]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (urlValidationTimeout) {
+        clearTimeout(urlValidationTimeout);
+      }
+    };
+  }, [urlValidationTimeout]);
 
   return (
-    <dialog
+    <Modal
       id={id}
-      style={{
-        width: "80%",
-        height: "80%",
-      }}
-      onClose={() => {
-        resetStateValues();
-      }}
+      title="Save Link to Inspect"
+      isOpen={isOpen}
+      onClose={handleClose}
+      size="large"
     >
-      <h2>Save Link to Inspect</h2>
-      <div style={{ margin: "5px 0" }}>
-        <h3>Enter the URL</h3>
+      <ModalBody>
+        <ModalContentSection title="Enter the URL">
+          <FormGroup>
+            <FormInput
+              type="text"
+              placeholder="Link URL..."
+              value={linkUrl}
+              onChange={(event) => {
+                const text = event.target.value;
+                setLinkUrl(text);
 
-        <input
-          type="text"
-          placeholder="Link URL..."
-          value={linkUrl}
-          onChange={(event) => {
-            const text = event.target.value;
-            if (text && text.match(/https?:\/\/[^ ]+/)) {
-              setLinkUrl(text);
-              setLoading(true);
-            } else {
-              setPageTitle("");
-              setLinkUrlError("");
-              setLoading(false);
-            }
-          }}
-        />
-        {loading && <div style={{ fontWeight: "bold" }}>Title loading...</div>}
-        {!loading && pageTitle && (
-          <div style={{ fontWeight: "bold" }}>{pageTitle}</div>
-        )}
-        {linkUrlError && <div style={{ color: "red" }}>{linkUrlError}</div>}
-      </div>
-      <div style={{ margin: "5px 0" }}>
-        <div
-          className="potentialInsights"
-          style={{
-            padding: "5px",
-            height: "200px",
-            overflowY: "scroll",
-          }}
-        >
-          <h3>Then: choose one or more existing insight</h3>
-          <FactsTable
-            factName="potentialInsight"
-            data={potentialInsights}
-            setData={
-              setPotentialInsights as React.Dispatch<
-                React.SetStateAction<Fact[] | undefined>
-              >
-            }
-            selectedFacts={selectedInsights}
-            setSelectedFacts={
-              setSelectedInsights as React.Dispatch<
-                React.SetStateAction<Fact[]>
-              >
-            }
-            dataFilter={dataFilter}
-            setDataFilter={setDataFilter}
-            selectRows={true}
-            queryFunction={async (query) => {
-              const response = await fetch(
-                `/api/insights?query=${query}&limit=20`,
-              );
-              if (!response.ok) {
-                throw new Error(response.statusText);
+                // Clear any existing timeout
+                if (urlValidationTimeout) {
+                  clearTimeout(urlValidationTimeout);
+                }
+
+                // Reset states immediately
+                setPageTitle("");
+                setLinkUrlError("");
+                setLoading(false);
+
+                // Only validate and fetch if the URL looks complete
+                if (text && text.length > 5) {
+                  const isValidUrl =
+                    text.match(/^https?:\/\/[^\s]+$/) ||
+                    text.match(/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\/.*)?$/);
+
+                  if (isValidUrl) {
+                    // Debounce the URL validation to prevent rapid requests
+                    const timeout = setTimeout(() => {
+                      const fullUrl = text.startsWith("http")
+                        ? text
+                        : `https://${text}`;
+                      setLinkUrl(fullUrl);
+                    }, 1000); // Wait 1 second after user stops typing
+
+                    setUrlValidationTimeout(timeout);
+                  }
+                }
+              }}
+              error={linkUrlError}
+            />
+          </FormGroup>
+          {loading && <ModalLoadingState message="Fetching page title..." />}
+          {!loading && pageTitle && (
+            <div style={{ fontWeight: "bold", marginTop: "var(--spacing-2)" }}>
+              {pageTitle}
+            </div>
+          )}
+        </ModalContentSection>
+
+        <ModalContentSection title="Then: choose one or more existing insight">
+          <div style={{ height: "200px", overflowY: "scroll" }}>
+            <FactsTable
+              factName="potentialInsight"
+              data={potentialInsights}
+              setData={
+                setPotentialInsights as React.Dispatch<
+                  React.SetStateAction<Fact[] | undefined>
+                >
               }
-              return response.json();
-            }}
-            columns={[
-              {
-                name: "Citations",
-                display: (insight: Fact | Insight): React.JSX.Element => (
-                  <span className="badge text-bg-danger">
-                    {insight.evidence?.length || 0}
-                  </span>
-                ),
-              },
-            ]}
-          />
-        </div>
-        <div style={{ padding: "5px" }}>
-          <h3>Or: create a new insight</h3>
-          {/* TODO: scrolling right to create a new insight should keep cancel/submit buttons visible  */}
-          <input
-            type="text"
-            placeholder="New insight name"
-            value={newInsightName}
-            onChange={(event) => {
-              setNewInsightName(event.target.value);
-            }}
-          />{" "}
-        </div>
-      </div>
-      <div
-        id="dialogFooter"
-        style={{
-          position: "sticky",
-          bottom: 0,
-          float: "right",
-          display: "inline",
-        }}
-      >
-        <button
-          className="btn bg-danger"
-          onClick={() => {
-            cancelDialog();
-          }}
-        >
+              selectedFacts={selectedInsights}
+              setSelectedFacts={
+                setSelectedInsights as React.Dispatch<
+                  React.SetStateAction<Fact[]>
+                >
+              }
+              dataFilter={dataFilter}
+              setDataFilter={setDataFilter}
+              selectRows={true}
+              queryFunction={async (query) => {
+                const response = await fetch(
+                  `/api/insights?query=${query}&limit=20`,
+                );
+                if (!response.ok) {
+                  throw new Error(response.statusText);
+                }
+                return response.json();
+              }}
+              columns={[
+                {
+                  name: "Citations",
+                  display: (insight: Fact | Insight): React.JSX.Element => (
+                    <span className="badge text-bg-danger">
+                      {insight.evidence?.length || 0}
+                    </span>
+                  ),
+                },
+              ]}
+            />
+          </div>
+        </ModalContentSection>
+
+        <ModalContentSection title="Or: create a new insight to contain them">
+          <FormGroup>
+            <FormInput
+              type="text"
+              placeholder="New insight name"
+              value={newInsightName}
+              onChange={(event) => setNewInsightName(event.target.value)}
+            />
+          </FormGroup>
+        </ModalContentSection>
+      </ModalBody>
+      <ModalFooter>
+        <ModalButton variant="secondary" onClick={handleClose}>
           Cancel
-        </button>
-        &nbsp;
-        <button
-          className="btn btn-primary"
-          onClick={async () => {
-            setServerFunctionInput({
-              url: linkUrl,
-              selectedInsights: [...selectedInsights],
-              newInsightName,
-            });
-            resetAndCloseDialog();
-          }}
+        </ModalButton>
+        <ModalButton
+          variant="primary"
+          onClick={handleSubmit}
           disabled={
-            !linkUrl ||
-            !!linkUrlError ||
-            !(selectedInsights.length > 0 || newInsightName)
+            !linkUrl || !(selectedInsights.length > 0 || newInsightName)
           }
         >
           Submit
-        </button>
-      </div>
-    </dialog>
+        </ModalButton>
+      </ModalFooter>
+    </Modal>
   );
 };
 

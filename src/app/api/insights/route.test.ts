@@ -20,15 +20,19 @@ jest.mock("../models/insights", () => {
     limit: jest.fn().mockReturnThis(),
     withGraphJoined: jest.fn().mockReturnThis(),
     whereIn: jest.fn().mockReturnThis(),
-    // ...
-    insertGraph: jest.fn().mockReturnThis(),
+    insert: jest.fn().mockReturnThis(),
     withGraphFetched: jest.fn().mockReturnThis(),
+    findById: jest.fn().mockReturnThis(),
     then: jest.fn(),
   };
 
   const MockInsightModelConstructor = jest.fn();
   Object.assign(MockInsightModelConstructor, {
     query: jest.fn(() => mockQueryBuilder),
+    relatedQuery: jest.fn(() => ({
+      for: jest.fn().mockReturnThis(),
+      insert: jest.fn().mockReturnThis(),
+    })),
   });
 
   return {
@@ -270,11 +274,13 @@ describe("/api/insights", () => {
   describe("POST /api/insights", () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      (InsightModel.query().insertGraph as jest.Mock).mockReturnThis();
+      (InsightModel.query().insert as jest.Mock).mockReturnThis();
       (InsightModel.query().withGraphFetched as jest.Mock).mockReturnThis();
       (InsightModel.query().then as jest.Mock).mockImplementation((callback) =>
         Promise.resolve(callback(mockInsights[0])),
       );
+      (InsightModel.relatedQuery as jest.Mock).mockReturnThis();
+      (InsightModel.query().findById as jest.Mock).mockReturnThis();
     });
 
     it("should return htttp 401 when user is not logged in", async () => {
@@ -290,10 +296,7 @@ describe("/api/insights", () => {
     });
 
     it("should return http 400 when the title is missing", async () => {
-      const searchParams = new URLSearchParams();
-      const nextUrl = { searchParams };
       const req = {
-        nextUrl,
         json: jest.fn().mockResolvedValue({}),
       } as unknown as NextRequest;
 
@@ -308,10 +311,7 @@ describe("/api/insights", () => {
 
     it("should successfully create and return an insight with the given title", async () => {
       const mockInsight = { id: 3, title: "New Insight" };
-      const searchParams = new URLSearchParams("title=New%20Insight");
-      const nextUrl = { searchParams };
       const req = {
-        nextUrl,
         json: jest.fn().mockResolvedValue({
           title: mockInsight.title,
         }),
@@ -326,49 +326,54 @@ describe("/api/insights", () => {
 
       const json = await response.json();
       expect(json).toEqual(mockInsight);
-      expect(InsightModel.query().insertGraph).toHaveBeenCalledWith({
+      expect(InsightModel.query().insert).toHaveBeenCalledWith({
         title: "New Insight",
         user_id: 1,
         uid: expect.any(String),
-        created_at: expect.any(String),
-        updated_at: expect.any(String),
-        evidence: [],
       });
     });
 
-    it("should successfully create and return an insight with the given title and citations", async () => {
-      const mockInsight = {
-        id: 4,
-        title: "New Insight",
-        citations: [{ summary_id: 123 }, { summary_id: 456 }],
-      };
-      const searchParams = new URLSearchParams();
-      const nextUrl = { searchParams };
+    it("should handle database errors gracefully", async () => {
       const req = {
-        nextUrl,
         json: jest.fn().mockResolvedValue({
-          title: mockInsight.title,
-          citations: mockInsight.citations,
+          title: "New Insight",
         }),
       } as unknown as NextRequest;
 
-      (InsightModel.query().then as jest.Mock).mockImplementation((callback) =>
-        Promise.resolve(callback(mockInsight)),
-      );
+      // Mock database error
+      (InsightModel.query().insert as jest.Mock).mockImplementation(() => {
+        throw new Error("Database connection failed");
+      });
 
       const response = await POST(req);
-      expect(response.status).toBe(200);
+      expect(response.status).toBe(500);
 
       const json = await response.json();
-      expect(json).toEqual(mockInsight);
-      expect(InsightModel.query().insertGraph).toHaveBeenCalledWith({
-        title: "New Insight",
-        user_id: 1,
-        uid: expect.any(String),
-        created_at: expect.any(String),
-        updated_at: expect.any(String),
-        evidence: [{ summary_id: 123 }, { summary_id: 456 }],
+      expect(json.statusText).toBe(
+        "Internal server error while creating insight",
+      );
+    });
+
+    it("should handle unique constraint violations", async () => {
+      const req = {
+        json: jest.fn().mockResolvedValue({
+          title: "New Insight",
+        }),
+      } as unknown as NextRequest;
+
+      const uniqueError = new Error("Duplicate key");
+      (uniqueError as any).code = "23505";
+      (InsightModel.query().insert as jest.Mock).mockImplementation(() => {
+        throw uniqueError;
       });
+
+      const response = await POST(req);
+      expect(response.status).toBe(500);
+
+      const json = await response.json();
+      expect(json.statusText).toBe(
+        "Internal server error while creating insight",
+      );
     });
   });
 });

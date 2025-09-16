@@ -66,6 +66,12 @@ export const middleware = async (req: NextRequest): Promise<NextResponse> => {
 
   if (authUser) {
     res.headers.set("x-authUser", JSON.stringify(authUser));
+  } else if (token && token !== "undefined") {
+    // Clear invalid token from cookies
+    res.cookies.set("token", "", {
+      expires: new Date(0),
+      path: "/",
+    });
   }
 
   return res;

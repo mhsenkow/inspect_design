@@ -37,8 +37,9 @@ const FactsTable = ({
   disabledIds,
   selectRows = false,
   hideHead = false,
-  theadTopCSS = "0px",
+  // theadTopCSS = "0px",
   enableFeedback = false,
+  cellActions,
 }: {
   data?: Fact[];
   setData: React.Dispatch<React.SetStateAction<Fact[] | undefined>>;
@@ -60,57 +61,77 @@ const FactsTable = ({
   height?: string;
   theadTopCSS?: string;
   enableFeedback?: boolean;
+  cellActions?: {
+    icon: string;
+    label: string;
+    onClick: (fact: Fact) => void;
+    enabled?: (fact: Fact) => boolean;
+  }[];
 }): React.JSX.Element => {
   const { token, loggedIn } = useUser();
   const [returnPath, setReturnPath] = useState<string>();
   useEffect(() => setReturnPath(window.location.pathname), []);
 
   const [loading, setLoading] = useState(false);
-  const [fetchedDataFitler, setFetchedDataFilter] = useState<string>();
+  const [fetchedDataFilter, setFetchedDataFilter] = useState<string>();
 
   useEffect(() => {
     if (
       queryFunction &&
       dataFilter != undefined &&
-      dataFilter != fetchedDataFitler &&
+      dataFilter != fetchedDataFilter &&
       !loading
     ) {
       setLoading(true);
       debounce({
         func: async () => {
-          const encodedDataFilter = encodeStringURI(dataFilter);
-          const localData = await queryFunction(encodedDataFilter);
-          setData(localData);
-          setFetchedDataFilter(dataFilter);
-          setLoading(false);
+          try {
+            const encodedDataFilter = encodeStringURI(dataFilter);
+            const localData = await queryFunction(encodedDataFilter);
+            setData(localData);
+            setFetchedDataFilter(dataFilter);
+          } catch (error) {
+            console.error("Search error:", error);
+          } finally {
+            setLoading(false);
+          }
         },
         key: queryFunction.name,
+        wait: 500, // Longer debounce for better UX
       });
     }
-  }, [
-    dataFilter,
-    fetchedDataFitler,
-    loading,
-    queryFunction,
-    setData,
-    setLoading,
-  ]);
+  }, [dataFilter, fetchedDataFilter, loading, queryFunction, setData]);
 
   const [filteredData, setFilteredData] = useState<Fact[]>();
   useEffect(() => {
     if (data) {
-      setFilteredData(
-        data.filter((fact) => {
-          if (dataFilter != undefined && fact.title) {
-            return fact.title // can't put ? here, so using `if` above
-              .toLocaleLowerCase()
-              .includes(dataFilter.toLocaleLowerCase());
+      // Only filter client-side if no queryFunction is provided (server-side search)
+      if (!queryFunction) {
+        const filtered = data.filter((fact) => {
+          if (dataFilter && dataFilter.trim() !== "") {
+            // Check multiple possible title fields for complex data structures
+            const title =
+              fact.title ||
+              fact.childInsight?.title ||
+              fact.parentInsight?.title ||
+              "";
+            if (title) {
+              return title
+                .toLowerCase()
+                .includes(dataFilter.toLowerCase().trim());
+            }
           }
           return true;
-        }),
-      );
+        });
+        setFilteredData(filtered);
+      } else {
+        // For server-side search, just use the data as-is
+        setFilteredData(data);
+      }
+    } else {
+      setFilteredData([]);
     }
-  }, [data, dataFilter]);
+  }, [data, dataFilter, queryFunction]);
 
   const toggleSelectedFacts = (...facts: Fact[]) => {
     if (selectedFacts) {
@@ -156,414 +177,537 @@ const FactsTable = ({
   }, [returnPath]);
 
   return (
-    <table
-      className="facts-table"
-      style={{
-        backgroundColor: "white",
-      }}
-      id={`factsTable-${factName}`}
-      onClick={(event) => {
-        const targetElement = event.target as HTMLElement;
-        const dataColumn = targetElement.getAttribute("data-column");
-        if (
-          targetElement.tagName == "TH" &&
-          targetElement?.textContent &&
-          Array.from(targetElement.classList).includes("sortable")
-        ) {
+    <div className="card">
+      <div className="card-header p-6">
+        <h3 className="card-header-title text-lg">Data Table</h3>
+      </div>
+      <table
+        className="w-full"
+        id={`factsTable-${factName}`}
+        onClick={(event) => {
+          const targetElement = event.target as HTMLElement;
+          const dataColumn = targetElement.getAttribute("data-column");
           if (
-            targetElement.textContent.slice(-1) != "▲" &&
-            targetElement.textContent.slice(-1) != "▼"
+            targetElement.tagName == "TH" &&
+            targetElement?.textContent &&
+            Array.from(targetElement.classList).includes("sortable")
           ) {
-            const columnText = targetElement.textContent;
-            targetElement.textContent = columnText + "▼";
-            if (dataColumn || columnText == "Updated") {
-              setSortDir({
-                column: dataColumn || "updated_at",
-                dir: "desc",
-              });
+            if (
+              targetElement.textContent.slice(-1) != "▲" &&
+              targetElement.textContent.slice(-1) != "▼"
+            ) {
+              const columnText = targetElement.textContent;
+              targetElement.textContent = columnText + "▼";
+              if (dataColumn || columnText == "Updated") {
+                setSortDir({
+                  column: dataColumn || "updated_at",
+                  dir: "desc",
+                });
+              }
+            } else if (targetElement.textContent.slice(-1) == "▼") {
+              const columnText = targetElement.textContent.slice(0, -1);
+              targetElement.textContent = columnText + "▲";
+              if (dataColumn || columnText == "Updated") {
+                setSortDir({
+                  column: dataColumn || "updated_at",
+                  dir: "asc",
+                });
+              }
+            } else if (targetElement.textContent.slice(-1) == "▲") {
+              const columnText = targetElement.textContent.slice(0, -1);
+              targetElement.textContent = columnText;
+              setSortDir(undefined);
             }
-          } else if (targetElement.textContent.slice(-1) == "▼") {
-            const columnText = targetElement.textContent.slice(0, -1);
-            targetElement.textContent = columnText + "▲";
-            if (dataColumn || columnText == "Updated") {
-              setSortDir({
-                column: dataColumn || "updated_at",
-                dir: "asc",
-              });
-            }
-          } else if (targetElement.textContent.slice(-1) == "▲") {
-            const columnText = targetElement.textContent.slice(0, -1);
-            targetElement.textContent = columnText;
-            setSortDir(undefined);
           }
-        }
-      }}
-    >
-      {!hideHead && (
-        <thead
-          style={{
-            position: "sticky",
-            top: theadTopCSS,
-            zIndex: 1000,
-            backgroundColor: "white",
-          }}
-        >
-          <tr>
-            <th>
-              <input
-                type="checkbox"
-                name="selectAllFacts"
-                checked={
-                  !!data &&
-                  data.length > 0 &&
-                  selectedFacts &&
-                  selectedFacts.length == data.length
-                }
-                onChange={() => {
-                  if (filteredData) {
-                    return toggleSelectedFacts(...filteredData);
-                  }
-                }}
-              />
-            </th>
-            <th className="sortable">Updated</th>
-            <th>
-              {/* search */}
-              {setDataFilter && (
+        }}
+      >
+        {!hideHead && (
+          <thead className="bg-base-500 border-b border-base-600">
+            <tr>
+              <th className="px-8 py-5 text-left text-xs font-medium text-inverse uppercase tracking-wider">
                 <input
-                  type="text"
-                  placeholder="Search the titles..."
-                  style={{ width: "100%", border: 0 }}
-                  className="factsTableSearch"
-                  value={dataFilter}
-                  onChange={async (event) => {
-                    setDataFilter(event.target.value.toLocaleLowerCase());
-                  }}
-                  onFocus={(event) => {
-                    // TODO: can I get the ClientSidePage itself or something other than the button title?
-                    if (
-                      event.relatedTarget &&
-                      event.relatedTarget.textContent == "Add Evidence"
-                    ) {
-                      event.target.blur();
+                  type="checkbox"
+                  name="selectAllFacts"
+                  checked={
+                    !!data &&
+                    data.length > 0 &&
+                    selectedFacts &&
+                    selectedFacts.length == data.length
+                  }
+                  onChange={() => {
+                    if (filteredData) {
+                      return toggleSelectedFacts(...filteredData);
                     }
                   }}
+                  className="rounded border-inverse text-inverse focus:ring-inverse"
                 />
-              )}
-              {loading && <strong>Loading...</strong>}
-            </th>
-            {columns &&
-              columns.map((column) => (
-                <th
-                  className="sortable"
-                  key={`Column: ${column.name}`}
-                  data-column={column.dataColumn}
-                >
-                  {column.name}
-                </th>
-              ))}
-          </tr>
-        </thead>
-      )}
-      {!loading && filteredData && (
-        <tbody>
-          {filteredData.sort(sortFunction).map((fact) => {
-            // TODO: think of a better way to combine disabled and category styles
-            let trStyle: React.CSSProperties = {
-              border: "1px black dotted",
-              borderRadius: "5px",
-            };
-            if (
-              disabledIds?.includes(
-                factName == "snippet"
-                  ? (fact as InsightEvidence).summary_id
-                  : (fact.id ?? -1),
-              )
-            ) {
-              trStyle = { ...trStyle, backgroundColor: "#ccc" };
-            } else {
-              trStyle = { ...trStyle, backgroundColor: "white" };
-            }
-            let trOnClick: React.MouseEventHandler<
-              HTMLTableRowElement
-            > = (): boolean => true;
-            if (
-              selectRows &&
-              !disabledIds?.includes(
-                factName == "snippet"
-                  ? (fact as InsightEvidence).summary_id
-                  : (fact.id ?? -1),
-              )
-            ) {
-              /**
-               * Select the row when the <tr> is clicked.
-               */
-              trOnClick = () => {
-                toggleSelectedFacts(fact);
-              };
-            }
-            return (
-              <React.Fragment key={`${factName} #${fact.id}`}>
-                <tr style={trStyle} onClick={trOnClick}>
-                  <td style={{ verticalAlign: "top" }}>
+              </th>
+              <th className="px-8 py-5 text-left text-xs font-medium text-inverse uppercase tracking-wider sortable cursor-pointer hover:text-secondary transition-colors duration-200">
+                Updated
+              </th>
+              <th className="px-8 py-5 text-left text-xs font-medium text-inverse uppercase tracking-wider">
+                {/* search */}
+                {setDataFilter && (
+                  <div className="relative">
                     <input
-                      type="checkbox"
-                      name="selectedFact"
-                      checked={
-                        selectedFacts &&
-                        selectedFacts.map((f) => f.id).includes(fact.id)
+                      type="text"
+                      placeholder={
+                        loading ? "Searching..." : "Search the titles..."
                       }
-                      onChange={() => {
-                        if (!selectRows) {
-                          return toggleSelectedFacts(fact);
+                      style={{
+                        backgroundColor: "var(--color-background-primary)",
+                        borderColor: "var(--color-border-primary)",
+                        color: "var(--color-text-primary)",
+                      }}
+                      onFocus={(event) => {
+                        const target = event.target as HTMLInputElement;
+                        target.style.borderColor = "var(--color-border-focus)";
+                        target.style.boxShadow =
+                          "0 0 0 2px rgba(24, 119, 242, 0.2)";
+                        // TODO: can I get the ClientSidePage itself or something other than the button title?
+                        if (
+                          event.relatedTarget &&
+                          (event.relatedTarget as HTMLElement).textContent ==
+                            "Add Evidence"
+                        ) {
+                          target.blur();
                         }
                       }}
-                      disabled={disabledIds?.includes(
-                        factName == "snippet"
-                          ? (fact as InsightEvidence).summary_id
-                          : (fact.id ?? -1),
-                      )}
+                      onBlur={(event) => {
+                        const target = event.target as HTMLInputElement;
+                        target.style.borderColor =
+                          "var(--color-border-primary)";
+                        target.style.boxShadow = "none";
+                      }}
+                      className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 text-sm transition-all duration-200 ${loading ? "pr-16 opacity-75" : dataFilter ? "pr-8" : ""}`}
+                      value={dataFilter || ""}
+                      onChange={(event) => {
+                        const value = event.target.value;
+                        setDataFilter(value);
+                      }}
+                      disabled={loading}
                     />
-                  </td>
-                  <td
-                    style={{
-                      verticalAlign: "top",
-                      textAlign: "right",
-                      fontFamily: "fixedsys",
-                    }}
-                  >
-                    {fact.updated_at &&
-                      new Date(fact.updated_at).toLocaleDateString("en-US", {
-                        month: "2-digit",
-                        day: "2-digit",
-                        year: "numeric",
-                      })}
-                    {!fact.updated_at && "---"}
-                  </td>
-                  <td
-                    style={{
-                      verticalAlign: "top",
-                      width: "100%",
-                      textAlign: "left",
-                    }}
-                  >
-                    {!selectRows &&
-                      (factName == "snippet" ? (
-                        <Link href={`/links/${fact.uid}`}>{fact.title}</Link>
-                      ) : (
-                        <Link href={`/insights/${fact.uid}`}>{fact.title}</Link>
-                      ))}
-                    {selectRows && fact.title}
-                    {/* FIXME: updates several times until reactions is an empty array */}
-                    <span>
-                      {fact.reactions &&
-                        fact.reactions.map((r) => r.reaction).join("")}
-                    </span>
-                  </td>
-                  {columns &&
-                    columns.map((column) => (
-                      <td
+                    {dataFilter && !loading && (
+                      <button
+                        type="button"
+                        onClick={() => setDataFilter("")}
+                        className="absolute right-3 top-half transform-center w-6 h-6 flex items-center justify-center rounded-full transition-all duration-200"
                         style={{
-                          verticalAlign: "top",
-                          textAlign: "center",
+                          color: "var(--color-text-tertiary)",
+                          backgroundColor: "transparent",
                         }}
-                        key={`Table column: ${column.name}`}
-                      >
-                        {column.display && column.display(fact)}
-                      </td>
-                    ))}
-                </tr>
-                {enableFeedback && (
-                  <>
-                    <tr>
-                      <td
-                        colSpan={columns ? columns.length + 3 : 4}
-                        style={{
-                          background: "#f6f6ff",
-                          fontSize: "0.95em",
-                          padding: "6px 0",
+                        onMouseEnter={(e) => {
+                          const target = e.target as HTMLElement;
+                          target.style.backgroundColor =
+                            "var(--color-background-secondary)";
+                          target.style.color = "var(--color-text-primary)";
                         }}
+                        onMouseLeave={(e) => {
+                          const target = e.target as HTMLElement;
+                          target.style.backgroundColor = "transparent";
+                          target.style.color = "var(--color-text-tertiary)";
+                        }}
+                        aria-label="Clear search"
+                        title="Clear search"
                       >
-                        <div
+                        <span
                           style={{
-                            display: "flex",
-                            flexDirection: "row",
-                            justifyContent: "space-around",
-                            width: "100%",
-                            margin: "10px",
+                            fontSize: "16px",
+                            fontWeight: "normal",
+                            lineHeight: "1",
                           }}
                         >
-                          <FeedbackLink
-                            actionVerb="React"
-                            icon="😲"
-                            setOnClickFunction={() => {
-                              if (loggedIn) {
-                                const newIsEditing = {} as EditingForFact;
-                                newIsEditing[fact.id!] = true;
-                                setIsEditingReactionForFact({
-                                  ...isEditingReactionForFact,
-                                  ...newIsEditing,
-                                });
-                              } else {
-                                confirmAndRegister();
-                              }
-                            }}
-                          />
-                          <FeedbackLink
-                            actionVerb="Comment"
-                            icon="💬"
-                            setOnClickFunction={() => {
-                              if (loggedIn) {
-                                const newIsEditing = {} as EditingForFact;
-                                newIsEditing[fact.id!] = true;
-                                setIsEditingCommentForFact({
-                                  ...isEditingCommentForFact,
-                                  ...newIsEditing,
-                                });
-                              } else {
-                                confirmAndRegister();
-                              }
-                            }}
-                          />
+                          ×
+                        </span>
+                      </button>
+                    )}
+                    {loading && (
+                      <div className="absolute right-3 top-half transform-center">
+                        <div
+                          className="animate-spin h-4 w-4 border-2 border-t-transparent rounded-full"
+                          style={{
+                            borderColor: "var(--color-base-500)",
+                            borderTopColor: "transparent",
+                          }}
+                        ></div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </th>
+              {columns &&
+                columns.map((column) => (
+                  <th
+                    className="px-8 py-5 text-left text-xs font-medium text-inverse uppercase tracking-wider sortable cursor-pointer hover:text-secondary transition-colors duration-200"
+                    key={`Column: ${column.name}`}
+                    data-column={column.dataColumn}
+                  >
+                    {column.name}
+                  </th>
+                ))}
+            </tr>
+          </thead>
+        )}
+        {!loading && filteredData && (
+          <tbody>
+            {filteredData.sort(sortFunction).map((fact) => {
+              // TODO: think of a better way to combine disabled and category styles
+              let trClassName = "hover:bg-secondary";
+              if (
+                disabledIds?.includes(
+                  factName == "snippet"
+                    ? (fact as InsightEvidence).summary_id
+                    : (fact.id ?? -1),
+                )
+              ) {
+                trClassName += " bg-tertiary opacity-50";
+              }
+              let trOnClick: React.MouseEventHandler<
+                HTMLTableRowElement
+              > = (): boolean => true;
+              if (
+                selectRows &&
+                !disabledIds?.includes(
+                  factName == "snippet"
+                    ? (fact as InsightEvidence).summary_id
+                    : (fact.id ?? -1),
+                )
+              ) {
+                /**
+                 * Select the row when the <tr> is clicked.
+                 */
+                trOnClick = () => {
+                  toggleSelectedFacts(fact);
+                };
+              }
+              return (
+                <React.Fragment key={`${factName} #${fact.id}`}>
+                  <tr
+                    className={`${trClassName} border-b border-secondary last:border-b-0 hover:bg-secondary transition-colors duration-200`}
+                    onClick={trOnClick}
+                  >
+                    <td className="px-8 py-5 whitespace-nowrap">
+                      <input
+                        type="checkbox"
+                        name="selectedFact"
+                        checked={
+                          selectedFacts &&
+                          selectedFacts.map((f) => f.id).includes(fact.id)
+                        }
+                        onChange={() => {
+                          if (!selectRows) {
+                            return toggleSelectedFacts(fact);
+                          }
+                        }}
+                        disabled={disabledIds?.includes(
+                          factName == "snippet"
+                            ? (fact as InsightEvidence).summary_id
+                            : (fact.id ?? -1),
+                        )}
+                        className="rounded border-primary text-primary focus:ring-primary"
+                      />
+                    </td>
+                    <td className="px-8 py-5 whitespace-nowrap text-sm text-secondary font-mono">
+                      {fact.updated_at &&
+                        new Date(fact.updated_at).toLocaleDateString("en-US", {
+                          month: "2-digit",
+                          day: "2-digit",
+                          year: "numeric",
+                        })}
+                      {!fact.updated_at && "---"}
+                    </td>
+                    <td className="px-8 py-5 text-sm text-primary font-medium relative">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          {!selectRows &&
+                            (factName == "snippet" ? (
+                              <Link
+                                href={`/links/${fact.uid}`}
+                                className="text-primary hover:text-primary-600 transition-colors duration-200"
+                              >
+                                {fact.title}
+                              </Link>
+                            ) : (
+                              <Link
+                                href={`/insights/${fact.uid}`}
+                                className="text-primary hover:text-primary-600 transition-colors duration-200"
+                              >
+                                {fact.title}
+                              </Link>
+                            ))}
+                          {selectRows && fact.title}
+                          {/* FIXME: updates several times until reactions is an empty array */}
+                          <span className="ml-2 text-muted">
+                            {fact.reactions &&
+                              fact.reactions.map((r) => r.reaction).join("")}
+                          </span>
                         </div>
-                        <div>
-                          {loggedIn && isEditingReactionForFact[fact.id!] && (
-                            <FeedbackInputElement
-                              actionType="reaction"
-                              submitFunc={(reaction) => {
-                                if (token) {
-                                  return submitReaction(
-                                    {
-                                      reaction,
-                                      // FIXME: update this submitReaction logic
-                                      summary_id: fact.summary_id,
-                                      insight_id: fact.insight_id,
-                                    },
-                                    token,
-                                  );
-                                }
-                                return Promise.resolve();
-                              }}
-                              directions="Select an emoji character"
-                              afterSubmit={(newObject) => {
-                                if (newObject) {
-                                  if (!fact.reactions) {
-                                    fact.reactions = [];
-                                  }
-                                  fact.reactions = [
-                                    ...fact.reactions.filter(
-                                      (r) => r.user_id != newObject.user_id,
-                                    ),
-                                    newObject as FactReaction,
-                                  ];
-                                  setData([...data!]);
-                                }
-                              }}
-                              closeFunc={() => {
-                                const newIsEditing = {} as EditingForFact;
-                                newIsEditing[fact.id!] = false;
-                                setIsEditingReactionForFact({
-                                  ...isEditingReactionForFact,
-                                  ...newIsEditing,
-                                });
-                              }}
-                            />
-                          )}
-                          {loggedIn && isEditingCommentForFact[fact.id!] && (
-                            <FeedbackInputElement
-                              actionType="comment"
-                              submitFunc={(comment) => {
-                                if (token) {
-                                  return submitComment(
-                                    {
-                                      comment,
-                                      summary_id: fact.summary_id,
-                                      insight_id: fact.insight_id,
-                                    },
-                                    token,
-                                  );
-                                }
-                                return Promise.resolve();
-                              }}
-                              directions="Enter a text comment"
-                              afterSubmit={(newObject) => {
-                                if (newObject) {
-                                  if (!fact.comments) {
-                                    fact.comments = [];
-                                  }
-                                  fact.comments = [...fact.comments, newObject];
-                                  setData([...data!]);
-                                }
-                              }}
-                              closeFunc={() => {
-                                const newIsEditing = {} as EditingForFact;
-                                newIsEditing[fact.id!] = false;
-                                setIsEditingCommentForFact({
-                                  ...isEditingCommentForFact,
-                                  ...newIsEditing,
-                                });
-                              }}
-                            />
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                    <tr>
-                      {fact.comments && fact.comments.length > 0 && (
+                        {cellActions && (
+                          <div className="flex items-center space-x-1 ml-2">
+                            {cellActions.map((action, index) => {
+                              const isEnabled = action.enabled
+                                ? action.enabled(fact)
+                                : true;
+                              return (
+                                <button
+                                  key={`${action.label}-${fact.id}-${index}`}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (isEnabled) {
+                                      action.onClick(fact);
+                                    }
+                                  }}
+                                  className={`btn btn-icon btn-sm ${
+                                    isEnabled
+                                      ? "btn-ghost text-text-secondary hover:text-text-primary hover:bg-background-secondary"
+                                      : "btn-ghost text-text-tertiary opacity-50 cursor-not-allowed"
+                                  }`}
+                                  disabled={!isEnabled}
+                                  aria-label={action.label}
+                                  title={action.label}
+                                >
+                                  {action.icon}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                    {columns &&
+                      columns.map((column) => (
+                        <td
+                          className="px-8 py-5 whitespace-nowrap text-sm text-secondary text-center"
+                          key={`Table column: ${column.name}`}
+                        >
+                          {column.display && column.display(fact)}
+                        </td>
+                      ))}
+                  </tr>
+                  {enableFeedback && (
+                    <>
+                      <tr>
                         <td
                           colSpan={columns ? columns.length + 3 : 4}
-                          style={{
-                            background: "#f9f9f9",
-                            fontSize: "0.95em",
-                          }}
+                          className="bg-secondary text-sm p-2"
                         >
-                          <div style={{ padding: "8px 0" }}>
-                            <ul
-                              style={{
-                                margin: "4px 0 0 0",
-                                paddingLeft: "18px",
-                                listStyleType: "none",
+                          <div className="flex justify-around w-full m-4">
+                            <FeedbackLink
+                              actionVerb="React"
+                              icon="😲"
+                              setOnClickFunction={() => {
+                                if (loggedIn) {
+                                  const newIsEditing = {} as EditingForFact;
+                                  newIsEditing[fact.id!] = true;
+                                  setIsEditingReactionForFact({
+                                    ...isEditingReactionForFact,
+                                    ...newIsEditing,
+                                  });
+                                } else {
+                                  confirmAndRegister();
+                                }
                               }}
-                            >
-                              {fact.comments.map((comment, idx) => (
-                                <li key={idx}>
-                                  <Comment
-                                    comment={comment}
-                                    removeCommentFunc={(id) => {
-                                      if (!fact.comments) {
-                                        fact.comments = [];
-                                      }
-                                      fact.comments =
-                                        fact.comments.filter(
-                                          (c) => c.id != id,
-                                        ) ?? [];
-                                      setData([...data!]);
-                                    }}
-                                  />
-                                </li>
-                              ))}
-                            </ul>
+                            />
+                            <FeedbackLink
+                              actionVerb="Comment"
+                              icon="💬"
+                              setOnClickFunction={() => {
+                                if (loggedIn) {
+                                  const newIsEditing = {} as EditingForFact;
+                                  newIsEditing[fact.id!] = true;
+                                  setIsEditingCommentForFact({
+                                    ...isEditingCommentForFact,
+                                    ...newIsEditing,
+                                  });
+                                } else {
+                                  confirmAndRegister();
+                                }
+                              }}
+                            />
+                          </div>
+                          <div>
+                            {loggedIn && isEditingReactionForFact[fact.id!] && (
+                              <FeedbackInputElement
+                                actionType="reaction"
+                                submitFunc={(reaction) => {
+                                  if (token) {
+                                    return submitReaction(
+                                      {
+                                        reaction,
+                                        // FIXME: update this submitReaction logic
+                                        summary_id: fact.summary_id,
+                                        insight_id: fact.insight_id,
+                                      },
+                                      token,
+                                    );
+                                  }
+                                  return Promise.resolve();
+                                }}
+                                directions="Select an emoji character"
+                                afterSubmit={(newObject) => {
+                                  if (newObject) {
+                                    if (!fact.reactions) {
+                                      fact.reactions = [];
+                                    }
+                                    fact.reactions = [
+                                      ...fact.reactions.filter(
+                                        (r) => r.user_id != newObject.user_id,
+                                      ),
+                                      newObject as FactReaction,
+                                    ];
+                                    setData([...data!]);
+                                  }
+                                }}
+                                closeFunc={() => {
+                                  const newIsEditing = {} as EditingForFact;
+                                  newIsEditing[fact.id!] = false;
+                                  setIsEditingReactionForFact({
+                                    ...isEditingReactionForFact,
+                                    ...newIsEditing,
+                                  });
+                                }}
+                              />
+                            )}
+                            {loggedIn && isEditingCommentForFact[fact.id!] && (
+                              <FeedbackInputElement
+                                actionType="comment"
+                                submitFunc={(comment) => {
+                                  if (token) {
+                                    return submitComment(
+                                      {
+                                        comment,
+                                        summary_id: fact.summary_id,
+                                        insight_id: fact.insight_id,
+                                      },
+                                      token,
+                                    );
+                                  }
+                                  return Promise.resolve();
+                                }}
+                                directions="Enter a text comment"
+                                afterSubmit={(newObject) => {
+                                  if (newObject) {
+                                    if (!fact.comments) {
+                                      fact.comments = [];
+                                    }
+                                    fact.comments = [
+                                      ...fact.comments,
+                                      newObject,
+                                    ];
+                                    setData([...data!]);
+                                  }
+                                }}
+                                closeFunc={() => {
+                                  const newIsEditing = {} as EditingForFact;
+                                  newIsEditing[fact.id!] = false;
+                                  setIsEditingCommentForFact({
+                                    ...isEditingCommentForFact,
+                                    ...newIsEditing,
+                                  });
+                                }}
+                              />
+                            )}
                           </div>
                         </td>
-                      )}
-                    </tr>
-                  </>
-                )}
-              </React.Fragment>
-            );
-          })}
-        </tbody>
-      )}
-      {!filteredData && (
-        <tbody>
-          <tr>
-            <td>
-              <strong>Loading data...</strong>
-            </td>
-          </tr>
-        </tbody>
-      )}
-    </table>
+                      </tr>
+                      <tr>
+                        {fact.comments && fact.comments.length > 0 && (
+                          <td
+                            colSpan={columns ? columns.length + 3 : 4}
+                            className="bg-secondary text-sm"
+                          >
+                            <div className="p-2">
+                              <ul className="m-1 pl-4 list-none">
+                                {fact.comments.map((comment, idx) => (
+                                  <li key={idx}>
+                                    <Comment
+                                      comment={comment}
+                                      removeCommentFunc={(id) => {
+                                        if (!fact.comments) {
+                                          fact.comments = [];
+                                        }
+                                        fact.comments =
+                                          fact.comments.filter(
+                                            (c) => c.id != id,
+                                          ) ?? [];
+                                        setData([...data!]);
+                                      }}
+                                    />
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                    </>
+                  )}
+                </React.Fragment>
+              );
+            })}
+          </tbody>
+        )}
+        {!filteredData && !loading && (
+          <tbody>
+            <tr>
+              <td
+                colSpan={columns ? columns.length + 3 : 4}
+                className="px-8 py-12 text-center text-text-tertiary"
+              >
+                <strong>Loading data...</strong>
+              </td>
+            </tr>
+          </tbody>
+        )}
+        {filteredData &&
+          filteredData.length === 0 &&
+          dataFilter &&
+          dataFilter.trim() !== "" && (
+            <tbody>
+              <tr>
+                <td
+                  colSpan={columns ? columns.length + 3 : 4}
+                  className="px-8 py-12 text-center text-text-tertiary"
+                >
+                  <div>
+                    <div className="text-lg mb-2">🔍</div>
+                    <div>
+                      <strong>
+                        No results found for &quot;{dataFilter}&quot;
+                      </strong>
+                    </div>
+                    <div className="text-sm mt-1">
+                      Try a different search term
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          )}
+        {filteredData &&
+          filteredData.length === 0 &&
+          (!dataFilter || dataFilter.trim() === "") && (
+            <tbody>
+              <tr>
+                <td
+                  colSpan={columns ? columns.length + 3 : 4}
+                  className="px-8 py-12 text-center text-text-tertiary"
+                >
+                  <div>
+                    <div className="text-lg mb-2">📝</div>
+                    <div>
+                      <strong>No items yet</strong>
+                    </div>
+                    <div className="text-sm mt-1">
+                      Add some items to get started
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          )}
+      </table>
+    </div>
   );
 };
 

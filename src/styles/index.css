@@ -1,0 +1,24 @@
+/* ===================================
+   MAIN STYLES INDEX - CSS MODULES ARCHITECTURE
+   =================================== */
+
+/* Import Bootstrap first */
+@import "bootstrap/dist/css/bootstrap.css";
+
+/* Import design tokens (CSS custom properties) */
+@import "./tokens/design-tokens.css";
+
+/* Import utility classes */
+@import "./utilities/utility-classes.css";
+
+/* Import component styles */
+@import "./components/button.css";
+@import "./components/card.module.css";
+@import "./components/main-insights-page.module.css";
+@import "./components/modal.module.css";
+
+/* Import theme variations */
+@import "./themes/theme-variations.css";
+
+/* Import legacy styles (to be migrated) */
+@import "./legacy/legacy-styles.css";

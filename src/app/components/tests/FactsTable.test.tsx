@@ -1,5 +1,11 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+} from "@testing-library/react";
 import "@testing-library/jest-dom";
 
 import FactsTable from "../FactsTable";
@@ -118,21 +124,23 @@ describe("FactsTable", () => {
   });
 
   it("filters facts based on dataFilter", async () => {
-    render(
-      <FactsTable
-        data={mockFacts}
-        setData={jest.fn()}
-        factName="insight"
-        selectedFacts={[]}
-        setSelectedFacts={jest.fn()}
-        columns={[]}
-        dataFilter="Fact 1"
-        setDataFilter={jest.fn()}
-        disabledIds={[]}
-        selectRows={false}
-        hideHead={false}
-      />,
-    );
+    await act(async () => {
+      render(
+        <FactsTable
+          data={mockFacts}
+          setData={jest.fn()}
+          factName="insight"
+          selectedFacts={[]}
+          setSelectedFacts={jest.fn()}
+          columns={[]}
+          dataFilter="Fact 1"
+          setDataFilter={jest.fn()}
+          disabledIds={[]}
+          selectRows={false}
+          hideHead={false}
+        />,
+      );
+    });
 
     await waitFor(() => {
       expect(screen.getByText("Fact 1")).toBeInTheDocument();
@@ -228,9 +236,7 @@ describe("FactsTable", () => {
       />,
     );
 
-    expect(screen.getByText("Fact 1").closest("tr")).toHaveStyle(
-      "background-color: #ccc",
-    );
+    expect(screen.getByText("Fact 1").closest("tr")).toHaveClass("bg-tertiary");
   });
 
   it("enables reacting to a fact, showing the resulting reaction to the right of the title", async () => {
