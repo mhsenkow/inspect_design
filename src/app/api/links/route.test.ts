@@ -165,4 +165,56 @@ describe("POST /api/links", () => {
       message: "Invalid request: url, source_id, and title are required",
     });
   });
+
+  it("should return existing summary if URL already exists", async () => {
+    const existingSummary = {
+      id: 1,
+      url: "http://example.com",
+      title: "Existing Summary",
+      source_id: 1,
+    };
+
+    // Mock the query to return existing summary
+    (SummaryModel.query().where as jest.Mock).mockReturnThis();
+    (SummaryModel.query().withGraphFetched as jest.Mock).mockReturnThis();
+    (SummaryModel.query().first as jest.Mock).mockResolvedValue(existingSummary);
+
+    const req = {
+      json: jest.fn().mockResolvedValue({
+        url: "http://example.com",
+        source_id: 1,
+        title: "New Summary",
+      }),
+    } as unknown as NextRequest;
+
+    const res = await POST(req);
+
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json).toEqual(existingSummary);
+    
+    // Should not call insert since summary already exists
+    expect(SummaryModel.query().insert).not.toHaveBeenCalled();
+  });
+
+  it("should handle database errors gracefully", async () => {
+    const req = {
+      json: jest.fn().mockResolvedValue({
+        url: "http://example.com",
+        source_id: 1,
+        title: "New Summary",
+      }),
+    } as unknown as NextRequest;
+
+    // Mock database error
+    (SummaryModel.query().where as jest.Mock).mockImplementation(() => {
+      throw new Error("Database connection failed");
+    });
+
+    const res = await POST(req);
+
+    expect(res.status).toBe(500);
+    const json = await res.json();
+    expect(json.message).toBe("Internal server error while creating link");
+  });
 });
