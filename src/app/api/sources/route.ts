@@ -39,7 +39,7 @@ export async function POST(
     // Create new source
     const newSource = await SourceModel.query().insert({ 
       baseurl: baseUrl,
-      logo_uri: null // Default to null, can be updated later
+      logo_uri: "" // Default to empty string, can be updated later
     });
     
     return NextResponse.json(newSource);

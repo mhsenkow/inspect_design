@@ -94,28 +94,25 @@ export async function POST(
         user_id: authUser.user_id,
         uid,
         title,
-        created_at: now,
-        updated_at: now,
       })
       .withGraphFetched("evidence");
 
     // Then add evidence if provided
     if (citations && citations.length > 0) {
-      await InsightModel.relatedQuery('evidence')
-        .for(newInsight.id)
-        .insert(
-          citations.map((c) => ({
-            summary_id: c.summary_id,
-            insight_id: newInsight.id,
-          }))
-        );
+      const { EvidenceModel } = await import("../models/evidence");
+      await EvidenceModel.query().insert(
+        citations.map((c) => ({
+          summary_id: c.summary_id,
+          insight_id: newInsight.id,
+        }))
+      );
       
       // Fetch the insight again with evidence
       const insightWithEvidence = await InsightModel.query()
-        .findById(newInsight.id)
+        .findById(newInsight.id!)
         .withGraphFetched("evidence");
       
-      return NextResponse.json(insightWithEvidence);
+      return NextResponse.json(insightWithEvidence || newInsight);
     }
 
     return NextResponse.json(newInsight);

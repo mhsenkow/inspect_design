@@ -22,7 +22,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     // Try multiple strategies to fetch the URL
-    const strategies = [
+    const strategies: RequestInit[] = [
       // Strategy 1: Full browser headers
       {
         headers: {
