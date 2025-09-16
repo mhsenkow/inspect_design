@@ -347,7 +347,9 @@ describe("/api/insights", () => {
       expect(response.status).toBe(500);
 
       const json = await response.json();
-      expect(json.statusText).toBe("Internal server error while creating insight");
+      expect(json.statusText).toBe(
+        "Internal server error while creating insight",
+      );
     });
 
     it("should handle unique constraint violations", async () => {
@@ -358,7 +360,7 @@ describe("/api/insights", () => {
       } as unknown as NextRequest;
 
       const uniqueError = new Error("Duplicate key");
-      (uniqueError as any).code = '23505';
+      (uniqueError as any).code = "23505";
       (InsightModel.query().insert as jest.Mock).mockImplementation(() => {
         throw uniqueError;
       });
@@ -367,7 +369,9 @@ describe("/api/insights", () => {
       expect(response.status).toBe(500);
 
       const json = await response.json();
-      expect(json.statusText).toBe("Internal server error while creating insight");
+      expect(json.statusText).toBe(
+        "Internal server error while creating insight",
+      );
     });
   });
 });

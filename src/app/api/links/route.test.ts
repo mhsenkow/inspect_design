@@ -177,7 +177,9 @@ describe("POST /api/links", () => {
     // Mock the query to return existing summary
     (SummaryModel.query().where as jest.Mock).mockReturnThis();
     (SummaryModel.query().withGraphFetched as jest.Mock).mockReturnThis();
-    (SummaryModel.query().first as jest.Mock).mockResolvedValue(existingSummary);
+    (SummaryModel.query().first as jest.Mock).mockResolvedValue(
+      existingSummary,
+    );
 
     const req = {
       json: jest.fn().mockResolvedValue({
@@ -192,7 +194,7 @@ describe("POST /api/links", () => {
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json).toEqual(existingSummary);
-    
+
     // Should not call insert since summary already exists
     expect(SummaryModel.query().insert).not.toHaveBeenCalled();
   });

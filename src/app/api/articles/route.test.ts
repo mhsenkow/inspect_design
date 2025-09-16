@@ -38,7 +38,8 @@ describe("POST /api/articles", () => {
   });
 
   it("should successfully fetch HTML content", async () => {
-    const mockHtml = "<html><head><title>Test Page</title></head><body>Content</body></html>";
+    const mockHtml =
+      "<html><head><title>Test Page</title></head><body>Content</body></html>";
     const mockResponse = {
       ok: true,
       text: jest.fn().mockResolvedValue(mockHtml),
@@ -87,7 +88,9 @@ describe("POST /api/articles", () => {
     (global.fetch as jest.Mock).mockResolvedValue(mockResponse);
 
     const req = {
-      json: jest.fn().mockResolvedValue({ url: "https://nonexistent-site.com" }),
+      json: jest
+        .fn()
+        .mockResolvedValue({ url: "https://nonexistent-site.com" }),
     } as unknown as NextRequest;
 
     const response = await POST(req);
@@ -101,7 +104,9 @@ describe("POST /api/articles", () => {
     (global.fetch as jest.Mock).mockRejectedValue(new Error("Network error"));
 
     const req = {
-      json: jest.fn().mockResolvedValue({ url: "https://unreachable-site.com" }),
+      json: jest
+        .fn()
+        .mockResolvedValue({ url: "https://unreachable-site.com" }),
     } as unknown as NextRequest;
 
     const response = await POST(req);
@@ -113,7 +118,7 @@ describe("POST /api/articles", () => {
 
   it("should handle timeout errors", async () => {
     const timeoutError = new Error("Request timeout");
-    timeoutError.name = 'AbortError';
+    timeoutError.name = "AbortError";
     (global.fetch as jest.Mock).mockRejectedValue(timeoutError);
 
     const req = {
@@ -147,8 +152,9 @@ describe("POST /api/articles", () => {
   });
 
   it("should try multiple fetch strategies", async () => {
-    const mockHtml = "<html><head><title>Test Page</title></head><body>Content</body></html>";
-    
+    const mockHtml =
+      "<html><head><title>Test Page</title></head><body>Content</body></html>";
+
     // First strategy fails, second succeeds
     (global.fetch as jest.Mock)
       .mockResolvedValueOnce({
@@ -170,7 +176,7 @@ describe("POST /api/articles", () => {
 
     const json = await response.json();
     expect(json.html).toBe(mockHtml);
-    
+
     // Should have tried multiple strategies
     expect(global.fetch).toHaveBeenCalledTimes(2);
   });

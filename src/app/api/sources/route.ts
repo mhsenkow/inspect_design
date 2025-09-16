@@ -9,11 +9,11 @@ export async function POST(
 ): Promise<NextResponse<Source | { message: string }>> {
   try {
     const { baseUrl } = await req.json();
-    
+
     if (!baseUrl) {
       return NextResponse.json(
         { message: "baseUrl is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -23,13 +23,13 @@ export async function POST(
     } catch {
       return NextResponse.json(
         { message: "Invalid baseUrl format" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Check if source already exists
     const existingSource = await SourceModel.query()
-      .where('baseurl', baseUrl)
+      .where("baseurl", baseUrl)
       .first();
 
     if (existingSource) {
@@ -37,26 +37,32 @@ export async function POST(
     }
 
     // Create new source
-    const newSource = await SourceModel.query().insert({ 
+    const newSource = await SourceModel.query().insert({
       baseurl: baseUrl,
-      logo_uri: "" // Default to empty string, can be updated later
+      logo_uri: "", // Default to empty string, can be updated later
     });
-    
+
     return NextResponse.json(newSource);
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Error in POST /api/sources:", err);
-    
+
     // Handle specific database errors
-    if (err.code === '23505') { // Unique constraint violation
+    if (
+      err &&
+      typeof err === "object" &&
+      "code" in err &&
+      err.code === "23505"
+    ) {
+      // Unique constraint violation
       return NextResponse.json(
         { message: "Source already exists" },
-        { status: 409 }
+        { status: 409 },
       );
     }
-    
+
     return NextResponse.json(
       { message: "Failed to create source" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

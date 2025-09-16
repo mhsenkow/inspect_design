@@ -1,9 +1,6 @@
 import { encode as encodeHTML, decode as decodeHTML } from "html-entities";
 import { Link, Source } from "../types";
-import {
-  GetSourceRouteProps,
-  GetSourceRouteResponse,
-} from "../api/sources/[baseurl]/route";
+import { GetSourceRouteProps } from "../api/sources/[baseurl]/route";
 
 const parseUidFromURL = (
   textWithURL: string,
@@ -75,20 +72,22 @@ export const getPageTitle = async (url: string): Promise<string> => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url }),
     });
-    
+
     if (!result.ok) {
       const errorData = await result.json().catch(() => ({}));
       const errorMessage = errorData.message || result.statusText;
-      throw new Error(`Failed to fetch article: ${result.status} ${errorMessage}`);
+      throw new Error(
+        `Failed to fetch article: ${result.status} ${errorMessage}`,
+      );
     }
-    
+
     const json = await result.json();
     const html = json.html;
-    
+
     if (!html) {
       throw new Error("No HTML content received from URL");
     }
-    
+
     const metaTitle = getPageMetaTitle(html);
     if (metaTitle) {
       return metaTitle;
@@ -116,18 +115,18 @@ export const createLink = async (url: string, token: string): Promise<Link> => {
     } catch {
       throw new Error("Invalid URL format");
     }
-    
+
     const cleanedUrl = cleanUrl(url);
     const baseUrl = parseBaseUrl(url);
-    
+
     if (!baseUrl) {
       throw new Error("Invalid URL format - could not parse base URL");
     }
-    
+
     let source;
     try {
       source = await getSource({ baseurl: baseUrl }, token);
-    } catch (error) {
+    } catch {
       console.log("Source not found, creating new source:", baseUrl);
       try {
         source = await createSource(baseUrl, token);
@@ -136,11 +135,11 @@ export const createLink = async (url: string, token: string): Promise<Link> => {
         throw new Error(`Failed to create source for ${baseUrl}`);
       }
     }
-    
+
     if (!source || !source.id) {
       throw new Error("Source creation failed - no source ID available");
     }
-    
+
     let title;
     try {
       title = await getPageTitle(cleanedUrl);
@@ -149,7 +148,7 @@ export const createLink = async (url: string, token: string): Promise<Link> => {
       // Use the URL as fallback title if page title fails
       title = `Link: ${cleanedUrl}`;
     }
-    
+
     const response = await fetch("/api/links", {
       method: "POST",
       headers: {
@@ -162,13 +161,15 @@ export const createLink = async (url: string, token: string): Promise<Link> => {
         title,
       }),
     });
-    
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       const errorMessage = errorData.message || response.statusText;
-      throw new Error(`Failed to create link: ${response.status} ${errorMessage}`);
+      throw new Error(
+        `Failed to create link: ${response.status} ${errorMessage}`,
+      );
     }
-    
+
     return await response.json();
   } catch (error) {
     if (error instanceof Error) {
@@ -189,13 +190,15 @@ export const getSource = async (
         "x-access-token": token,
       },
     });
-    
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       const errorMessage = errorData.message || response.statusText;
-      throw new Error(`Failed to get source: ${response.status} ${errorMessage}`);
+      throw new Error(
+        `Failed to get source: ${response.status} ${errorMessage}`,
+      );
     }
-    
+
     return await response.json();
   } catch (error) {
     if (error instanceof Error) {
@@ -205,7 +208,10 @@ export const getSource = async (
   }
 };
 
-export const createSource = async (baseUrl: string, token: string): Promise<Source> => {
+export const createSource = async (
+  baseUrl: string,
+  token: string,
+): Promise<Source> => {
   try {
     const response = await fetch(`/api/sources`, {
       method: "POST",
@@ -215,13 +221,15 @@ export const createSource = async (baseUrl: string, token: string): Promise<Sour
       },
       body: JSON.stringify({ baseUrl }),
     });
-    
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       const errorMessage = errorData.message || response.statusText;
-      throw new Error(`Failed to create source: ${response.status} ${errorMessage}`);
+      throw new Error(
+        `Failed to create source: ${response.status} ${errorMessage}`,
+      );
     }
-    
+
     return await response.json();
   } catch (error) {
     if (error instanceof Error) {

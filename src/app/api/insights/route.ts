@@ -69,16 +69,13 @@ export async function POST(
   try {
     const uid = Date.now().toString(36);
     const authUser = await getAuthUser(headers);
-    
+
     if (!authUser) {
-      return NextResponse.json(
-        { statusText: "Unauthorized" },
-        { status: 401 },
-      );
+      return NextResponse.json({ statusText: "Unauthorized" }, { status: 401 });
     }
 
     const { title, citations } = await req.json();
-    
+
     if (!title) {
       return NextResponse.json(
         { statusText: "Creating a new insight requires at least a title" },
@@ -86,8 +83,6 @@ export async function POST(
       );
     }
 
-    const now = new Date();
-    
     // First create the insight without evidence
     const newInsight = await InsightModel.query()
       .insert({
@@ -104,14 +99,14 @@ export async function POST(
         citations.map((c) => ({
           summary_id: c.summary_id,
           insight_id: newInsight.id,
-        }))
+        })),
       );
-      
+
       // Fetch the insight again with evidence
       const insightWithEvidence = await InsightModel.query()
         .findById(newInsight.id!)
         .withGraphFetched("evidence");
-      
+
       return NextResponse.json(insightWithEvidence || newInsight);
     }
 

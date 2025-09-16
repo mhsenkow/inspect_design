@@ -76,23 +76,26 @@ const ClientSidePage = ({
     }
   };
 
-  const createLinkAndAddToInsights = async ({
-    url,
-    selectedInsights,
-    newInsightName,
-  }: {
-    url: string;
-    selectedInsights: Insight[];
-    newInsightName: string;
-  }, token: string): Promise<FLVResponse[]> => {
+  const createLinkAndAddToInsights = async (
+    {
+      url,
+      selectedInsights,
+      newInsightName,
+    }: {
+      url: string;
+      selectedInsights: Insight[];
+      newInsightName: string;
+    },
+    token: string,
+  ): Promise<FLVResponse[]> => {
     const responses: FLVResponse[] = [];
     if (!token) {
       throw new Error("Authentication token is required");
     }
-    
+
     try {
       const link = await createLink(url, token);
-      
+
       if (newInsightName) {
         const response = await createInsightFromCitations(
           newInsightName,
@@ -101,7 +104,7 @@ const ClientSidePage = ({
         );
         responses.push(response);
       }
-      
+
       if (selectedInsights.length > 0) {
         await Promise.all(
           selectedInsights.map(async (insight) => {
@@ -116,7 +119,10 @@ const ClientSidePage = ({
               // FIXME: does not update the insight in prod
               responses.push({ action: 0, facts: [insight] });
             } catch (error) {
-              console.error(`Failed to add citation to insight ${insight.uid}:`, error);
+              console.error(
+                `Failed to add citation to insight ${insight.uid}:`,
+                error,
+              );
               throw error;
             }
           }),
@@ -126,7 +132,7 @@ const ClientSidePage = ({
       console.error("Error in createLinkAndAddToInsights:", error);
       throw error;
     }
-    
+
     return responses;
   };
 
@@ -207,9 +213,7 @@ const ClientSidePage = ({
                     title="Publish Selected"
                   >
                     <span className={cardStyles.addButtonIcon}>📢</span>
-                    <span className={cardStyles.addButtonText}>
-                      Publish
-                    </span>
+                    <span className={cardStyles.addButtonText}>Publish</span>
                   </button>
                   <button
                     onClick={() => {
@@ -239,9 +243,7 @@ const ClientSidePage = ({
                     title="Delete Selected"
                   >
                     <span className={cardStyles.addButtonIcon}>🗑️</span>
-                    <span className={cardStyles.addButtonText}>
-                      Delete
-                    </span>
+                    <span className={cardStyles.addButtonText}>Delete</span>
                   </button>
                 </div>
               )}
@@ -328,37 +330,50 @@ const ClientSidePage = ({
               if (input && token) {
                 console.log("Creating link and adding to insights:", input);
                 // When SaveLinkDialog submits, trigger createLinkAndAddToInsights
-                createLinkAndAddToInsights(input, token).then((responses) => {
-                  console.log("Successfully created link and added to insights:", responses);
-                  // Update the live data with the responses
-                  responses.forEach((response) => {
-                    if (response.action === 1) {
-                      setLiveData([
-                        ...(response.facts as Insight[]),
-                        ...liveData,
-                      ]);
-                    } else if (response.action === 0) {
-                      // Update existing insights
-                      const updatedData = liveData.map((insight) => {
-                        const updatedInsight = response.facts.find(
-                          (f) => f.uid === insight.uid,
-                        ) as Insight;
-                        return updatedInsight
-                          ? { ...insight, ...updatedInsight }
-                          : insight;
-                      });
-                      setLiveData(updatedData);
-                    }
+                createLinkAndAddToInsights(input, token)
+                  .then((responses) => {
+                    console.log(
+                      "Successfully created link and added to insights:",
+                      responses,
+                    );
+                    // Update the live data with the responses
+                    responses.forEach((response) => {
+                      if (response.action === 1) {
+                        setLiveData([
+                          ...(response.facts as Insight[]),
+                          ...liveData,
+                        ]);
+                      } else if (response.action === 0) {
+                        // Update existing insights
+                        const updatedData = liveData.map((insight) => {
+                          const updatedInsight = response.facts.find(
+                            (f) => f.uid === insight.uid,
+                          ) as Insight;
+                          return updatedInsight
+                            ? { ...insight, ...updatedInsight }
+                            : insight;
+                        });
+                        setLiveData(updatedData);
+                      }
+                    });
+                    // Show success message
+                    alert("Link saved successfully!");
+                  })
+                  .catch((error) => {
+                    console.error(
+                      "Error creating link and adding to insights:",
+                      error,
+                    );
+                    // Show user-friendly error message
+                    alert(
+                      `Failed to save link: ${error.message || "Unknown error"}`,
+                    );
                   });
-                  // Show success message
-                  alert("Link saved successfully!");
-                }).catch((error) => {
-                  console.error("Error creating link and adding to insights:", error);
-                  // Show user-friendly error message
-                  alert(`Failed to save link: ${error.message || 'Unknown error'}`);
-                });
               } else {
-                console.error("Missing input or token:", { input, token: !!token });
+                console.error("Missing input or token:", {
+                  input,
+                  token: !!token,
+                });
                 alert("Authentication required to save links");
               }
             }}

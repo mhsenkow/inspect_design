@@ -48,7 +48,7 @@ export async function POST(
   try {
     const uid = Date.now().toString(36);
     const { url, source_id, title } = await req.json();
-    
+
     if (!url || !source_id || !title) {
       return NextResponse.json(
         {
@@ -62,7 +62,7 @@ export async function POST(
 
     // Check if URL already exists
     const existingSummary = await SummaryModel.query()
-      .where('url', url)
+      .where("url", url)
       .withGraphFetched("source")
       .first();
 
@@ -83,7 +83,7 @@ export async function POST(
         updated_at: now,
       })
       .withGraphFetched("source");
-    
+
     return NextResponse.json(newSummary);
   } catch (error) {
     console.error("Error in POST /api/links:", error);

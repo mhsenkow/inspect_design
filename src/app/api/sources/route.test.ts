@@ -99,7 +99,7 @@ describe("POST /api/comments", () => {
     expect(response.status).toBe(200);
     const json = await response.json();
     expect(json).toEqual(existingSource);
-    
+
     // Should not call insert since source already exists
     expect(SourceModel.query().insert).not.toHaveBeenCalled();
   });
@@ -110,7 +110,7 @@ describe("POST /api/comments", () => {
     } as any;
 
     const uniqueError = new Error("Duplicate key");
-    (uniqueError as any).code = '23505';
+    (uniqueError as any).code = "23505";
     (SourceModel.query().insert as jest.Mock).mockImplementation(() => {
       throw uniqueError;
     });
