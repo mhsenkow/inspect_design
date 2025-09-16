@@ -56,6 +56,8 @@ describe("getPageTitle", () => {
     const mockFetch = jest.fn();
     window.fetch = mockFetch;
     mockFetch.mockResolvedValue({
+      ok: true,
+      status: 200,
       json: () =>
         Promise.resolve({
           html: "<html><head><title>Test Title</title><meta property='og:title' content='Test Title 2' /></head><body></body></html>",
@@ -70,6 +72,8 @@ describe("getPageTitle", () => {
   it("should decode html entities from the title", async () => {
     const mockFetch = jest.fn();
     window.fetch = mockFetch.mockResolvedValue({
+      ok: true,
+      status: 200,
       json: () =>
         Promise.resolve({
           html: "<html><head><meta property='og:title' content='Test &amp; Title' /></head><body></body></html>",
@@ -84,13 +88,15 @@ describe("getPageTitle", () => {
     const mockFetch = jest.fn();
     window.fetch = mockFetch;
     mockFetch.mockResolvedValue({
+      ok: true,
+      status: 200,
       json: () =>
         Promise.resolve({ html: "<html><head></head><body></body></html>" }),
     });
 
     await expect(
       async () => await getPageTitle("https://example.com"),
-    ).rejects.toThrow("Summary title not found for: https://example.com");
+    ).rejects.toThrow("No title found in page content");
   });
 });
 describe("decodeStringURI", () => {
@@ -243,6 +249,8 @@ describe("Create link", () => {
         json: () => Promise.resolve({ id: 1 }),
       }) // source
       .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
         json: () =>
           Promise.resolve({
             html: `<html><head><title>Test Title</title><meta property='og:title' content='${title}' /></head><body></body></html>`,
@@ -270,7 +278,7 @@ describe("Create link", () => {
     expect(window.fetch).toHaveBeenNthCalledWith(2, "/api/articles", {
       body: JSON.stringify({ url: cleanedUrl }),
       method: "POST",
-      headers: { "Content-Type": "text/html" },
+      headers: { "Content-Type": "application/json" },
     });
     expect(window.fetch).toHaveBeenNthCalledWith(3, "/api/links", {
       body: JSON.stringify({

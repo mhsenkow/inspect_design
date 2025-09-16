@@ -18,16 +18,17 @@ jest.mock("../models/summaries", () => {
     page: jest.fn().mockReturnThis(),
     insert: jest.fn().mockReturnThis(),
     withGraphFetched: jest.fn().mockReturnThis(),
+    first: jest.fn().mockResolvedValue(null),
     then: jest.fn(),
   };
 
-  const MockInsightModelConstructor = jest.fn();
-  Object.assign(MockInsightModelConstructor, {
+  const MockSummaryModelConstructor = jest.fn();
+  Object.assign(MockSummaryModelConstructor, {
     query: jest.fn(() => mockQueryBuilder),
   });
 
   return {
-    SummaryModel: MockInsightModelConstructor,
+    SummaryModel: MockSummaryModelConstructor,
   };
 });
 

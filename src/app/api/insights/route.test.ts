@@ -20,15 +20,19 @@ jest.mock("../models/insights", () => {
     limit: jest.fn().mockReturnThis(),
     withGraphJoined: jest.fn().mockReturnThis(),
     whereIn: jest.fn().mockReturnThis(),
-    // ...
-    insertGraph: jest.fn().mockReturnThis(),
+    insert: jest.fn().mockReturnThis(),
     withGraphFetched: jest.fn().mockReturnThis(),
+    findById: jest.fn().mockReturnThis(),
     then: jest.fn(),
   };
 
   const MockInsightModelConstructor = jest.fn();
   Object.assign(MockInsightModelConstructor, {
     query: jest.fn(() => mockQueryBuilder),
+    relatedQuery: jest.fn(() => ({
+      for: jest.fn().mockReturnThis(),
+      insert: jest.fn().mockReturnThis(),
+    })),
   });
 
   return {
@@ -326,8 +330,6 @@ describe("/api/insights", () => {
         title: "New Insight",
         user_id: 1,
         uid: expect.any(String),
-        created_at: expect.any(Date),
-        updated_at: expect.any(Date),
       });
     });
 

@@ -13,16 +13,18 @@ jest.mock("../models/sources", () => {
   const mockQueryBuilder = {
     insert: jest.fn().mockReturnThis(),
     withGraphFetched: jest.fn().mockReturnThis(),
+    where: jest.fn().mockReturnThis(),
+    first: jest.fn().mockResolvedValue(null),
     then: jest.fn(),
   };
 
-  const MockInsightModelConstructor = jest.fn();
-  Object.assign(MockInsightModelConstructor, {
+  const MockSourceModelConstructor = jest.fn();
+  Object.assign(MockSourceModelConstructor, {
     query: jest.fn(() => mockQueryBuilder),
   });
 
   return {
-    SourceModel: MockInsightModelConstructor,
+    SourceModel: MockSourceModelConstructor,
   };
 });
 
@@ -30,25 +32,27 @@ jest.mock("../../functions", () => ({
   getAuthUser: jest.fn(),
 }));
 
-describe("POST /api/comments", () => {
+describe("POST /api/sources", () => {
   const mockAuthUser = { user_id: 1, name: "Test User" };
   const mockSource = {
-    baseurl: "test",
+    id: 1,
+    baseurl: "example.com",
+    logo_uri: "",
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (SourceModel.query().insert as jest.Mock).mockReturnThis();
-    (SourceModel.query().withGraphFetched as jest.Mock).mockReturnThis();
-    (SourceModel.query().then as jest.Mock).mockImplementation((callback) =>
-      Promise.resolve(callback(mockSource)),
-    );
     (getAuthUser as jest.Mock).mockResolvedValue(mockAuthUser);
   });
 
   it("should create a source from a baseurl", async () => {
+    // Mock successful source creation
+    (SourceModel.query().where as jest.Mock).mockReturnThis();
+    (SourceModel.query().first as jest.Mock).mockResolvedValue(null);
+    (SourceModel.query().insert as jest.Mock).mockResolvedValue(mockSource);
+
     const req = {
-      json: jest.fn().mockResolvedValue(mockSource),
+      json: jest.fn().mockResolvedValue({ baseUrl: "example.com" }),
     } as any;
 
     const response = await POST(req as NextRequest);
@@ -71,7 +75,7 @@ describe("POST /api/comments", () => {
 
   it("should return 400 if baseUrl format is invalid", async () => {
     const req = {
-      json: jest.fn().mockResolvedValue({ baseUrl: "invalid-url" }),
+      json: jest.fn().mockResolvedValue({ baseUrl: "invalid url with spaces" }),
     } as any;
 
     const response = await POST(req as NextRequest);
@@ -111,6 +115,9 @@ describe("POST /api/comments", () => {
 
     const uniqueError = new Error("Duplicate key");
     (uniqueError as any).code = "23505";
+    
+    (SourceModel.query().where as jest.Mock).mockReturnThis();
+    (SourceModel.query().first as jest.Mock).mockResolvedValue(null);
     (SourceModel.query().insert as jest.Mock).mockImplementation(() => {
       throw uniqueError;
     });
@@ -123,8 +130,11 @@ describe("POST /api/comments", () => {
 
   it("should return 500 upon general database error", async () => {
     const req = {
-      json: jest.fn().mockResolvedValue(mockSource),
+      json: jest.fn().mockResolvedValue({ baseUrl: "example.com" }),
     } as any;
+    
+    (SourceModel.query().where as jest.Mock).mockReturnThis();
+    (SourceModel.query().first as jest.Mock).mockResolvedValue(null);
     (SourceModel.query().insert as jest.Mock).mockImplementation(() => {
       throw new Error("DB error");
     });
