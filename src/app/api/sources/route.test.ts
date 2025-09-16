@@ -115,7 +115,7 @@ describe("POST /api/sources", () => {
 
     const uniqueError = new Error("Duplicate key");
     (uniqueError as any).code = "23505";
-    
+
     (SourceModel.query().where as jest.Mock).mockReturnThis();
     (SourceModel.query().first as jest.Mock).mockResolvedValue(null);
     (SourceModel.query().insert as jest.Mock).mockImplementation(() => {
@@ -132,7 +132,7 @@ describe("POST /api/sources", () => {
     const req = {
       json: jest.fn().mockResolvedValue({ baseUrl: "example.com" }),
     } as any;
-    
+
     (SourceModel.query().where as jest.Mock).mockReturnThis();
     (SourceModel.query().first as jest.Mock).mockResolvedValue(null);
     (SourceModel.query().insert as jest.Mock).mockImplementation(() => {

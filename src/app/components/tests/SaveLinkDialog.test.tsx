@@ -252,7 +252,7 @@ describe("SaveLinkDialog", () => {
       // 2. useLinks hook with dynamic query parameters
       // 3. Multiple useEffect hooks with complex dependencies
       // This integration test is difficult to mock properly and may need refactoring
-      
+
       // Mock useLinks to return existing link when called with URL query
       (useLinks as jest.Mock).mockImplementation(({ query }) => {
         if (query && query.includes("url=")) {
@@ -276,7 +276,7 @@ describe("SaveLinkDialog", () => {
       );
 
       const input = screen.getByPlaceholderText("Link URL...");
-      
+
       // Use act to wrap the state update
       await act(async () => {
         fireEvent.change(input, { target: { value: "http://example.com" } });
@@ -284,13 +284,16 @@ describe("SaveLinkDialog", () => {
 
       // Wait for the debounced URL validation to complete (1 second + buffer)
       await act(async () => {
-        await new Promise(resolve => setTimeout(resolve, 1100));
+        await new Promise((resolve) => setTimeout(resolve, 1100));
       });
 
       // Wait for the error message to appear
-      await waitFor(() => {
-        expect(screen.getByText("Link already exists")).toBeInTheDocument();
-      }, { timeout: 3000 });
+      await waitFor(
+        () => {
+          expect(screen.getByText("Link already exists")).toBeInTheDocument();
+        },
+        { timeout: 3000 },
+      );
 
       const submitButton = screen.getByText("Submit");
       expect(submitButton).toBeDisabled();
