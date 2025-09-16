@@ -1,4 +1,4 @@
-# Inspect Design - Local Development Setup
+# Inspect - Local Development Setup
 
 ## Prerequisites
 
