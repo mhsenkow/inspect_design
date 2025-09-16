@@ -84,10 +84,15 @@ const ClientSidePage = ({
     url: string;
     selectedInsights: Insight[];
     newInsightName: string;
-  }): Promise<FLVResponse[]> => {
+  }, token: string): Promise<FLVResponse[]> => {
     const responses: FLVResponse[] = [];
-    if (token) {
+    if (!token) {
+      throw new Error("Authentication token is required");
+    }
+    
+    try {
       const link = await createLink(url, token);
+      
       if (newInsightName) {
         const response = await createInsightFromCitations(
           newInsightName,
@@ -96,20 +101,32 @@ const ClientSidePage = ({
         );
         responses.push(response);
       }
-      await Promise.all(
-        selectedInsights.map(async (insight) => {
-          await addCitationsToInsight(
-            {
-              insight,
-              evidence: [{ summary_id: link.id } as InsightEvidence],
-            },
-            token,
-          );
-          // FIXME: does not update the insight in prod
-          responses.push({ action: 0, facts: [insight] });
-        }),
-      );
+      
+      if (selectedInsights.length > 0) {
+        await Promise.all(
+          selectedInsights.map(async (insight) => {
+            try {
+              await addCitationsToInsight(
+                {
+                  insight,
+                  evidence: [{ summary_id: link.id } as InsightEvidence],
+                },
+                token,
+              );
+              // FIXME: does not update the insight in prod
+              responses.push({ action: 0, facts: [insight] });
+            } catch (error) {
+              console.error(`Failed to add citation to insight ${insight.uid}:`, error);
+              throw error;
+            }
+          }),
+        );
+      }
+    } catch (error) {
+      console.error("Error in createLinkAndAddToInsights:", error);
+      throw error;
     }
+    
     return responses;
   };
 
@@ -166,105 +183,68 @@ const ClientSidePage = ({
                 <span className={cardStyles.hierarchyIcon}>📋</span>
                 Insights List
               </div>
-              <div className={cardStyles.sectionHeader}>
-                <h3 className={cardStyles.sectionTitle}>
-                  Your insights and research:
-                </h3>
-                {loggedIn && (
-                  <div className={cardStyles.sectionActions}>
-                    {selectedInsights.length === 0 ? (
-                      <>
-                        <button
-                          onClick={promptForNewInsightName}
-                          className={cardStyles.addButton}
-                          aria-label="Create New Insight"
-                          title="Create New Insight"
-                        >
-                          <span className={cardStyles.addButtonIcon}>+</span>
-                          <span className={cardStyles.addButtonText}>
-                            Create
-                          </span>
-                        </button>
-                        <button
-                          onClick={() => setIsSaveLinkDialogOpen(true)}
-                          className={cardStyles.addButton}
-                          aria-label="Save Link"
-                          title="Save Link"
-                        >
-                          <span className={cardStyles.addButtonIcon}>🔗</span>
-                          <span className={cardStyles.addButtonText}>
-                            Save Link
-                          </span>
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          onClick={() => {
-                            setServerFunctionInputForInsightsList({
-                              insights: selectedInsights,
-                            });
-                            setActiveServerFunctionForInsightsList({
-                              function: async (
-                                input: InsightsAPISchema,
-                                token: string,
-                              ) => {
-                                if (token) {
-                                  return publishInsights(input, token);
-                                }
-                                return Promise.resolve([]);
-                              },
-                            });
-                          }}
-                          className={cardStyles.addButton}
-                          aria-label="Publish Selected"
-                          title="Publish Selected"
-                        >
-                          <span className={cardStyles.addButtonIcon}>📢</span>
-                          <span className={cardStyles.addButtonText}>
-                            Publish
-                          </span>
-                        </button>
-                        <button
-                          onClick={() => {
-                            if (
-                              selectedInsights &&
-                              selectedInsights.length > 0 &&
-                              confirm("Are you sure?")
-                            ) {
-                              setServerFunctionInputForInsightsList({
-                                insights: selectedInsights,
-                              });
-                              setActiveServerFunctionForInsightsList({
-                                function: async (
-                                  input: InsightsAPISchema,
-                                  token: string,
-                                ) => {
-                                  if (token) {
-                                    return deleteInsights(input, token);
-                                  }
-                                  return Promise.resolve([]);
-                                },
-                              });
+              {loggedIn && selectedInsights.length > 0 && (
+                <div className={cardStyles.sectionActions}>
+                  <button
+                    onClick={() => {
+                      setServerFunctionInputForInsightsList({
+                        insights: selectedInsights,
+                      });
+                      setActiveServerFunctionForInsightsList({
+                        function: async (
+                          input: InsightsAPISchema,
+                          token: string,
+                        ) => {
+                          if (token) {
+                            return publishInsights(input, token);
+                          }
+                          return Promise.resolve([]);
+                        },
+                      });
+                    }}
+                    className={cardStyles.addButton}
+                    aria-label="Publish Selected"
+                    title="Publish Selected"
+                  >
+                    <span className={cardStyles.addButtonIcon}>📢</span>
+                    <span className={cardStyles.addButtonText}>
+                      Publish
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (
+                        selectedInsights &&
+                        selectedInsights.length > 0 &&
+                        confirm("Are you sure?")
+                      ) {
+                        setServerFunctionInputForInsightsList({
+                          insights: selectedInsights,
+                        });
+                        setActiveServerFunctionForInsightsList({
+                          function: async (
+                            input: InsightsAPISchema,
+                            token: string,
+                          ) => {
+                            if (token) {
+                              return deleteInsights(input, token);
                             }
-                          }}
-                          className={cardStyles.addButton}
-                          aria-label="Delete Selected"
-                          title="Delete Selected"
-                        >
-                          <span className={cardStyles.addButtonIcon}>🗑️</span>
-                          <span className={cardStyles.addButtonText}>
-                            Delete
-                          </span>
-                        </button>
-                      </>
-                    )}
-                  </div>
-                )}
-              </div>
-              <div className={cardStyles.sectionSubtitle}>
-                Manage and organize your insights
-              </div>
+                            return Promise.resolve([]);
+                          },
+                        });
+                      }
+                    }}
+                    className={cardStyles.addButton}
+                    aria-label="Delete Selected"
+                    title="Delete Selected"
+                  >
+                    <span className={cardStyles.addButtonIcon}>🗑️</span>
+                    <span className={cardStyles.addButtonText}>
+                      Delete
+                    </span>
+                  </button>
+                </div>
+              )}
             </div>
             <div className={cardStyles.contentCardBody}>
               <InfiniteScrollLoader
@@ -345,9 +325,11 @@ const ClientSidePage = ({
               (insight) => insight.user_id == currentUser?.id,
             )}
             setServerFunctionInput={(input) => {
-              if (input) {
+              if (input && token) {
+                console.log("Creating link and adding to insights:", input);
                 // When SaveLinkDialog submits, trigger createLinkAndAddToInsights
-                createLinkAndAddToInsights(input).then((responses) => {
+                createLinkAndAddToInsights(input, token).then((responses) => {
+                  console.log("Successfully created link and added to insights:", responses);
                   // Update the live data with the responses
                   responses.forEach((response) => {
                     if (response.action === 1) {
@@ -368,7 +350,16 @@ const ClientSidePage = ({
                       setLiveData(updatedData);
                     }
                   });
+                  // Show success message
+                  alert("Link saved successfully!");
+                }).catch((error) => {
+                  console.error("Error creating link and adding to insights:", error);
+                  // Show user-friendly error message
+                  alert(`Failed to save link: ${error.message || 'Unknown error'}`);
                 });
+              } else {
+                console.error("Missing input or token:", { input, token: !!token });
+                alert("Authentication required to save links");
               }
             }}
             setActiveServerFunction={() => {}} // Not needed since we handle it above

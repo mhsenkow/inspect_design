@@ -66,37 +66,64 @@ export type PostInsightsRouteResponse = NextResponse<
 export async function POST(
   req: PostInsightsRouteRequest,
 ): Promise<PostInsightsRouteResponse> {
-  const uid = Date.now().toString(36);
-  const authUser = await getAuthUser(headers);
-  if (authUser) {
-    const { title, citations } = await req.json();
-    if (title) {
-      const now = Date.now();
-      const newInsight = await InsightModel.query()
-        .insertGraph({
-          user_id: authUser.user_id,
-          uid,
-          title,
-          created_at: new Date(now).toLocaleDateString(),
-          updated_at: new Date(now).toLocaleDateString(),
-          evidence:
-            citations?.map((c) => ({
-              summary_id: c.summary_id,
-            })) ?? [],
-        } as Insight)
-        .withGraphFetched("evidence");
-
-      return NextResponse.json(newInsight);
+  try {
+    const uid = Date.now().toString(36);
+    const authUser = await getAuthUser(headers);
+    
+    if (!authUser) {
+      return NextResponse.json(
+        { statusText: "Unauthorized" },
+        { status: 401 },
+      );
     }
+
+    const { title, citations } = await req.json();
+    
+    if (!title) {
+      return NextResponse.json(
+        { statusText: "Creating a new insight requires at least a title" },
+        { status: 400 },
+      );
+    }
+
+    const now = new Date();
+    
+    // First create the insight without evidence
+    const newInsight = await InsightModel.query()
+      .insert({
+        user_id: authUser.user_id,
+        uid,
+        title,
+        created_at: now,
+        updated_at: now,
+      })
+      .withGraphFetched("evidence");
+
+    // Then add evidence if provided
+    if (citations && citations.length > 0) {
+      await InsightModel.relatedQuery('evidence')
+        .for(newInsight.id)
+        .insert(
+          citations.map((c) => ({
+            summary_id: c.summary_id,
+            insight_id: newInsight.id,
+          }))
+        );
+      
+      // Fetch the insight again with evidence
+      const insightWithEvidence = await InsightModel.query()
+        .findById(newInsight.id)
+        .withGraphFetched("evidence");
+      
+      return NextResponse.json(insightWithEvidence);
+    }
+
+    return NextResponse.json(newInsight);
+  } catch (error) {
+    console.error("Error in POST /api/insights:", error);
     return NextResponse.json(
-      { statusText: "Creating a new insight requires at least a title" },
-      { status: 400 },
+      { statusText: "Internal server error while creating insight" },
+      { status: 500 },
     );
   }
-  return NextResponse.json(
-    {
-      statusText: "Unauthorized",
-    },
-    { status: 401 },
-  );
 }

@@ -52,6 +52,7 @@ const SaveLinkDialog = ({
   const [potentialInsights, setPotentialInsights] = useState<Insight[]>(
     potentialInsightsFromServer,
   );
+  const [urlValidationTimeout, setUrlValidationTimeout] = useState<NodeJS.Timeout | null>(null);
 
   // TODO: improve the logic here
   const useLinksReturn = useLinks({
@@ -74,6 +75,10 @@ const SaveLinkDialog = ({
     setLinkUrlError("");
     setPageTitle("");
     setLoading(false);
+    if (urlValidationTimeout) {
+      clearTimeout(urlValidationTimeout);
+      setUrlValidationTimeout(null);
+    }
   };
 
   const handleClose = useCallback(() => {
@@ -84,6 +89,14 @@ const SaveLinkDialog = ({
   }, [setActiveServerFunction, setServerFunctionInput, onClose]);
 
   const handleSubmit = useCallback(() => {
+    // Validate URL before submitting
+    try {
+      new URL(linkUrl);
+    } catch {
+      setLinkUrlError("Invalid URL format");
+      return;
+    }
+    
     setServerFunctionInput({
       url: linkUrl,
       selectedInsights: [...selectedInsights],
@@ -100,19 +113,43 @@ const SaveLinkDialog = ({
   ]);
 
   useEffect(() => {
-    if (linkUrl && !pageTitle) {
-      getPageTitle(linkUrl)
-        .then((title) => {
-          setPageTitle(title);
-          setLoading(false);
-        })
-        .catch((error) => {
-          setLinkUrlError("Could not get page title");
-          setLoading(false);
-          console.error("Error fetching page title:", error);
-        });
+    if (linkUrl && !pageTitle && !loading && !linkUrlError) {
+      // Only fetch if URL looks valid and complete
+      const isValidCompleteUrl = linkUrl.match(/^https?:\/\/[^\s]+$/) && 
+                                linkUrl.length > 10;
+      
+      if (isValidCompleteUrl) {
+        setLoading(true);
+        setLinkUrlError("");
+        
+        getPageTitle(linkUrl)
+          .then((title) => {
+            setPageTitle(title);
+            setLoading(false);
+          })
+          .catch((error) => {
+            console.error("Error fetching page title:", error);
+            setLoading(false);
+            
+            // Check if it's a blocking error (403, 429, etc.)
+            if (error.message.includes('403') || error.message.includes('blocked') || error.message.includes('Forbidden')) {
+              setLinkUrlError("Website blocks automated access - you can still save the link");
+            } else {
+              setLinkUrlError("Could not get page title - you can still save the link");
+            }
+          });
+      }
     }
-  }, [pageTitle, linkUrl]);
+  }, [linkUrl, pageTitle, loading, linkUrlError]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (urlValidationTimeout) {
+        clearTimeout(urlValidationTimeout);
+      }
+    };
+  }, [urlValidationTimeout]);
 
   return (
     <Modal
@@ -131,30 +168,38 @@ const SaveLinkDialog = ({
               value={linkUrl}
               onChange={(event) => {
                 const text = event.target.value;
-
-                if (
-                  text &&
-                  (text.match(/https?:\/\/[^ ]+/) ||
-                    text.match(/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}.*$/))
-                ) {
-                  // If it doesn't start with http/https, add https://
-                  const fullUrl = text.startsWith("http")
-                    ? text
-                    : `https://${text}`;
-                  setLinkUrl(fullUrl);
-                  setLoading(true);
-                  setLinkUrlError("");
-                } else {
-                  setLinkUrl(text);
-                  setPageTitle("");
-                  setLinkUrlError("");
-                  setLoading(false);
+                setLinkUrl(text);
+                
+                // Clear any existing timeout
+                if (urlValidationTimeout) {
+                  clearTimeout(urlValidationTimeout);
+                }
+                
+                // Reset states immediately
+                setPageTitle("");
+                setLinkUrlError("");
+                setLoading(false);
+                
+                // Only validate and fetch if the URL looks complete
+                if (text && text.length > 5) {
+                  const isValidUrl = text.match(/^https?:\/\/[^\s]+$/) || 
+                                   text.match(/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\/.*)?$/);
+                  
+                  if (isValidUrl) {
+                    // Debounce the URL validation to prevent rapid requests
+                    const timeout = setTimeout(() => {
+                      const fullUrl = text.startsWith("http") ? text : `https://${text}`;
+                      setLinkUrl(fullUrl);
+                    }, 1000); // Wait 1 second after user stops typing
+                    
+                    setUrlValidationTimeout(timeout);
+                  }
                 }
               }}
               error={linkUrlError}
             />
           </FormGroup>
-          {loading && <ModalLoadingState message="Title loading..." />}
+          {loading && <ModalLoadingState message="Fetching page title..." />}
           {!loading && pageTitle && (
             <div style={{ fontWeight: "bold", marginTop: "var(--spacing-2)" }}>
               {pageTitle}
@@ -224,7 +269,6 @@ const SaveLinkDialog = ({
           onClick={handleSubmit}
           disabled={
             !linkUrl ||
-            !!linkUrlError ||
             !(selectedInsights.length > 0 || newInsightName)
           }
         >
