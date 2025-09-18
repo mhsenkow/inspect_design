@@ -15,6 +15,7 @@ import FeedbackLink from "./FeedbackLink";
 import useUser from "../hooks/useUser";
 import FeedbackInputElement from "./FeedbackInputElement";
 import Comment from "./Comment";
+import ReactionIcon from "./ReactionIcon";
 
 export const REACTION_DIRECTIONS = "Select an emoji character";
 export const COMMENT_DIRECTIONS = "Enter a text comment";
@@ -40,6 +41,7 @@ const FactsTable = ({
   // theadTopCSS = "0px",
   enableFeedback = false,
   cellActions,
+  enableReactionIcons = false,
 }: {
   data?: Fact[];
   setData: React.Dispatch<React.SetStateAction<Fact[] | undefined>>;
@@ -67,10 +69,25 @@ const FactsTable = ({
     onClick: (fact: Fact) => void;
     enabled?: (fact: Fact) => boolean;
   }[];
+  enableReactionIcons?: boolean;
 }): React.JSX.Element => {
   const { token, loggedIn } = useUser();
   const [returnPath, setReturnPath] = useState<string>();
   useEffect(() => setReturnPath(window.location.pathname), []);
+
+  // Safe JWT parsing helper
+  const getCurrentUserId = useCallback(() => {
+    if (!token) return undefined;
+    try {
+      const parts = token.split(".");
+      if (parts.length !== 3) return undefined;
+      const payload = JSON.parse(atob(parts[1]));
+      return payload.user_id;
+    } catch (error) {
+      console.warn("Failed to parse JWT token:", error);
+      return undefined;
+    }
+  }, [token]);
 
   const [loading, setLoading] = useState(false);
   const [fetchedDataFilter, setFetchedDataFilter] = useState<string>();
@@ -177,7 +194,7 @@ const FactsTable = ({
   }, [returnPath]);
 
   return (
-    <div className="card">
+    <div className="card reaction-table-container">
       <div className="card-header p-6">
         <h3 className="card-header-title text-lg">Data Table</h3>
       </div>
@@ -383,7 +400,7 @@ const FactsTable = ({
               return (
                 <React.Fragment key={`${factName} #${fact.id}`}>
                   <tr
-                    className={`${trClassName} border-b border-secondary last:border-b-0 hover:bg-secondary transition-colors duration-200`}
+                    className={`${trClassName} border-b border-secondary last:border-b-0 hover:bg-secondary transition-colors duration-200 reaction-table-row overflow-visible`}
                     onClick={trOnClick}
                   >
                     <td className="px-8 py-5 whitespace-nowrap">
@@ -416,7 +433,7 @@ const FactsTable = ({
                         })}
                       {!fact.updated_at && "---"}
                     </td>
-                    <td className="px-8 py-5 text-sm text-primary font-medium relative">
+                    <td className="px-8 py-5 text-sm text-primary font-medium relative reaction-cell-container">
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
                           {!selectRows &&
@@ -473,6 +490,65 @@ const FactsTable = ({
                           </div>
                         )}
                       </div>
+                      {enableReactionIcons && loggedIn && (
+                        <ReactionIcon
+                          reactions={fact.reactions || []}
+                          currentUserId={getCurrentUserId()}
+                          onReactionSubmit={async (reaction) => {
+                            if (token) {
+                              // Handle different data structures
+                              let insightId: number | undefined;
+                              let summaryId: number | undefined;
+
+                              if (
+                                factName === "childInsights" &&
+                                (fact as any).childInsight
+                              ) {
+                                // For child insights, use the childInsight.id
+                                insightId = (fact as any).childInsight.id;
+                                summaryId = undefined; // Child insights don't have summary_id
+                              } else if (
+                                factName === "parentInsights" &&
+                                (fact as any).parentInsight
+                              ) {
+                                // For parent insights, use the parentInsight.id
+                                insightId = (fact as any).parentInsight.id;
+                                summaryId = undefined; // Parent insights don't have summary_id
+                              } else if (factName === "insight") {
+                                // For main page insights, use fact.id as insight_id
+                                insightId = fact.id;
+                                summaryId = undefined; // Main insights don't have summary_id
+                              } else {
+                                // For regular insights and evidence
+                                insightId = fact.insight_id;
+                                summaryId = fact.summary_id;
+                              }
+
+                              const result = await submitReaction(
+                                {
+                                  reaction,
+                                  summary_id: summaryId,
+                                  insight_id: insightId,
+                                },
+                                token,
+                              );
+                              if (result) {
+                                // Remove any existing reaction from this user for this fact
+                                const existingReactions =
+                                  fact.reactions?.filter(
+                                    (r) => r.user_id !== result.user_id,
+                                  ) || [];
+                                fact.reactions = [
+                                  ...existingReactions,
+                                  result as FactReaction,
+                                ];
+                                setData([...data!]);
+                              }
+                            }
+                          }}
+                          className="reaction-icon-cell"
+                        />
+                      )}
                     </td>
                     {columns &&
                       columns.map((column) => (
@@ -492,22 +568,24 @@ const FactsTable = ({
                           className="bg-secondary text-sm p-2"
                         >
                           <div className="flex justify-around w-full m-4">
-                            <FeedbackLink
-                              actionVerb="React"
-                              icon="😲"
-                              setOnClickFunction={() => {
-                                if (loggedIn) {
-                                  const newIsEditing = {} as EditingForFact;
-                                  newIsEditing[fact.id!] = true;
-                                  setIsEditingReactionForFact({
-                                    ...isEditingReactionForFact,
-                                    ...newIsEditing,
-                                  });
-                                } else {
-                                  confirmAndRegister();
-                                }
-                              }}
-                            />
+                            {!enableReactionIcons && (
+                              <FeedbackLink
+                                actionVerb="React"
+                                icon="😲"
+                                setOnClickFunction={() => {
+                                  if (loggedIn) {
+                                    const newIsEditing = {} as EditingForFact;
+                                    newIsEditing[fact.id!] = true;
+                                    setIsEditingReactionForFact({
+                                      ...isEditingReactionForFact,
+                                      ...newIsEditing,
+                                    });
+                                  } else {
+                                    confirmAndRegister();
+                                  }
+                                }}
+                              />
+                            )}
                             <FeedbackLink
                               actionVerb="Comment"
                               icon="💬"
@@ -526,48 +604,50 @@ const FactsTable = ({
                             />
                           </div>
                           <div>
-                            {loggedIn && isEditingReactionForFact[fact.id!] && (
-                              <FeedbackInputElement
-                                actionType="reaction"
-                                submitFunc={(reaction) => {
-                                  if (token) {
-                                    return submitReaction(
-                                      {
-                                        reaction,
-                                        // FIXME: update this submitReaction logic
-                                        summary_id: fact.summary_id,
-                                        insight_id: fact.insight_id,
-                                      },
-                                      token,
-                                    );
-                                  }
-                                  return Promise.resolve();
-                                }}
-                                directions="Select an emoji character"
-                                afterSubmit={(newObject) => {
-                                  if (newObject) {
-                                    if (!fact.reactions) {
-                                      fact.reactions = [];
+                            {!enableReactionIcons &&
+                              loggedIn &&
+                              isEditingReactionForFact[fact.id!] && (
+                                <FeedbackInputElement
+                                  actionType="reaction"
+                                  submitFunc={(reaction) => {
+                                    if (token) {
+                                      return submitReaction(
+                                        {
+                                          reaction,
+                                          // FIXME: update this submitReaction logic
+                                          summary_id: fact.summary_id,
+                                          insight_id: fact.insight_id,
+                                        },
+                                        token,
+                                      );
                                     }
-                                    fact.reactions = [
-                                      ...fact.reactions.filter(
-                                        (r) => r.user_id != newObject.user_id,
-                                      ),
-                                      newObject as FactReaction,
-                                    ];
-                                    setData([...data!]);
-                                  }
-                                }}
-                                closeFunc={() => {
-                                  const newIsEditing = {} as EditingForFact;
-                                  newIsEditing[fact.id!] = false;
-                                  setIsEditingReactionForFact({
-                                    ...isEditingReactionForFact,
-                                    ...newIsEditing,
-                                  });
-                                }}
-                              />
-                            )}
+                                    return Promise.resolve();
+                                  }}
+                                  directions="Select an emoji character"
+                                  afterSubmit={(newObject) => {
+                                    if (newObject) {
+                                      if (!fact.reactions) {
+                                        fact.reactions = [];
+                                      }
+                                      fact.reactions = [
+                                        ...fact.reactions.filter(
+                                          (r) => r.user_id != newObject.user_id,
+                                        ),
+                                        newObject as FactReaction,
+                                      ];
+                                      setData([...data!]);
+                                    }
+                                  }}
+                                  closeFunc={() => {
+                                    const newIsEditing = {} as EditingForFact;
+                                    newIsEditing[fact.id!] = false;
+                                    setIsEditingReactionForFact({
+                                      ...isEditingReactionForFact,
+                                      ...newIsEditing,
+                                    });
+                                  }}
+                                />
+                              )}
                             {loggedIn && isEditingCommentForFact[fact.id!] && (
                               <FeedbackInputElement
                                 actionType="comment"

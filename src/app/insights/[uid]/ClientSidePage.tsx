@@ -19,6 +19,8 @@ import {
 import FeedbackInputElement from "../../components/FeedbackInputElement";
 import { submitComment, submitReaction } from "../../functions";
 import FeedbackLink from "../../components/FeedbackLink";
+import FeedbackItem from "../../components/FeedbackItem";
+import HeaderItem from "../../components/HeaderItem";
 import SourceLogo from "../../components/SourceLogo";
 import useUser from "../../hooks/useUser";
 import EditableTitle from "../../components/EditableTitle";
@@ -66,9 +68,13 @@ const ClientSidePage = ({
   currentUser,
 }: Props): React.JSX.Element => {
   const { token, loggedIn } = useUser();
+  const [isClient, setIsClient] = useState(false);
 
   const [returnPath, setReturnPath] = useState<string>();
-  useEffect(() => setReturnPath(window.location.pathname), []);
+  useEffect(() => {
+    setIsClient(true);
+    setReturnPath(window.location.pathname);
+  }, []);
 
   const [insight, setInsight] = useState(insightInput);
   const [insightComments, setInsightComments] = useState<FactComment[]>();
@@ -120,7 +126,6 @@ const ClientSidePage = ({
       );
     }
   }, [insight.evidence]);
-  const [isEditingReaction, setIsEditingReaction] = useState(false);
   const [isEditingComment, setIsEditingComment] = useState(false);
 
   // Modal states
@@ -208,74 +213,97 @@ const ClientSidePage = ({
       <div className={styles.mainContent}>
         <CurrentUserContext.Provider value={currentUser}>
           {/* Page Header - Overall Page Level */}
-          <div className={styles.pageHeader}>
-            <div className={styles.pageHeaderContent}>
-              <div className={styles.headerTop}>
-                <div className={styles.headerLeft}>
-                  <div className={styles.sourceLogoContainer}>
-                    <SourceLogo fact={insight} />
+          <HeaderItem
+            reactions={insightReactions || []}
+            currentUserId={currentUser?.id}
+            onReactionSubmit={async (reaction) => {
+              if (token) {
+                const result = await submitReaction(
+                  { reaction, insight_id: insight.id },
+                  token,
+                );
+                if (result) {
+                  // Remove any existing reaction from this user for this insight
+                  const existingReactions =
+                    insight.reactions?.filter(
+                      (r) => r.user_id !== currentUser?.id,
+                    ) || [];
+                  setInsight({
+                    ...insight,
+                    reactions: [...existingReactions, result as FactReaction],
+                  });
+                }
+              }
+            }}
+            className="insight-header-item"
+          >
+            <div className={styles.pageHeader}>
+              <div className={styles.pageHeaderContent}>
+                <div className={styles.headerTop}>
+                  <div className={styles.headerLeft}>
+                    <div className={styles.sourceLogoContainer}>
+                      <SourceLogo fact={insight} />
+                    </div>
+                    <div className={styles.headerInfo}>
+                      <EditableTitle
+                        insight={insight}
+                        apiRoot="/api/insights"
+                      />
+                      <div className={styles.headerSubtitle}>
+                        {createdOrUpdated}
+                      </div>
+                    </div>
                   </div>
-                  <div className={styles.headerInfo}>
-                    <EditableTitle insight={insight} apiRoot="/api/insights" />
-                    <div className={styles.headerSubtitle}>
-                      {createdOrUpdated}
+                  <div className={styles.headerRight}>
+                    <div className={styles.citationsCount}>
+                      📄 {liveSnippetData.length ?? 0} citations
                     </div>
                   </div>
                 </div>
-                <div className={styles.headerRight}>
-                  <div className={styles.reactionsContainer}>
-                    {insightReactions?.map((r) => r.reaction).join("") || (
-                      <span className="text-text-tertiary">
-                        😲 (no reactions)
-                      </span>
-                    )}
-                  </div>
-                  <div className={styles.citationsCount}>
-                    📄 {liveSnippetData.length ?? 0} citations
-                  </div>
-                </div>
               </div>
-
-              {/* Big Actions */}
-              {currentUser && insight.user_id == currentUser.id && (
-                <div className={styles.actionsSection}>
-                  {!insight.is_public && (
-                    <button
-                      className={styles.actionButton}
-                      aria-label="Publish Insight"
-                      title="Publish Insight"
-                      onClick={async () => {
-                        if (token && confirm("Are you sure?")) {
-                          await publishInsights({ insights: [insight] }, token);
-                          setInsight({ ...insight, is_public: true });
-                        }
-                      }}
-                    >
-                      <span>🌎</span>
-                      <span className="text-xs">Publish</span>
-                    </button>
-                  )}
-                  <button
-                    className="btn btn-sm btn-ghost text-text-secondary hover:text-text-primary hover:bg-background-secondary flex items-center gap-1"
-                    aria-label="Delete Insight"
-                    title="Delete Insight"
-                    onClick={async () => {
-                      if (token && confirm("Are you sure?")) {
-                        await deleteInsights({ insights: [insight] }, token);
-                        window.location.href = "/";
-                      }
-                    }}
-                  >
-                    <span>🗑️</span>
-                    <span className="text-xs">Delete</span>
-                  </button>
-                </div>
-              )}
             </div>
-          </div>
+          </HeaderItem>
+
+          {/* Big Actions */}
+          {isClient && currentUser && insight.user_id == currentUser.id && (
+            <div className={styles.actionsSection}>
+              {!insight.is_public && (
+                <button
+                  className={styles.actionButton}
+                  aria-label="Publish Insight"
+                  title="Publish Insight"
+                  onClick={async () => {
+                    if (token && confirm("Are you sure?")) {
+                      await publishInsights({ insights: [insight] }, token);
+                      setInsight({ ...insight, is_public: true });
+                    }
+                  }}
+                >
+                  <span>🌎</span>
+                  <span className="text-xs">Publish</span>
+                </button>
+              )}
+              <button
+                className="btn btn-sm btn-ghost text-text-secondary hover:text-text-primary hover:bg-background-secondary flex items-center gap-1"
+                aria-label="Delete Insight"
+                title="Delete Insight"
+                onClick={async () => {
+                  if (token && confirm("Are you sure?")) {
+                    await deleteInsights({ insights: [insight] }, token);
+                    window.location.href = "/";
+                  }
+                }}
+              >
+                <span>🗑️</span>
+                <span className="text-xs">Delete</span>
+              </button>
+            </div>
+          )}
 
           {/* Parent Insights Section */}
-          {(loggedIn || insight.parents.length > 0) && (
+          {(isClient
+            ? loggedIn || insight.parents.length > 0
+            : insight.parents.length > 0) && (
             <div className={cardStyles.contentCard}>
               <div className={cardStyles.contentCardHeader}>
                 <div className={cardStyles.hierarchyIndicator}>
@@ -286,7 +314,7 @@ const ClientSidePage = ({
                   <h3 className={cardStyles.sectionTitle}>
                     This insight is important because:
                   </h3>
-                  {currentUser?.id == insight.user_id && (
+                  {isClient && currentUser?.id == insight.user_id && (
                     <div className={cardStyles.sectionActions}>
                       <button
                         onClick={() => {
@@ -408,6 +436,7 @@ const ClientSidePage = ({
                     }
                     selectedActions={[]}
                     hideHead={true}
+                    enableReactionIcons={true}
                   />
                 </FactsDataContext.Provider>
               </div>
@@ -425,7 +454,7 @@ const ClientSidePage = ({
                 <h3 className={cardStyles.sectionTitle}>
                   Insights that build upon this one:
                 </h3>
-                {currentUser?.id == insight.user_id && (
+                {isClient && currentUser?.id == insight.user_id && (
                   <div className={cardStyles.sectionActions}>
                     <button
                       onClick={() => {
@@ -561,6 +590,7 @@ const ClientSidePage = ({
                   }
                   activeServerFunction={activeServerFunctionForChildInsights}
                   selectedActions={[]}
+                  enableReactionIcons={true}
                   columns={[
                     {
                       name: "📄",
@@ -595,7 +625,7 @@ const ClientSidePage = ({
                 <h3 className={cardStyles.sectionTitle}>
                   Supporting evidence and citations:
                 </h3>
-                {currentUser?.id == insight.user_id && (
+                {isClient && currentUser?.id == insight.user_id && (
                   <div className={cardStyles.sectionActions}>
                     <button
                       onClick={() => {
@@ -735,6 +765,7 @@ const ClientSidePage = ({
                     >
                   }
                   selectedActions={[]}
+                  enableReactionIcons={true}
                 />
               </InfiniteScrollLoader>
             </div>
@@ -750,43 +781,88 @@ const ClientSidePage = ({
               <h3 className={cardStyles.sectionTitle}>
                 Reactions and comments:
               </h3>
-              <div className="flex items-center justify-center space-x-8">
-                <FeedbackLink
-                  actionVerb="React"
-                  icon="😲"
-                  setOnClickFunction={() =>
-                    currentUser
-                      ? setIsEditingReaction(true)
-                      : confirmAndRegister()
+              <FeedbackItem
+                reactions={insightReactions || []}
+                currentUserId={currentUser?.id}
+                onReactionSubmit={async (reaction) => {
+                  if (token) {
+                    const result = await submitReaction(
+                      { reaction, insight_id: insight.id },
+                      token,
+                    );
+                    if (result) {
+                      // Remove any existing reaction from this user for this insight
+                      const existingReactions =
+                        insight.reactions?.filter(
+                          (r) => r.user_id !== currentUser?.id,
+                        ) || [];
+                      setInsight({
+                        ...insight,
+                        reactions: [
+                          ...existingReactions,
+                          result as FactReaction,
+                        ],
+                      });
+                    }
                   }
-                />
-                <FeedbackLink
-                  actionVerb="Comment"
-                  icon="💬"
-                  setOnClickFunction={() =>
-                    currentUser
-                      ? setIsEditingComment(true)
-                      : confirmAndRegister()
-                  }
-                />
-              </div>
+                }}
+                className="insight-feedback-item"
+              >
+                <div className="flex items-center justify-center space-x-8">
+                  <FeedbackLink
+                    actionVerb="Comment"
+                    icon="💬"
+                    setOnClickFunction={() =>
+                      currentUser
+                        ? setIsEditingComment(true)
+                        : confirmAndRegister()
+                    }
+                  />
+                </div>
+              </FeedbackItem>
             </div>
             <div className={cardStyles.contentCardBody}>
               {/* Comments */}
               {insightComments && insightComments.length > 0 && (
                 <div className="space-y-3">
                   {insightComments.map((comment) => (
-                    <Comment
+                    <FeedbackItem
                       key={`Insight Comment #${comment.id}`}
-                      comment={comment}
-                      removeCommentFunc={(id) => {
-                        setInsight({
-                          ...insight,
-                          comments:
-                            insight.comments?.filter((c) => c.id !== id) ?? [],
-                        });
+                      reactions={comment.reactions || []}
+                      currentUserId={currentUser?.id}
+                      onReactionSubmit={async (reaction) => {
+                        if (token) {
+                          const result = await submitReaction(
+                            { reaction, insight_id: insight.id },
+                            token,
+                          );
+                          if (result) {
+                            // Remove any existing reaction from this user for this comment
+                            const existingReactions =
+                              comment.reactions?.filter(
+                                (r) => r.user_id !== result.user_id,
+                              ) || [];
+                            comment.reactions = [
+                              ...existingReactions,
+                              result as FactReaction,
+                            ];
+                            setInsight({ ...insight });
+                          }
+                        }
                       }}
-                    />
+                    >
+                      <Comment
+                        comment={comment}
+                        removeCommentFunc={(id) => {
+                          setInsight({
+                            ...insight,
+                            comments:
+                              insight.comments?.filter((c) => c.id !== id) ??
+                              [],
+                          });
+                        }}
+                      />
+                    </FeedbackItem>
                   ))}
                 </div>
               )}
@@ -799,42 +875,7 @@ const ClientSidePage = ({
           </div>
 
           {/* Feedback Input Elements */}
-          {currentUser && isEditingReaction && (
-            <FeedbackInputElement
-              actionType="reaction"
-              submitFunc={(reaction) => {
-                if (token) {
-                  return submitReaction(
-                    { reaction, insight_id: insight.id },
-                    token,
-                  );
-                }
-                return Promise.resolve();
-              }}
-              directions="Select an emoji character"
-              afterSubmit={(newObject) => {
-                if (newObject) {
-                  const existingReaction = insight.reactions?.find(
-                    (r) =>
-                      r.user_id == currentUser?.id &&
-                      r.insight_id == insight.id,
-                  );
-                  const existingReactions = insight.reactions?.filter(
-                    (r) => r.id !== existingReaction?.id,
-                  );
-                  setInsight({
-                    ...insight,
-                    reactions: [
-                      ...(existingReactions ?? []),
-                      newObject as FactReaction,
-                    ],
-                  });
-                }
-              }}
-              closeFunc={() => setIsEditingReaction(false)}
-            />
-          )}
-          {currentUser && isEditingComment && (
+          {isClient && currentUser && isEditingComment && (
             <FeedbackInputElement
               actionType="comment"
               submitFunc={(comment) => {
@@ -860,7 +901,7 @@ const ClientSidePage = ({
           )}
 
           {/* Dialogs - Child Level */}
-          {currentUser && insight.user_id == currentUser.id && (
+          {isClient && currentUser && insight.user_id == currentUser.id && (
             <>
               <AddLinksAsEvidenceDialog
                 id={ADD_LINKS_AS_EVIDENCE_DIALOG_ID}

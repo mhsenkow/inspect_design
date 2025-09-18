@@ -8,6 +8,8 @@ import { FactComment, FactReaction, Link, User } from "../../types";
 import FeedbackInputElement from "../../components/FeedbackInputElement";
 import { submitComment, submitReaction } from "../../functions";
 import FeedbackLink from "../../components/FeedbackLink";
+import FeedbackItem from "../../components/FeedbackItem";
+import ReactionIcon from "../../components/ReactionIcon";
 import useUser from "../../hooks/useUser";
 import SourceLogo from "../../components/SourceLogo";
 import CurrentUserContext from "../../contexts/CurrentUserContext";
@@ -21,7 +23,6 @@ const ClientSidePage = ({
   currentUser?: User;
 }): React.JSX.Element => {
   const [link, setLink] = useState(linkInput);
-  const [isEditingReaction, setIsEditingReaction] = useState(false);
   const [isEditingComment, setIsEditingComment] = useState(false);
 
   const { token } = useUser();
@@ -38,10 +39,30 @@ const ClientSidePage = ({
       <CurrentUserContext.Provider value={currentUser || null}>
         <div id="source">
           <div style={{ display: "flex" }}>
-            {(link.reactions &&
-              link.reactions.map((r) => r.reaction).join("")) || (
-              <span>😲 (no reactions)</span>
-            )}
+            <ReactionIcon
+              reactions={link.reactions || []}
+              currentUserId={currentUser?.id}
+              onReactionSubmit={async (reaction) => {
+                if (token) {
+                  const result = await submitReaction(
+                    { reaction, summary_id: link.id },
+                    token,
+                  );
+                  if (result) {
+                    // Remove any existing reaction from this user for this link
+                    const existingReactions =
+                      link.reactions?.filter(
+                        (r) => r.user_id !== result.user_id,
+                      ) || [];
+                    setLink({
+                      ...link,
+                      reactions: [...existingReactions, result as FactReaction],
+                    });
+                  }
+                }
+              }}
+              className="reaction-button-header"
+            />
           </div>
           <div id="created_at">
             <p>{createdOrUpdated}</p>
@@ -76,30 +97,6 @@ const ClientSidePage = ({
             </a>
           </h2>
         </div>
-        {currentUser && isEditingReaction && (
-          <FeedbackInputElement
-            actionType="reaction"
-            submitFunc={(reaction) => {
-              if (token) {
-                return submitReaction({ reaction, summary_id: link.id }, token);
-              }
-              return Promise.resolve();
-            }}
-            directions="Select an emoji character"
-            afterSubmit={(newObject) => {
-              if (newObject) {
-                if (!link.reactions) {
-                  link.reactions = [];
-                }
-                setLink({
-                  ...link,
-                  reactions: [...link.reactions, newObject as FactReaction],
-                });
-              }
-            }}
-            closeFunc={() => setIsEditingReaction(false)}
-          />
-        )}
         {currentUser && isEditingComment && (
           <FeedbackInputElement
             actionType="comment"
@@ -131,32 +128,48 @@ const ClientSidePage = ({
           />
         )}
         {currentUser && (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "space-around",
-              width: "100%",
-              margin: "10px",
+          <FeedbackItem
+            reactions={link.reactions || []}
+            currentUserId={currentUser?.id}
+            onReactionSubmit={async (reaction) => {
+              if (token) {
+                const result = await submitReaction(
+                  { reaction, summary_id: link.id },
+                  token,
+                );
+                if (result) {
+                  // Remove any existing reaction from this user for this link
+                  const existingReactions =
+                    link.reactions?.filter(
+                      (r) => r.user_id !== result.user_id,
+                    ) || [];
+                  setLink({
+                    ...link,
+                    reactions: [...existingReactions, result as FactReaction],
+                  });
+                }
+              }
             }}
+            className="link-feedback-item"
           >
-            <FeedbackLink
-              actionVerb="React"
-              icon="😲"
-              setOnClickFunction={() => {
-                setIsEditingReaction(true);
-                setIsEditingComment(false);
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "space-around",
+                width: "100%",
+                margin: "10px",
               }}
-            />
-            <FeedbackLink
-              actionVerb="Comment"
-              icon="💬"
-              setOnClickFunction={() => {
-                setIsEditingReaction(false);
-                setIsEditingComment(true);
-              }}
-            />
-          </div>
+            >
+              <FeedbackLink
+                actionVerb="Comment"
+                icon="💬"
+                setOnClickFunction={() => {
+                  setIsEditingComment(true);
+                }}
+              />
+            </div>
+          </FeedbackItem>
         )}
         <div className="comments">
           {link.comments &&

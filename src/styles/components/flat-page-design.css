@@ -1,0 +1,110 @@
+/* ===================================
+   FLAT PAGE DESIGN
+   =================================== */
+
+/* Main page container - centered with max width */
+.pageContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-4);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Flat Header Section */
+.flatHeader {
+  padding: var(--spacing-4) var(--spacing-6);
+  border-bottom: 1px solid var(--color-border-primary);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.flatHeader .headerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.flatHeader .headerTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.flatHeader .headerSubtitle {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* Flat Insights List Section */
+.flatInsightsList {
+  padding: var(--spacing-4) var(--spacing-6);
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.flatInsightsList .sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-4);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.flatInsightsList .sectionIcon {
+  font-size: 1rem;
+}
+
+/* Remove all shadows and hover effects from internal sections */
+.flatInsightsList .content-card-body {
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+.flatInsightsList .content-card-body:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Flat table styling */
+.flatInsightsList table {
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+.flatInsightsList table:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.flatInsightsList tbody tr {
+  transition: none !important;
+}
+
+.flatInsightsList tbody tr:hover {
+  transform: none !important;
+  box-shadow: none !important;
+  background-color: var(--color-background-secondary) !important;
+}
+
+/* Ensure reaction icons still work with flat design */
+.flatInsightsList .reaction-icon {
+  position: absolute !important;
+  right: -16px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  z-index: 30 !important;
+}

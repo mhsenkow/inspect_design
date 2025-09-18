@@ -141,114 +141,52 @@ const ClientSidePage = ({
   return (
     <div className={styles.pageContainer}>
       <div className={styles.mainContent}>
-        {/* Page Header - Overall Page Level */}
-        <div className={styles.pageHeader}>
-          <div className={styles.pageHeaderContent}>
-            <div className={styles.headerTop}>
-              <div className={styles.headerInfo}>
-                <h1 className={styles.headerTitle}>My Insights</h1>
-                <p className={styles.headerSubtitle}>
-                  {liveData.length > 0
-                    ? `${liveData.length} insight${liveData.length !== 1 ? "s" : ""}`
-                    : "No insights yet"}
-                </p>
-              </div>
-              {loggedIn && (
-                <div style={{ display: "flex", gap: "var(--spacing-2)" }}>
-                  <button
-                    onClick={promptForNewInsightName}
-                    className={cardStyles.addButton}
-                    aria-label="Create New Insight"
-                    title="Create New Insight"
-                  >
-                    <span className={cardStyles.addButtonIcon}>+</span>
-                    <span className={cardStyles.addButtonText}>
-                      Create New Insight
-                    </span>
-                  </button>
-                  <button
-                    onClick={() => setIsSaveLinkDialogOpen(true)}
-                    className={cardStyles.addButton}
-                    aria-label="Save Link"
-                    title="Save Link"
-                  >
-                    <span className={cardStyles.addButtonIcon}>🔗</span>
-                    <span className={cardStyles.addButtonText}>Save Link</span>
-                  </button>
-                </div>
-              )}
+        {/* Main Page Card - Single container with rounded corners and shadow */}
+        <div className={cardStyles.contentCard}>
+          {/* Flat Header Section */}
+          <div className="flatHeader">
+            <div className="headerInfo">
+              <h1 className="headerTitle">My Insights</h1>
+              <p className="headerSubtitle">
+                {liveData.length > 0
+                  ? `${liveData.length} insight${liveData.length !== 1 ? "s" : ""}`
+                  : "No insights yet"}
+              </p>
             </div>
+            {loggedIn && (
+              <div style={{ display: "flex", gap: "var(--spacing-2)" }}>
+                <button
+                  onClick={promptForNewInsightName}
+                  className={cardStyles.addButton}
+                  aria-label="Create New Insight"
+                  title="Create New Insight"
+                >
+                  <span className={cardStyles.addButtonIcon}>+</span>
+                  <span className={cardStyles.addButtonText}>
+                    Create New Insight
+                  </span>
+                </button>
+                <button
+                  onClick={() => setIsSaveLinkDialogOpen(true)}
+                  className={cardStyles.addButton}
+                  aria-label="Save Link"
+                  title="Save Link"
+                >
+                  <span className={cardStyles.addButtonIcon}>🔗</span>
+                  <span className={cardStyles.addButtonText}>Save Link</span>
+                </button>
+              </div>
+            )}
           </div>
-        </div>
 
-        {/* Main Content - Main Level */}
-        <CurrentUserContext.Provider value={currentUser}>
-          <div className={cardStyles.contentCard}>
-            <div className={cardStyles.contentCardHeader}>
-              <div className={cardStyles.hierarchyIndicator}>
-                <span className={cardStyles.hierarchyIcon}>📋</span>
-                Insights List
-              </div>
-              {loggedIn && selectedInsights.length > 0 && (
-                <div className={cardStyles.sectionActions}>
-                  <button
-                    onClick={() => {
-                      setServerFunctionInputForInsightsList({
-                        insights: selectedInsights,
-                      });
-                      setActiveServerFunctionForInsightsList({
-                        function: async (
-                          input: InsightsAPISchema,
-                          token: string,
-                        ) => {
-                          if (token) {
-                            return publishInsights(input, token);
-                          }
-                          return Promise.resolve([]);
-                        },
-                      });
-                    }}
-                    className={cardStyles.addButton}
-                    aria-label="Publish Selected"
-                    title="Publish Selected"
-                  >
-                    <span className={cardStyles.addButtonIcon}>📢</span>
-                    <span className={cardStyles.addButtonText}>Publish</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (
-                        selectedInsights &&
-                        selectedInsights.length > 0 &&
-                        confirm("Are you sure?")
-                      ) {
-                        setServerFunctionInputForInsightsList({
-                          insights: selectedInsights,
-                        });
-                        setActiveServerFunctionForInsightsList({
-                          function: async (
-                            input: InsightsAPISchema,
-                            token: string,
-                          ) => {
-                            if (token) {
-                              return deleteInsights(input, token);
-                            }
-                            return Promise.resolve([]);
-                          },
-                        });
-                      }
-                    }}
-                    className={cardStyles.addButton}
-                    aria-label="Delete Selected"
-                    title="Delete Selected"
-                  >
-                    <span className={cardStyles.addButtonIcon}>🗑️</span>
-                    <span className={cardStyles.addButtonText}>Delete</span>
-                  </button>
-                </div>
-              )}
+          {/* Flat Insights List Section */}
+          <div className="flatInsightsList">
+            <div className="sectionHeader">
+              <span className="sectionIcon">📋</span>
+              Insights List
             </div>
-            <div className={cardStyles.contentCardBody}>
+
+            <CurrentUserContext.Provider value={currentUser}>
               <InfiniteScrollLoader
                 data={liveData}
                 setData={
@@ -295,6 +233,7 @@ const ClientSidePage = ({
                   }
                   unselectedActions={[]}
                   selectedActions={[]}
+                  enableReactionIcons={true}
                   columns={[
                     {
                       name: "📄",
@@ -315,7 +254,7 @@ const ClientSidePage = ({
                   ]}
                 />
               </InfiniteScrollLoader>
-            </div>
+            </CurrentUserContext.Provider>
           </div>
 
           {/* Child Level - Dialogs */}
@@ -378,8 +317,8 @@ const ClientSidePage = ({
               }
             }}
             setActiveServerFunction={() => {}} // Not needed since we handle it above
-          />
-        </CurrentUserContext.Provider>
+          ></SaveLinkDialog>
+        </div>
       </div>
     </div>
   );

@@ -27,6 +27,7 @@ const FactsListView = ({
   hideHead,
   enableFeedback,
   cellActions,
+  enableReactionIcons = false,
 }: {
   factName: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -56,6 +57,7 @@ const FactsListView = ({
     onClick: (fact: Fact) => void;
     enabled?: (fact: Fact) => boolean;
   }[];
+  enableReactionIcons?: boolean;
 }): React.JSX.Element => {
   const { data, setData } = useContext(FactsDataContext);
   const [flvResponses, setFLVResponses] = useState<FLVResponse[]>([]);
@@ -159,7 +161,10 @@ const FactsListView = ({
   const HEADER_ELEMENT_ID = "factsLisActionstHeader";
   return (
     <>
-      <div id={HEADER_ELEMENT_ID} className="content-card space-main">
+      <div
+        id={HEADER_ELEMENT_ID}
+        className="content-card space-main reaction-card-container"
+      >
         {(!selectedFacts || selectedFacts.length == 0) &&
           unselectedActions &&
           unselectedActions.length > 0 && (
@@ -225,7 +230,7 @@ const FactsListView = ({
             </div>
           )}
         {data && data.length > 0 && (
-          <div className="content-card-body">
+          <div className="content-card-body reaction-card-container">
             <FactsTable
               factName={factName}
               data={data}
@@ -240,6 +245,7 @@ const FactsListView = ({
               hideHead={hideHead}
               enableFeedback={enableFeedback}
               cellActions={cellActions}
+              enableReactionIcons={enableReactionIcons}
             />
           </div>
         )}

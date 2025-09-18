@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import useUser from "../hooks/useUser";
 
 import { Insight } from "../types";
@@ -14,7 +14,13 @@ const EditableTitle = ({
 }): React.JSX.Element => {
   const [title, setTitle] = useState(insight.title);
   const [editingTitle, setEditingTitle] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   const { token, user_id } = useUser();
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const updateTitle = useCallback(
     (newTitle: string, token: string): Promise<Response> =>
       fetch(`${apiRoot}/${insight.uid}`, {
@@ -43,7 +49,7 @@ const EditableTitle = ({
       {!editingTitle && (
         <span>
           {title}
-          {user_id == insight.user_id && (
+          {isClient && user_id == insight.user_id && (
             <span
               style={{ cursor: "pointer" }}
               onClick={() => {

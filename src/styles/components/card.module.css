@@ -15,7 +15,6 @@
 
 .card:hover {
   box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
 }
 
 /* Card Header */
@@ -97,7 +96,6 @@
 
 .contentCard:hover {
   box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
 }
 
 .contentCardHeader {

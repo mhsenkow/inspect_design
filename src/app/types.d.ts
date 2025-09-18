@@ -1,6 +1,6 @@
 export type FactReaction = {
   id?: number;
-  reaction?: string;
+  reaction: string;
   insight_id?: number;
   summary_id?: number;
   user_id: number;
@@ -13,6 +13,7 @@ export type FactComment = {
   insight_id?: number;
   user_id?: number;
   user?: User;
+  reactions?: FactReaction[];
 };
 
 export type Follower = {

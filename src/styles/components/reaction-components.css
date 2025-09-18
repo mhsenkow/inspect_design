@@ -1,0 +1,320 @@
+/* ===================================
+   SIMPLIFIED REACTION ICON SYSTEM
+   =================================== */
+
+/* Single Reaction Icon Design - EDGE POSITIONING */
+.reaction-icon {
+  position: absolute !important;
+  top: 50% !important;
+  right: -16px !important; /* Further out to reach card edge */
+  transform: translateY(-50%) !important;
+  width: 24px;
+  height: 24px;
+  padding: 4px;
+  background-color: var(--color-background-primary);
+  border: 2px solid var(--color-border-primary);
+  border-radius: 4px; /* Square with slight rounding */
+  cursor: pointer;
+  transition: all var(--transition-base);
+  z-index: 30 !important; /* Higher z-index to ensure visibility */
+  opacity: 0.3; /* Base transparency - will be overridden by state classes */
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reaction-icon-emoji {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.reaction-loading {
+  font-size: 10px;
+  color: var(--color-text-secondary);
+}
+
+/* Reaction icon opacity states */
+.reaction-icon.reaction-icon-transparent {
+  opacity: 0.5 !important; /* Half transparent for default emoji */
+}
+
+.reaction-icon.reaction-icon-solid {
+  opacity: 1 !important; /* Solid for user's selected emoji */
+  background-color: var(--color-background-primary);
+  box-shadow: var(--shadow-md);
+}
+
+/* ===================================
+   REACTION PICKER
+   =================================== */
+
+.reaction-picker {
+  position: fixed;
+  z-index: 1000;
+  pointer-events: auto;
+}
+
+.reaction-picker-content {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 8px;
+  background-color: var(--color-background-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  animation: reactionPickerSlideIn 0.1s ease-out;
+}
+
+@keyframes reactionPickerSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reaction-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  font-size: 16px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.reaction-option:hover {
+  background-color: var(--color-background-secondary);
+  transform: scale(1.1);
+}
+
+.reaction-emoji {
+  font-size: 14px;
+}
+
+/* ===================================
+   POSITIONING HELPERS
+   =================================== */
+
+/* Cell positioning helpers - EDGE OVERFLOW DESIGN */
+.reaction-cell-container {
+  position: relative !important;
+  overflow: visible !important; /* Allow icons to extend beyond cell boundaries */
+  margin-right: 16px !important; /* Add space for half-on/half-off icons */
+  padding-right: 0 !important; /* Remove default padding to make room */
+}
+
+/* Table row adjustments for edge icons */
+.reaction-table-row {
+  position: relative;
+  overflow: visible !important;
+}
+
+/* Table container adjustments */
+.reaction-table-container {
+  overflow: visible !important; /* Ensure table doesn't clip edge icons */
+  position: relative; /* Make it a positioning context */
+}
+
+/* Position reaction icons at the edge of the table container */
+.reaction-table-container .reaction-icon {
+  position: absolute !important;
+  right: -12px !important; /* Half on, half off the container */
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  z-index: 20 !important; /* Higher z-index to ensure they appear above other elements */
+}
+
+/* Position reaction icons at the edge of table cells */
+.reaction-cell-container .reaction-icon {
+  position: absolute !important;
+  right: -12px !important; /* Half on, half off the cell */
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  z-index: 20 !important;
+}
+
+/* Ensure all table cells with reaction icons are properly positioned */
+td.reaction-cell-container {
+  position: relative !important;
+  overflow: visible !important;
+  margin-right: 24px !important; /* More space for edge icons */
+  padding-right: 0 !important;
+}
+
+
+/* Force edge positioning for ALL reaction icons */
+.reaction-icon {
+  position: absolute !important;
+  right: -12px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  z-index: 20 !important;
+}
+
+/* Ensure table rows and cells allow overflow */
+.reaction-table-row {
+  overflow: visible !important;
+}
+
+td.overflow-visible {
+  overflow: visible !important;
+}
+
+/* Card container adjustments */
+.reaction-card-container {
+  overflow: visible !important; /* Ensure cards don't clip edge icons */
+  margin-right: 24px; /* More space for edge icons */
+  position: relative; /* Make it a positioning context */
+}
+
+/* Position reaction icons at the edge of the card container */
+.reaction-card-container .reaction-icon {
+  position: absolute !important;
+  right: -12px !important; /* Half on, half off the container */
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  z-index: 20 !important; /* Higher z-index to ensure they appear above other elements */
+}
+
+/* Ensure FactsListView tables get proper positioning */
+.content-card-body.reaction-card-container .reaction-table-container {
+  position: relative !important;
+  overflow: visible !important;
+}
+
+.content-card-body.reaction-card-container .reaction-table-row {
+  position: relative !important;
+  overflow: visible !important;
+}
+
+/* Ensure the actual table allows overflow */
+.content-card-body.reaction-card-container table {
+  overflow: visible !important;
+}
+
+.content-card-body.reaction-card-container tbody {
+  overflow: visible !important;
+}
+
+.content-card-body.reaction-card-container tr {
+  overflow: visible !important;
+}
+
+.content-card-body.reaction-card-container td {
+  overflow: visible !important;
+}
+
+.content-card-body.reaction-card-container .reaction-icon {
+  position: absolute !important;
+  right: -16px !important; /* Further out to reach card edge */
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  z-index: 30 !important;
+}
+
+/* ===================================
+   FEEDBACK ITEMS
+   =================================== */
+
+/* Feedback item edge icons */
+.feedback-item-container {
+  position: relative;
+  overflow: visible;
+  margin-right: 16px;
+  padding: var(--spacing-3);
+  background-color: var(--color-background-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-base);
+}
+
+.feedback-item-content {
+  padding-right: 8px; /* Space for edge icon */
+}
+
+.feedback-item-reaction-icon {
+  position: absolute;
+  top: 50%;
+  right: -12px;
+  transform: translateY(-50%);
+  opacity: 0.3; /* Base transparency - will be overridden by state classes */
+  transition: all var(--transition-base);
+}
+
+.feedback-item-reaction-icon.reaction-icon-transparent {
+  opacity: 0.5 !important; /* Half transparent for default emoji */
+}
+
+.feedback-item-reaction-icon.reaction-icon-solid {
+  opacity: 1 !important; /* Solid for user's selected emoji */
+  background-color: var(--color-background-primary);
+  box-shadow: var(--shadow-md);
+}
+
+/* ===================================
+   HEADER ITEMS
+   =================================== */
+
+/* Header item edge icons */
+.header-item-container {
+  position: relative;
+  overflow: visible;
+  margin-right: 16px;
+  padding: var(--spacing-4);
+  background-color: var(--color-background-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-base);
+}
+
+.header-item-content {
+  padding-right: 8px; /* Space for edge icon */
+}
+
+.header-item-reaction-icon {
+  position: absolute;
+  top: 50%;
+  right: -12px;
+  transform: translateY(-50%);
+  opacity: 0.3; /* Base transparency - will be overridden by state classes */
+  transition: all var(--transition-base);
+}
+
+.header-item-reaction-icon.reaction-icon-transparent {
+  opacity: 0.5 !important; /* Half transparent for default emoji */
+}
+
+.header-item-reaction-icon.reaction-icon-solid {
+  opacity: 1 !important; /* Solid for user's selected emoji */
+  background-color: var(--color-background-primary);
+  box-shadow: var(--shadow-md);
+}
+
+/* ===================================
+   RESPONSIVE DESIGN
+   =================================== */
+
+@media (max-width: 768px) {
+  .reaction-picker-content {
+    padding: 4px 6px;
+    gap: 3px;
+  }
+  
+  .reaction-option {
+    width: 24px;
+    height: 24px;
+    font-size: 14px;
+  }
+  
+  .reaction-emoji {
+    font-size: 12px;
+  }
+}

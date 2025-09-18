@@ -8,7 +8,7 @@ export class ReactionModel extends Model implements FactReaction {
   static tableName = "reactions";
 
   id?: number;
-  reaction?: string;
+  reaction!: string;
 
   static jsonSchema = {
     type: "object",

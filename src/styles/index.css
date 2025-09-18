@@ -16,6 +16,8 @@
 @import "./components/card.module.css";
 @import "./components/main-insights-page.module.css";
 @import "./components/modal.module.css";
+@import "./components/reaction-components.css";
+@import "./components/flat-page-design.css";
 
 /* Import theme variations */
 @import "./themes/theme-variations.css";
