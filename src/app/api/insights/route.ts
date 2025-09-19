@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 
 import "../../api/db";
+import knex from "../../api/db";
 import { Insight, InsightEvidence } from "../../types";
 import { getAuthUser } from "../../functions";
 import { InsightModel } from "../models/insights";
@@ -32,6 +33,7 @@ export async function GET(req: NextRequest): Promise<GetInsightsRouteResponse> {
       .limit(limit);
 
     const finalQuery = InsightModel.query()
+      .select("insights.*") // Explicitly select all insight fields including timestamps
       .withGraphJoined(
         `[
       ${includeParents ? "parents.parentInsight," : ""}
@@ -89,7 +91,9 @@ export async function POST(
         user_id: authUser.user_id,
         uid,
         title,
-      })
+        created_at: knex.fn.now(),
+        updated_at: knex.fn.now(),
+      } as any)
       .withGraphFetched("evidence");
 
     // Then add evidence if provided

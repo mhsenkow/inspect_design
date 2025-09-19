@@ -55,7 +55,7 @@ const FactsTable = ({
   }[];
   queryFunction?: (query: string) => Promise<Fact[]>;
   dataFilter: string | undefined;
-  setDataFilter: React.Dispatch<React.SetStateAction<string>>;
+  setDataFilter?: React.Dispatch<React.SetStateAction<string>>;
   disabledIds?: number[];
   selectRows?: boolean;
   hideHead?: boolean;
@@ -256,99 +256,6 @@ const FactsTable = ({
                   className="rounded border-inverse text-inverse focus:ring-inverse"
                 />
               </th>
-              <th className="px-8 py-5 text-left text-xs font-medium text-inverse uppercase tracking-wider sortable cursor-pointer hover:text-secondary transition-colors duration-200">
-                Updated
-              </th>
-              <th className="px-8 py-5 text-left text-xs font-medium text-inverse uppercase tracking-wider">
-                {/* search */}
-                {setDataFilter && (
-                  <div className="relative">
-                    <input
-                      type="text"
-                      placeholder={
-                        loading ? "Searching..." : "Search the titles..."
-                      }
-                      style={{
-                        backgroundColor: "var(--color-background-primary)",
-                        borderColor: "var(--color-border-primary)",
-                        color: "var(--color-text-primary)",
-                      }}
-                      onFocus={(event) => {
-                        const target = event.target as HTMLInputElement;
-                        target.style.borderColor = "var(--color-border-focus)";
-                        target.style.boxShadow =
-                          "0 0 0 2px rgba(24, 119, 242, 0.2)";
-                        // TODO: can I get the ClientSidePage itself or something other than the button title?
-                        if (
-                          event.relatedTarget &&
-                          (event.relatedTarget as HTMLElement).textContent ==
-                            "Add Evidence"
-                        ) {
-                          target.blur();
-                        }
-                      }}
-                      onBlur={(event) => {
-                        const target = event.target as HTMLInputElement;
-                        target.style.borderColor =
-                          "var(--color-border-primary)";
-                        target.style.boxShadow = "none";
-                      }}
-                      className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 text-sm transition-all duration-200 ${loading ? "pr-16 opacity-75" : dataFilter ? "pr-8" : ""}`}
-                      value={dataFilter || ""}
-                      onChange={(event) => {
-                        const value = event.target.value;
-                        setDataFilter(value);
-                      }}
-                      disabled={loading}
-                    />
-                    {dataFilter && !loading && (
-                      <button
-                        type="button"
-                        onClick={() => setDataFilter("")}
-                        className="absolute right-3 top-half transform-center w-6 h-6 flex items-center justify-center rounded-full transition-all duration-200"
-                        style={{
-                          color: "var(--color-text-tertiary)",
-                          backgroundColor: "transparent",
-                        }}
-                        onMouseEnter={(e) => {
-                          const target = e.target as HTMLElement;
-                          target.style.backgroundColor =
-                            "var(--color-background-secondary)";
-                          target.style.color = "var(--color-text-primary)";
-                        }}
-                        onMouseLeave={(e) => {
-                          const target = e.target as HTMLElement;
-                          target.style.backgroundColor = "transparent";
-                          target.style.color = "var(--color-text-tertiary)";
-                        }}
-                        aria-label="Clear search"
-                        title="Clear search"
-                      >
-                        <span
-                          style={{
-                            fontSize: "16px",
-                            fontWeight: "normal",
-                            lineHeight: "1",
-                          }}
-                        >
-                          ×
-                        </span>
-                      </button>
-                    )}
-                    {loading && (
-                      <div className="absolute right-3 top-half transform-center">
-                        <div
-                          className="animate-spin h-4 w-4 border-2 border-t-transparent rounded-full"
-                          style={{
-                            borderColor: "var(--color-base-500)",
-                            borderTopColor: "transparent",
-                          }}
-                        ></div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </th>
               {columns &&
                 columns.map((column) => (
                   <th
@@ -486,66 +393,66 @@ const FactsTable = ({
                             })}
                           </div>
                         )}
+                        {enableReactionIcons && loggedIn && (
+                          <ReactionIcon
+                            reactions={fact.reactions || []}
+                            currentUserId={getCurrentUserId()}
+                            onReactionSubmit={async (reaction) => {
+                              if (token) {
+                                // Handle different data structures
+                                let insightId: number | undefined;
+                                let summaryId: number | undefined;
+
+                                if (
+                                  factName === "childInsights" &&
+                                  (fact as any).childInsight
+                                ) {
+                                  // For child insights, use the childInsight.id
+                                  insightId = (fact as any).childInsight.id;
+                                  summaryId = undefined; // Child insights don't have summary_id
+                                } else if (
+                                  factName === "parentInsights" &&
+                                  (fact as any).parentInsight
+                                ) {
+                                  // For parent insights, use the parentInsight.id
+                                  insightId = (fact as any).parentInsight.id;
+                                  summaryId = undefined; // Parent insights don't have summary_id
+                                } else if (factName === "insight") {
+                                  // For main page insights, use fact.id as insight_id
+                                  insightId = fact.id;
+                                  summaryId = undefined; // Main insights don't have summary_id
+                                } else {
+                                  // For regular insights and evidence
+                                  insightId = fact.insight_id;
+                                  summaryId = fact.summary_id;
+                                }
+
+                                const result = await submitReaction(
+                                  {
+                                    reaction,
+                                    summary_id: summaryId,
+                                    insight_id: insightId,
+                                  },
+                                  token,
+                                );
+                                if (result) {
+                                  // Remove any existing reaction from this user for this fact
+                                  const existingReactions =
+                                    fact.reactions?.filter(
+                                      (r) => r.user_id !== result.user_id,
+                                    ) || [];
+                                  fact.reactions = [
+                                    ...existingReactions,
+                                    result as FactReaction,
+                                  ];
+                                  setData([...data!]);
+                                }
+                              }
+                            }}
+                            className="reaction-icon-cell"
+                          />
+                        )}
                       </div>
-                      {enableReactionIcons && loggedIn && (
-                        <ReactionIcon
-                          reactions={fact.reactions || []}
-                          currentUserId={getCurrentUserId()}
-                          onReactionSubmit={async (reaction) => {
-                            if (token) {
-                              // Handle different data structures
-                              let insightId: number | undefined;
-                              let summaryId: number | undefined;
-
-                              if (
-                                factName === "childInsights" &&
-                                (fact as any).childInsight
-                              ) {
-                                // For child insights, use the childInsight.id
-                                insightId = (fact as any).childInsight.id;
-                                summaryId = undefined; // Child insights don't have summary_id
-                              } else if (
-                                factName === "parentInsights" &&
-                                (fact as any).parentInsight
-                              ) {
-                                // For parent insights, use the parentInsight.id
-                                insightId = (fact as any).parentInsight.id;
-                                summaryId = undefined; // Parent insights don't have summary_id
-                              } else if (factName === "insight") {
-                                // For main page insights, use fact.id as insight_id
-                                insightId = fact.id;
-                                summaryId = undefined; // Main insights don't have summary_id
-                              } else {
-                                // For regular insights and evidence
-                                insightId = fact.insight_id;
-                                summaryId = fact.summary_id;
-                              }
-
-                              const result = await submitReaction(
-                                {
-                                  reaction,
-                                  summary_id: summaryId,
-                                  insight_id: insightId,
-                                },
-                                token,
-                              );
-                              if (result) {
-                                // Remove any existing reaction from this user for this fact
-                                const existingReactions =
-                                  fact.reactions?.filter(
-                                    (r) => r.user_id !== result.user_id,
-                                  ) || [];
-                                fact.reactions = [
-                                  ...existingReactions,
-                                  result as FactReaction,
-                                ];
-                                setData([...data!]);
-                              }
-                            }
-                          }}
-                          className="reaction-icon-cell"
-                        />
-                      )}
                     </td>
                     {columns &&
                       columns.map((column) => (

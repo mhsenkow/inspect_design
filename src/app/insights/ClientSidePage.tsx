@@ -45,6 +45,7 @@ const ClientSidePage = ({
   const [liveData, setLiveData] = useState(insights);
   const [selectedInsights, setSelectedInsights] = useState<Insight[]>([]);
   const [isSaveLinkDialogOpen, setIsSaveLinkDialogOpen] = useState(false);
+  const [dataFilter, setDataFilter] = useState<string>("");
 
   const [
     serverFunctionInputForInsightsList,
@@ -154,60 +155,113 @@ const ClientSidePage = ({
                   : "No insights yet"}
               </p>
             </div>
-            {loggedIn && (
-              <div style={{ display: "flex", gap: "var(--spacing-2)" }}>
-                <button
-                  onClick={promptForNewInsightName}
-                  className={cardStyles.addButton}
-                  aria-label="Create New Insight"
-                  title="Create New Insight"
-                >
-                  <span className={cardStyles.addButtonIcon}>+</span>
-                  <span className={cardStyles.addButtonText}>
-                    Create New Insight
-                  </span>
-                </button>
-                <button
-                  onClick={() => setIsSaveLinkDialogOpen(true)}
-                  className={cardStyles.addButton}
-                  aria-label="Save Link"
-                  title="Save Link"
-                >
-                  <span className={cardStyles.addButtonIcon}>🔗</span>
-                  <span className={cardStyles.addButtonText}>Save Link</span>
-                </button>
-                {selectedInsights.length > 0 && (
+            <div
+              style={{
+                display: "flex",
+                gap: "var(--spacing-2)",
+                alignItems: "center",
+              }}
+            >
+              {/* Search Input */}
+              <div
+                className="search-container"
+                style={{ position: "relative" }}
+              >
+                <input
+                  type="text"
+                  placeholder="Search insights..."
+                  value={dataFilter}
+                  onChange={(e) => setDataFilter(e.target.value)}
+                  className="search-input"
+                  style={{
+                    backgroundColor: "var(--color-background-primary)",
+                    borderColor: "var(--color-border-primary)",
+                    color: "var(--color-text-primary)",
+                    padding: "var(--spacing-2) var(--spacing-3)",
+                    border: "1px solid var(--color-border-primary)",
+                    borderRadius: "var(--radius-lg)",
+                    fontSize: "var(--font-size-sm)",
+                    minWidth: "200px",
+                  }}
+                />
+                {dataFilter && (
                   <button
-                    onClick={async () => {
-                      if (
-                        token &&
-                        selectedInsights.length > 0 &&
-                        confirm(
-                          `Are you sure you want to delete ${selectedInsights.length} insight${
-                            selectedInsights.length !== 1 ? "s" : ""
-                          }?`,
-                        )
-                      ) {
-                        await deleteInsights(
-                          { insights: selectedInsights },
-                          token,
-                        );
-                        // Refresh the page to show updated data
-                        window.location.reload();
-                      }
+                    type="button"
+                    onClick={() => setDataFilter("")}
+                    className="search-clear"
+                    style={{
+                      position: "absolute",
+                      right: "var(--spacing-2)",
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "var(--color-text-tertiary)",
                     }}
-                    className={`${cardStyles.addButton} ${cardStyles.removeButton}`}
-                    aria-label="Delete Selected Insights"
-                    title="Delete Selected Insights"
+                    aria-label="Clear search"
+                    title="Clear search"
                   >
-                    <span className={cardStyles.addButtonIcon}>🗑️</span>
-                    <span className={cardStyles.addButtonText}>
-                      Delete ({selectedInsights.length})
-                    </span>
+                    ×
                   </button>
                 )}
               </div>
-            )}
+
+              {loggedIn && (
+                <>
+                  <button
+                    onClick={promptForNewInsightName}
+                    className={cardStyles.addButton}
+                    aria-label="Create New Insight"
+                    title="Create New Insight"
+                  >
+                    <span className={cardStyles.addButtonIcon}>+</span>
+                    <span className={cardStyles.addButtonText}>
+                      Create New Insight
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => setIsSaveLinkDialogOpen(true)}
+                    className={cardStyles.addButton}
+                    aria-label="Save Link"
+                    title="Save Link"
+                  >
+                    <span className={cardStyles.addButtonIcon}>🔗</span>
+                    <span className={cardStyles.addButtonText}>Save Link</span>
+                  </button>
+                  {selectedInsights.length > 0 && (
+                    <button
+                      onClick={async () => {
+                        if (
+                          token &&
+                          selectedInsights.length > 0 &&
+                          confirm(
+                            `Are you sure you want to delete ${selectedInsights.length} insight${
+                              selectedInsights.length !== 1 ? "s" : ""
+                            }?`,
+                          )
+                        ) {
+                          await deleteInsights(
+                            { insights: selectedInsights },
+                            token,
+                          );
+                          // Refresh the page to show updated data
+                          window.location.reload();
+                        }
+                      }}
+                      className={`${cardStyles.addButton} ${cardStyles.removeButton}`}
+                      aria-label="Delete Selected Insights"
+                      title="Delete Selected Insights"
+                    >
+                      <span className={cardStyles.addButtonIcon}>🗑️</span>
+                      <span className={cardStyles.addButtonText}>
+                        Delete ({selectedInsights.length})
+                      </span>
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
           </div>
 
           {/* Flat Insights List Section */}
@@ -248,30 +302,42 @@ const ClientSidePage = ({
                 {/* FIXME: create selectedActions to /insights table to add parent/children to selected insights  */}
                 {/* FIXME: be a landing page for anonymous users with top insights */}
                 {/* FIXME: sort by citation count desc by default (here & the route) */}
-                <FactsListView
-                  factName="insight"
-                  serverFunctionInput={serverFunctionInputForInsightsList}
-                  setServerFunctionInput={setServerFunctionInputForInsightsList}
-                  activeServerFunction={activeServerFunctionForInsightsList}
-                  setActiveServerFunction={
-                    setActiveServerFunctionForInsightsList
-                  }
-                  selectedFacts={selectedInsights}
-                  setSelectedFacts={
-                    setSelectedInsights as React.Dispatch<
-                      React.SetStateAction<Fact[]>
-                    >
-                  }
-                  unselectedActions={[]}
-                  selectedActions={[]}
-                  enableReactionIcons={true}
-                  columns={[
-                    {
-                      name: "Updated",
-                      dataColumn: "updated_at",
-                      display: (insight: Fact | Insight) => (
-                        <span className="text-sm text-secondary font-mono">
-                          {insight.updated_at
+                {liveData.length > 0 ? (
+                  <FactsListView
+                    factName="insight"
+                    serverFunctionInput={serverFunctionInputForInsightsList}
+                    setServerFunctionInput={
+                      setServerFunctionInputForInsightsList
+                    }
+                    activeServerFunction={activeServerFunctionForInsightsList}
+                    setActiveServerFunction={
+                      setActiveServerFunctionForInsightsList
+                    }
+                    selectedFacts={selectedInsights}
+                    setSelectedFacts={
+                      setSelectedInsights as React.Dispatch<
+                        React.SetStateAction<Fact[]>
+                      >
+                    }
+                    unselectedActions={[]}
+                    selectedActions={[]}
+                    enableReactionIcons={true}
+                    dataFilter={dataFilter}
+                    setDataFilter={setDataFilter}
+                    columns={[
+                      {
+                        name: "Updated",
+                        dataColumn: "updated_at",
+                        display: (insight: Fact | Insight) => {
+                          // Debug: log the insight data to see what's available
+                          console.log("Insight data:", {
+                            id: insight.id,
+                            title: insight.title,
+                            updated_at: insight.updated_at,
+                            hasUpdatedAt: !!insight.updated_at,
+                          });
+
+                          const dateStr = insight.updated_at
                             ? new Date(insight.updated_at).toLocaleDateString(
                                 "en-US",
                                 {
@@ -280,58 +346,87 @@ const ClientSidePage = ({
                                   year: "numeric",
                                 },
                               )
-                            : "---"}
-                        </span>
-                      ),
-                    },
-                    {
-                      name: "Title",
-                      dataColumn: "title",
-                      display: (insight: Fact | Insight) => (
-                        <Link
-                          href={`/insights/${insight.uid}`}
-                          className="text-primary hover:text-primary-600 transition-colors duration-200"
+                            : "---";
+                          return (
+                            <span className="text-sm text-secondary font-mono">
+                              {dateStr}
+                            </span>
+                          );
+                        },
+                      },
+                      {
+                        name: "Title",
+                        dataColumn: "title",
+                        display: (insight: Fact | Insight) => (
+                          <Link
+                            href={`/insights/${insight.uid}`}
+                            className="text-primary hover:text-primary-600 transition-colors duration-200"
+                          >
+                            {insight.title}
+                          </Link>
+                        ),
+                      },
+                      {
+                        name: "📄",
+                        dataColumn: "evidence",
+                        display: (insight: Fact | Insight) => (
+                          <span className="badge text-bg-danger">
+                            {insight.evidence?.length || 0}
+                          </span>
+                        ),
+                      },
+                      {
+                        name: "👶",
+                        dataColumn: "children",
+                        display: (insight: Fact | Insight) => (
+                          <span className="badge text-bg-info">
+                            {insight.children?.length || 0}
+                          </span>
+                        ),
+                      },
+                      {
+                        name: "👨‍👩‍👧‍👦",
+                        dataColumn: "parents",
+                        display: (insight: Fact | Insight) => (
+                          <span className="badge text-bg-warning">
+                            {insight.parents?.length || 0}
+                          </span>
+                        ),
+                      },
+                      {
+                        name: "🌎",
+                        dataColumn: "is_public",
+                        display: (insight: Fact | Insight) => (
+                          <span>{insight.is_public ? "✅" : ""}</span>
+                        ),
+                      },
+                    ]}
+                  />
+                ) : (
+                  <div className="empty-state">
+                    <div className="empty-state-content">
+                      <div className="empty-state-icon">📝</div>
+                      <h3 className="empty-state-title">No insights yet</h3>
+                      <p className="empty-state-description">
+                        Create your first insight to get started organizing your
+                        thoughts and research.
+                      </p>
+                      {loggedIn && (
+                        <button
+                          onClick={promptForNewInsightName}
+                          className={cardStyles.addButton}
+                          aria-label="Create Your First Insight"
+                          title="Create Your First Insight"
                         >
-                          {insight.title}
-                        </Link>
-                      ),
-                    },
-                    {
-                      name: "📄",
-                      dataColumn: "evidence",
-                      display: (insight: Fact | Insight) => (
-                        <span className="badge text-bg-danger">
-                          {insight.evidence?.length || 0}
-                        </span>
-                      ),
-                    },
-                    {
-                      name: "👶",
-                      dataColumn: "children",
-                      display: (insight: Fact | Insight) => (
-                        <span className="badge text-bg-info">
-                          {insight.children?.length || 0}
-                        </span>
-                      ),
-                    },
-                    {
-                      name: "👨‍👩‍👧‍👦",
-                      dataColumn: "parents",
-                      display: (insight: Fact | Insight) => (
-                        <span className="badge text-bg-warning">
-                          {insight.parents?.length || 0}
-                        </span>
-                      ),
-                    },
-                    {
-                      name: "🌎",
-                      dataColumn: "is_public",
-                      display: (insight: Fact | Insight) => (
-                        <span>{insight.is_public ? "✅" : ""}</span>
-                      ),
-                    },
-                  ]}
-                />
+                          <span className={cardStyles.addButtonIcon}>+</span>
+                          <span className={cardStyles.addButtonText}>
+                            Create Your First Insight
+                          </span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
               </InfiniteScrollLoader>
             </CurrentUserContext.Provider>
           </div>

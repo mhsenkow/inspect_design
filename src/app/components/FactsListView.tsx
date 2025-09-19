@@ -28,6 +28,8 @@ const FactsListView = ({
   enableFeedback,
   cellActions,
   enableReactionIcons = false,
+  dataFilter,
+  setDataFilter,
 }: {
   factName: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -58,10 +60,11 @@ const FactsListView = ({
     enabled?: (fact: Fact) => boolean;
   }[];
   enableReactionIcons?: boolean;
+  dataFilter?: string;
+  setDataFilter?: React.Dispatch<React.SetStateAction<string>>;
 }): React.JSX.Element => {
   const { data, setData } = useContext(FactsDataContext);
   const [flvResponses, setFLVResponses] = useState<FLVResponse[]>([]);
-  const [dataFilter, setDataFilter] = useState<string>("");
 
   const { token, loggedIn } = useUser();
 
@@ -123,7 +126,7 @@ const FactsListView = ({
                 setData(data.filter((item) => !ids.includes(item.id)));
               }
             }
-            setDataFilter("");
+            setDataFilter?.("");
           } else if (response.action == 0) {
             response.facts.forEach((f) => {
               if (f.uid) {
