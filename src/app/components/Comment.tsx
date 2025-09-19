@@ -23,9 +23,9 @@ const Comment = ({ comment, removeCommentFunc }: Props) => {
     >
       <div
         style={{
-          border: "1px black dotted",
+          border: "1px solid var(--color-border-primary)",
           textAlign: "center",
-          backgroundColor: "#ddd",
+          backgroundColor: "var(--color-background-secondary)",
         }}
       >
         {comment.user!.avatar_uri && (

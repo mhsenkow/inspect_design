@@ -62,7 +62,7 @@ const AppHeader = (): React.JSX.Element => {
               />
             </a>
           </p>
-          <p style={{ color: "#ccc" }}>
+          <p style={{ color: "var(--color-text-muted)" }}>
             {/* Download the app to receive mobile notifications and share
               articles with your connections! */}
             Help me incubate Inspect and other DG projects to empower people

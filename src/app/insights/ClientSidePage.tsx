@@ -176,6 +176,36 @@ const ClientSidePage = ({
                   <span className={cardStyles.addButtonIcon}>🔗</span>
                   <span className={cardStyles.addButtonText}>Save Link</span>
                 </button>
+                {selectedInsights.length > 0 && (
+                  <button
+                    onClick={async () => {
+                      if (
+                        token &&
+                        selectedInsights.length > 0 &&
+                        confirm(
+                          `Are you sure you want to delete ${selectedInsights.length} insight${
+                            selectedInsights.length !== 1 ? "s" : ""
+                          }?`,
+                        )
+                      ) {
+                        await deleteInsights(
+                          { insights: selectedInsights },
+                          token,
+                        );
+                        // Refresh the page to show updated data
+                        window.location.reload();
+                      }
+                    }}
+                    className={`${cardStyles.addButton} ${cardStyles.removeButton}`}
+                    aria-label="Delete Selected Insights"
+                    title="Delete Selected Insights"
+                  >
+                    <span className={cardStyles.addButtonIcon}>🗑️</span>
+                    <span className={cardStyles.addButtonText}>
+                      Delete ({selectedInsights.length})
+                    </span>
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -233,34 +263,7 @@ const ClientSidePage = ({
                     >
                   }
                   unselectedActions={[]}
-                  selectedActions={[
-                    {
-                      className:
-                        "btn btn-sm btn-ghost text-text-secondary hover:text-text-primary hover:bg-background-secondary",
-                      text: "Delete",
-                      handleOnClick: async () => {
-                        if (
-                          token &&
-                          selectedInsights.length > 0 &&
-                          confirm(
-                            `Are you sure you want to delete ${selectedInsights.length} insight${selectedInsights.length !== 1 ? "s" : ""}?`,
-                          )
-                        ) {
-                          await deleteInsights(
-                            { insights: selectedInsights },
-                            token,
-                          );
-                          // Refresh the page to show updated data
-                          window.location.reload();
-                        }
-                      },
-                      serverFunction: async () => ({
-                        action: 0 as const,
-                        facts: [],
-                      }), // Dummy function since we handle deletion in handleOnClick
-                      enabled: selectedInsights.length > 0,
-                    },
-                  ]}
+                  selectedActions={[]}
                   enableReactionIcons={true}
                   columns={[
                     {
