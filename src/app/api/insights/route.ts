@@ -36,6 +36,7 @@ export async function GET(req: NextRequest): Promise<GetInsightsRouteResponse> {
       .select("insights.*") // Explicitly select all insight fields including timestamps
       .withGraphJoined(
         `[
+      reactions,
       ${includeParents ? "parents.parentInsight," : ""}
       ${includeChildren ? "children.childInsight.evidence," : ""}
       ${includeEvidence ? "evidence" : ""}

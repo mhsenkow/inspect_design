@@ -4,9 +4,12 @@ import styles from "../../styles/components/main-insights-page.module.css";
 import cardStyles from "../../styles/components/card.module.css";
 import React, { useState } from "react";
 import Link from "next/link";
+import ReactionIcon from "../components/ReactionIcon";
+import { submitReaction } from "../functions";
 
 import {
   Fact,
+  FactReaction,
   FLVResponse,
   Insight,
   InsightEvidence,
@@ -41,7 +44,7 @@ const ClientSidePage = ({
   insights: Insight[];
   currentUser: User | null;
 }): React.JSX.Element => {
-  const { token } = useUser();
+  const { token, user_id } = useUser();
   const [liveData, setLiveData] = useState(insights);
   const [selectedInsights, setSelectedInsights] = useState<Insight[]>([]);
   const [isSaveLinkDialogOpen, setIsSaveLinkDialogOpen] = useState(false);
@@ -160,12 +163,18 @@ const ClientSidePage = ({
                 display: "flex",
                 gap: "var(--spacing-2)",
                 alignItems: "center",
+                flex: 1,
+                justifyContent: "flex-end",
               }}
             >
               {/* Search Input */}
               <div
                 className="search-container"
-                style={{ position: "relative" }}
+                style={{
+                  position: "relative",
+                  flex: 1,
+                  marginLeft: "var(--spacing-4)",
+                }}
               >
                 <input
                   type="text"
@@ -181,7 +190,7 @@ const ClientSidePage = ({
                     border: "1px solid var(--color-border-primary)",
                     borderRadius: "var(--radius-lg)",
                     fontSize: "var(--font-size-sm)",
-                    minWidth: "200px",
+                    width: "100%",
                   }}
                 />
                 {dataFilter && (
@@ -266,11 +275,6 @@ const ClientSidePage = ({
 
           {/* Flat Insights List Section */}
           <div className="flatInsightsList">
-            <div className="sectionHeader">
-              <span className="sectionIcon">📋</span>
-              Insights List
-            </div>
-
             <CurrentUserContext.Provider value={currentUser}>
               <InfiniteScrollLoader
                 data={liveData}
@@ -358,12 +362,56 @@ const ClientSidePage = ({
                         name: "Title",
                         dataColumn: "title",
                         display: (insight: Fact | Insight) => (
-                          <Link
-                            href={`/insights/${insight.uid}`}
-                            className="text-primary hover:text-primary-600 transition-colors duration-200"
-                          >
-                            {insight.title}
-                          </Link>
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <Link
+                                href={`/insights/${insight.uid}`}
+                                className="text-primary hover:text-primary-600 transition-colors duration-200"
+                              >
+                                {insight.title}
+                              </Link>
+                              {/* Show existing reactions */}
+                              <span className="ml-2 text-muted">
+                                {insight.reactions &&
+                                  insight.reactions
+                                    .map((r) => r.reaction)
+                                    .join("")}
+                              </span>
+                            </div>
+                            {/* Reaction icon integrated here */}
+                            <div className="ml-2">
+                              <ReactionIcon
+                                reactions={insight.reactions || []}
+                                currentUserId={user_id}
+                                onReactionSubmit={async (reaction) => {
+                                  if (token) {
+                                    const result = await submitReaction(
+                                      {
+                                        reaction,
+                                        summary_id: undefined,
+                                        insight_id: insight.id,
+                                      },
+                                      token,
+                                    );
+                                    if (result) {
+                                      // Update the insight's reactions
+                                      const existingReactions =
+                                        insight.reactions?.filter(
+                                          (r) => r.user_id !== result.user_id,
+                                        ) || [];
+                                      insight.reactions = [
+                                        ...existingReactions,
+                                        result as FactReaction,
+                                      ];
+                                      // Trigger a re-render by updating the parent state
+                                      setLiveData([...liveData]);
+                                    }
+                                  }
+                                }}
+                                className="reaction-icon-cell"
+                              />
+                            </div>
+                          </div>
                         ),
                       },
                       {

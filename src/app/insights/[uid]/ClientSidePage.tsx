@@ -614,24 +614,6 @@ const ClientSidePage = ({
                     activeServerFunction={activeServerFunctionForChildInsights}
                     selectedActions={[]}
                     enableReactionIcons={true}
-                    columns={[
-                      {
-                        name: "📄",
-                        dataColumn: "childInsight.evidence",
-                        display: (insightLink: Fact | InsightLink) => (
-                          <span className="badge text-bg-danger">
-                            {insightLink.childInsight.directEvidenceCount ?? 0}
-                          </span>
-                        ),
-                      },
-                      {
-                        name: "🌎",
-                        dataColumn: "childInsight.is_public",
-                        display: (insight: Fact | Insight) => (
-                          <span>{insight.is_public ? "✅" : ""}</span>
-                        ),
-                      },
-                    ]}
                   />
                 </FactsDataContext.Provider>
               </div>

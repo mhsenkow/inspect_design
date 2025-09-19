@@ -328,132 +328,207 @@ const FactsTable = ({
                         className="rounded border-primary text-primary focus:ring-primary"
                       />
                     </td>
-                    <td className="px-8 py-5 whitespace-nowrap text-sm text-secondary font-mono">
-                      {fact.updated_at &&
-                        new Date(fact.updated_at).toLocaleDateString("en-US", {
-                          month: "2-digit",
-                          day: "2-digit",
-                          year: "numeric",
-                        })}
-                      {!fact.updated_at && "---"}
-                    </td>
-                    <td className="px-8 py-5 text-sm text-primary font-medium relative reaction-cell-container">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          {!selectRows &&
-                            (factName == "snippet" ? (
-                              <Link
-                                href={`/links/${fact.uid}`}
-                                className="text-primary hover:text-primary-600 transition-colors duration-200"
-                              >
-                                {fact.title}
-                              </Link>
-                            ) : (
-                              <Link
-                                href={`/insights/${fact.uid}`}
-                                className="text-primary hover:text-primary-600 transition-colors duration-200"
-                              >
-                                {fact.title}
-                              </Link>
-                            ))}
-                          {selectRows && fact.title}
-                          {/* FIXME: updates several times until reactions is an empty array */}
-                          <span className="ml-2 text-muted">
-                            {fact.reactions &&
-                              fact.reactions.map((r) => r.reaction).join("")}
-                          </span>
-                        </div>
-                        {cellActions && (
-                          <div className="flex items-center space-x-1 ml-2">
-                            {cellActions.map((action, index) => {
-                              const isEnabled = action.enabled
-                                ? action.enabled(fact)
-                                : true;
-                              return (
-                                <button
-                                  key={`${action.label}-${fact.id}-${index}`}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (isEnabled) {
-                                      action.onClick(fact);
-                                    }
-                                  }}
-                                  className={`btn btn-icon btn-sm ${
-                                    isEnabled
-                                      ? "btn-ghost text-text-secondary hover:text-text-primary hover:bg-background-secondary"
-                                      : "btn-ghost text-text-tertiary opacity-50 cursor-not-allowed"
-                                  }`}
-                                  disabled={!isEnabled}
-                                  aria-label={action.label}
-                                  title={action.label}
-                                >
-                                  {action.icon}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        )}
-                        {enableReactionIcons && loggedIn && (
-                          <ReactionIcon
-                            reactions={fact.reactions || []}
-                            currentUserId={getCurrentUserId()}
-                            onReactionSubmit={async (reaction) => {
-                              if (token) {
-                                // Handle different data structures
-                                let insightId: number | undefined;
-                                let summaryId: number | undefined;
+                    {/* Only show hardcoded columns if no columns prop is provided */}
+                    {!columns && (
+                      <>
+                        <td className="px-8 py-5 whitespace-nowrap text-sm text-secondary font-mono">
+                          {(() => {
+                            // Handle different data structures for different fact types
+                            let dateToShow = null;
 
-                                if (
-                                  factName === "childInsights" &&
-                                  (fact as any).childInsight
-                                ) {
-                                  // For child insights, use the childInsight.id
-                                  insightId = (fact as any).childInsight.id;
-                                  summaryId = undefined; // Child insights don't have summary_id
-                                } else if (
-                                  factName === "parentInsights" &&
-                                  (fact as any).parentInsight
-                                ) {
-                                  // For parent insights, use the parentInsight.id
-                                  insightId = (fact as any).parentInsight.id;
-                                  summaryId = undefined; // Parent insights don't have summary_id
-                                } else if (factName === "insight") {
-                                  // For main page insights, use fact.id as insight_id
-                                  insightId = fact.id;
-                                  summaryId = undefined; // Main insights don't have summary_id
-                                } else {
-                                  // For regular insights and evidence
-                                  insightId = fact.insight_id;
-                                  summaryId = fact.summary_id;
-                                }
+                            if (fact.updated_at) {
+                              dateToShow = fact.updated_at;
+                            } else if ((fact as any).childInsight?.updated_at) {
+                              dateToShow = (fact as any).childInsight
+                                .updated_at;
+                            } else if (
+                              (fact as any).parentInsight?.updated_at
+                            ) {
+                              dateToShow = (fact as any).parentInsight
+                                .updated_at;
+                            } else if ((fact as any).snippet?.updated_at) {
+                              dateToShow = (fact as any).snippet.updated_at;
+                            }
 
-                                const result = await submitReaction(
+                            return dateToShow
+                              ? new Date(dateToShow).toLocaleDateString(
+                                  "en-US",
                                   {
-                                    reaction,
-                                    summary_id: summaryId,
-                                    insight_id: insightId,
+                                    month: "2-digit",
+                                    day: "2-digit",
+                                    year: "numeric",
                                   },
-                                  token,
-                                );
-                                if (result) {
-                                  // Remove any existing reaction from this user for this fact
-                                  const existingReactions =
-                                    fact.reactions?.filter(
-                                      (r) => r.user_id !== result.user_id,
-                                    ) || [];
-                                  fact.reactions = [
-                                    ...existingReactions,
-                                    result as FactReaction,
-                                  ];
-                                  setData([...data!]);
-                                }
-                              }
-                            }}
-                            className="reaction-icon-cell"
-                          />
-                        )}
-                      </div>
-                    </td>
+                                )
+                              : "---";
+                          })()}
+                        </td>
+                        <td className="px-8 py-5 text-sm text-primary font-medium relative reaction-cell-container">
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              {!selectRows &&
+                                (() => {
+                                  // Handle different data structures for different fact types
+                                  let titleToShow = null;
+                                  let uidToUse = null;
+
+                                  if (fact.title && fact.uid) {
+                                    titleToShow = fact.title;
+                                    uidToUse = fact.uid;
+                                  } else if (
+                                    (fact as any).childInsight?.title &&
+                                    (fact as any).childInsight?.uid
+                                  ) {
+                                    titleToShow = (fact as any).childInsight
+                                      .title;
+                                    uidToUse = (fact as any).childInsight.uid;
+                                  } else if (
+                                    (fact as any).parentInsight?.title &&
+                                    (fact as any).parentInsight?.uid
+                                  ) {
+                                    titleToShow = (fact as any).parentInsight
+                                      .title;
+                                    uidToUse = (fact as any).parentInsight.uid;
+                                  } else if (
+                                    (fact as any).snippet?.title &&
+                                    (fact as any).snippet?.uid
+                                  ) {
+                                    titleToShow = (fact as any).snippet.title;
+                                    uidToUse = (fact as any).snippet.uid;
+                                  }
+
+                                  if (titleToShow && uidToUse) {
+                                    return factName === "snippet" ? (
+                                      <Link
+                                        href={`/links/${uidToUse}`}
+                                        className="text-primary hover:text-primary-600 transition-colors duration-200"
+                                      >
+                                        {titleToShow}
+                                      </Link>
+                                    ) : (
+                                      <Link
+                                        href={`/insights/${uidToUse}`}
+                                        className="text-primary hover:text-primary-600 transition-colors duration-200"
+                                      >
+                                        {titleToShow}
+                                      </Link>
+                                    );
+                                  }
+                                  return null;
+                                })()}
+                              {selectRows &&
+                                (() => {
+                                  // Handle different data structures for selectRows
+                                  if (fact.title) return fact.title;
+                                  if ((fact as any).childInsight?.title)
+                                    return (fact as any).childInsight.title;
+                                  if ((fact as any).parentInsight?.title)
+                                    return (fact as any).parentInsight.title;
+                                  if ((fact as any).snippet?.title)
+                                    return (fact as any).snippet.title;
+                                  return null;
+                                })()}
+                              {/* FIXME: updates several times until reactions is an empty array */}
+                              <span className="ml-2 text-muted">
+                                {fact.reactions &&
+                                  fact.reactions
+                                    .map((r) => r.reaction)
+                                    .join("")}
+                              </span>
+                            </div>
+                            {cellActions && (
+                              <div className="flex items-center space-x-1 ml-2">
+                                {cellActions.map((action, index) => {
+                                  const isEnabled = action.enabled
+                                    ? action.enabled(fact)
+                                    : true;
+                                  return (
+                                    <button
+                                      key={`${action.label}-${fact.id}-${index}`}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (isEnabled) {
+                                          action.onClick(fact);
+                                        }
+                                      }}
+                                      className={`btn btn-icon btn-sm ${
+                                        isEnabled
+                                          ? "btn-ghost text-text-secondary hover:text-text-primary hover:bg-background-secondary"
+                                          : "btn-ghost text-text-tertiary opacity-50 cursor-not-allowed"
+                                      }`}
+                                      disabled={!isEnabled}
+                                      aria-label={action.label}
+                                      title={action.label}
+                                    >
+                                      {action.icon}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            )}
+                            {enableReactionIcons && loggedIn && (
+                              <ReactionIcon
+                                reactions={fact.reactions || []}
+                                currentUserId={getCurrentUserId()}
+                                onReactionSubmit={async (reaction) => {
+                                  if (token) {
+                                    // Handle different data structures
+                                    let insightId: number | undefined;
+                                    let summaryId: number | undefined;
+
+                                    if (
+                                      factName === "childInsights" &&
+                                      (fact as any).childInsight
+                                    ) {
+                                      // For child insights, use the childInsight.id
+                                      insightId = (fact as any).childInsight.id;
+                                      summaryId = undefined; // Child insights don't have summary_id
+                                    } else if (
+                                      factName === "parentInsights" &&
+                                      (fact as any).parentInsight
+                                    ) {
+                                      // For parent insights, use the parentInsight.id
+                                      insightId = (fact as any).parentInsight
+                                        .id;
+                                      summaryId = undefined; // Parent insights don't have summary_id
+                                    } else if (factName === "insight") {
+                                      // For main page insights, use fact.id as insight_id
+                                      insightId = fact.id;
+                                      summaryId = undefined; // Main insights don't have summary_id
+                                    } else {
+                                      // For regular insights and evidence
+                                      insightId = fact.insight_id;
+                                      summaryId = fact.summary_id;
+                                    }
+
+                                    const result = await submitReaction(
+                                      {
+                                        reaction,
+                                        summary_id: summaryId,
+                                        insight_id: insightId,
+                                      },
+                                      token,
+                                    );
+                                    if (result) {
+                                      // Remove any existing reaction from this user for this fact
+                                      const existingReactions =
+                                        fact.reactions?.filter(
+                                          (r) => r.user_id !== result.user_id,
+                                        ) || [];
+                                      fact.reactions = [
+                                        ...existingReactions,
+                                        result as FactReaction,
+                                      ];
+                                      setData([...data!]);
+                                    }
+                                  }
+                                }}
+                                className="reaction-icon-cell"
+                              />
+                            )}
+                          </div>
+                        </td>
+                      </>
+                    )}
                     {columns &&
                       columns.map((column) => (
                         <td
@@ -468,7 +543,7 @@ const FactsTable = ({
                     <>
                       <tr>
                         <td
-                          colSpan={columns ? columns.length + 3 : 4}
+                          colSpan={columns ? columns.length + 1 : 3}
                           className="bg-secondary text-sm p-2"
                         >
                           <div className="flex justify-around w-full m-4">
@@ -597,7 +672,7 @@ const FactsTable = ({
                       <tr>
                         {fact.comments && fact.comments.length > 0 && (
                           <td
-                            colSpan={columns ? columns.length + 3 : 4}
+                            colSpan={columns ? columns.length + 1 : 3}
                             className="bg-secondary text-sm"
                           >
                             <div className="p-2">
@@ -635,7 +710,7 @@ const FactsTable = ({
           <tbody>
             <tr>
               <td
-                colSpan={columns ? columns.length + 3 : 4}
+                colSpan={columns ? columns.length + 1 : 3}
                 className="px-8 py-12 text-center text-text-tertiary"
               >
                 <strong>Loading data...</strong>
@@ -650,7 +725,7 @@ const FactsTable = ({
             <tbody>
               <tr>
                 <td
-                  colSpan={columns ? columns.length + 3 : 4}
+                  colSpan={columns ? columns.length + 1 : 3}
                   className="px-8 py-12 text-center text-text-tertiary"
                 >
                   <div>
@@ -674,7 +749,7 @@ const FactsTable = ({
             <tbody>
               <tr>
                 <td
-                  colSpan={columns ? columns.length + 3 : 4}
+                  colSpan={columns ? columns.length + 1 : 3}
                   className="px-8 py-12 text-center text-text-tertiary"
                 >
                   <div>
