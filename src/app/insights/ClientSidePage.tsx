@@ -3,6 +3,7 @@
 import styles from "../../styles/components/main-insights-page.module.css";
 import cardStyles from "../../styles/components/card.module.css";
 import React, { useState } from "react";
+import Link from "next/link";
 
 import {
   Fact,
@@ -232,15 +233,90 @@ const ClientSidePage = ({
                     >
                   }
                   unselectedActions={[]}
-                  selectedActions={[]}
+                  selectedActions={[
+                    {
+                      className:
+                        "btn btn-sm btn-ghost text-text-secondary hover:text-text-primary hover:bg-background-secondary",
+                      text: "Delete",
+                      handleOnClick: async () => {
+                        if (
+                          token &&
+                          selectedInsights.length > 0 &&
+                          confirm(
+                            `Are you sure you want to delete ${selectedInsights.length} insight${selectedInsights.length !== 1 ? "s" : ""}?`,
+                          )
+                        ) {
+                          await deleteInsights(
+                            { insights: selectedInsights },
+                            token,
+                          );
+                          // Refresh the page to show updated data
+                          window.location.reload();
+                        }
+                      },
+                      serverFunction: async () => ({
+                        action: 0 as const,
+                        facts: [],
+                      }), // Dummy function since we handle deletion in handleOnClick
+                      enabled: selectedInsights.length > 0,
+                    },
+                  ]}
                   enableReactionIcons={true}
                   columns={[
+                    {
+                      name: "Updated",
+                      dataColumn: "updated_at",
+                      display: (insight: Fact | Insight) => (
+                        <span className="text-sm text-secondary font-mono">
+                          {insight.updated_at
+                            ? new Date(insight.updated_at).toLocaleDateString(
+                                "en-US",
+                                {
+                                  month: "2-digit",
+                                  day: "2-digit",
+                                  year: "numeric",
+                                },
+                              )
+                            : "---"}
+                        </span>
+                      ),
+                    },
+                    {
+                      name: "Title",
+                      dataColumn: "title",
+                      display: (insight: Fact | Insight) => (
+                        <Link
+                          href={`/insights/${insight.uid}`}
+                          className="text-primary hover:text-primary-600 transition-colors duration-200"
+                        >
+                          {insight.title}
+                        </Link>
+                      ),
+                    },
                     {
                       name: "📄",
                       dataColumn: "evidence",
                       display: (insight: Fact | Insight) => (
                         <span className="badge text-bg-danger">
                           {insight.evidence?.length || 0}
+                        </span>
+                      ),
+                    },
+                    {
+                      name: "👶",
+                      dataColumn: "children",
+                      display: (insight: Fact | Insight) => (
+                        <span className="badge text-bg-info">
+                          {insight.children?.length || 0}
+                        </span>
+                      ),
+                    },
+                    {
+                      name: "👨‍👩‍👧‍👦",
+                      dataColumn: "parents",
+                      display: (insight: Fact | Insight) => (
+                        <span className="badge text-bg-warning">
+                          {insight.parents?.length || 0}
                         </span>
                       ),
                     },

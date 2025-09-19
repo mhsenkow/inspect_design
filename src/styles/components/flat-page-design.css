@@ -45,7 +45,7 @@
 
 /* Flat Insights List Section */
 .flatInsightsList {
-  padding: var(--spacing-4) var(--spacing-6);
+  padding: var(--spacing-2) var(--spacing-6) var(--spacing-4);
   background: transparent;
   box-shadow: none;
   border-radius: 0;
@@ -55,16 +55,16 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-2);
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  margin-bottom: var(--spacing-4);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-3);
+  text-transform: none;
+  letter-spacing: normal;
 }
 
 .flatInsightsList .sectionIcon {
-  font-size: 1rem;
+  font-size: var(--font-size-lg);
 }
 
 /* Remove all shadows and hover effects from internal sections */
@@ -72,6 +72,7 @@
   box-shadow: none !important;
   border-radius: 0 !important;
   background: transparent !important;
+  padding: var(--spacing-2) !important; /* Reduced padding for tighter spacing */
 }
 
 .flatInsightsList .content-card-body:hover {

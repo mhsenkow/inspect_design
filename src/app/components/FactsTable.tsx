@@ -195,9 +195,6 @@ const FactsTable = ({
 
   return (
     <div className="card reaction-table-container">
-      <div className="card-header p-6">
-        <h3 className="card-header-title text-lg">Data Table</h3>
-      </div>
       <table
         className="w-full"
         id={`factsTable-${factName}`}
