@@ -318,9 +318,10 @@ td.overflow-visible {
 .insight-header-container .header-item-container {
   margin-right: 0 !important;
   margin-left: 0 !important;
-  border-radius: 0 !important;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0 !important; /* Top rounded corners only */
   border-left: none !important;
   border-right: none !important;
+  border-top: none !important; /* Remove top border to blend with card */
   overflow: visible !important;
 }
 
@@ -394,6 +395,37 @@ td.overflow-visible {
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   white-space: nowrap;
+}
+
+/* ===================================
+   INSIGHT PAGE LAYOUT IMPROVEMENTS
+   =================================== */
+
+/* Improved spacing for insight page sections */
+.insight-page-card .cardBody {
+  padding: var(--spacing-5) var(--spacing-6);
+}
+
+/* Better spacing between sections */
+.insight-page-card .cardBody + .cardBody {
+  margin-top: var(--spacing-1);
+}
+
+/* Consistent section headers */
+.insight-page-card .contentCardHeader {
+  margin-bottom: var(--spacing-4);
+  padding-bottom: var(--spacing-2);
+}
+
+/* Better spacing for section content */
+.insight-page-card .sectionContent {
+  margin-top: var(--spacing-3);
+}
+
+/* Improved empty state spacing */
+.insight-page-card .emptyState {
+  padding: var(--spacing-6) 0;
+  text-align: center;
 }
 
 /* ===================================

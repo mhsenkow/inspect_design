@@ -40,29 +40,89 @@ const EditableTitle = ({
       {editingTitle && (
         <textarea
           id="titleBeingEdited"
-          style={{ margin: "0 auto", width: "100%" }}
+          style={{
+            margin: "0 auto",
+            width: "100%",
+            border: "2px solid var(--color-base-500)",
+            borderRadius: "var(--radius-md)",
+            padding: "var(--spacing-2)",
+            fontSize: "var(--font-size-lg)",
+            fontFamily: "inherit",
+            resize: "vertical",
+            minHeight: "60px",
+          }}
           value={title}
           onChange={(event) => setTitle(event.target.value)}
-          rows={4}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" && event.ctrlKey) {
+              // Ctrl+Enter to save
+              if (token && title && title !== insight.title) {
+                updateTitle(title, token).then((response) => {
+                  if (response.status === 200) {
+                    setEditingTitle(false);
+                  }
+                });
+              }
+            } else if (event.key === "Escape") {
+              // Escape to cancel
+              setTitle(insight.title);
+              setEditingTitle(false);
+            }
+          }}
+          autoFocus
+          rows={2}
         />
       )}
       {!editingTitle && (
-        <span>
+        <span
+          style={{
+            cursor:
+              isClient && user_id == insight.user_id ? "pointer" : "default",
+            padding: "var(--spacing-1)",
+            borderRadius: "var(--radius-sm)",
+            transition: "background-color var(--transition-base)",
+            display: "inline-block",
+            minWidth: "200px",
+          }}
+          onClick={() => {
+            if (isClient && user_id == insight.user_id) {
+              setEditingTitle(true);
+            }
+          }}
+          onMouseEnter={(e) => {
+            if (isClient && user_id == insight.user_id) {
+              e.currentTarget.style.backgroundColor =
+                "var(--color-background-secondary)";
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (isClient && user_id == insight.user_id) {
+              e.currentTarget.style.backgroundColor = "transparent";
+            }
+          }}
+        >
           {title}
           {isClient && user_id == insight.user_id && (
             <span
-              style={{ cursor: "pointer" }}
-              onClick={() => {
-                setEditingTitle(true);
+              style={{
+                marginLeft: "var(--spacing-2)",
+                opacity: 0.6,
+                fontSize: "var(--font-size-sm)",
               }}
             >
-              🖊
+              ✏️
             </span>
           )}
         </span>
       )}
       {editingTitle && (
-        <p>
+        <div
+          style={{
+            marginTop: "var(--spacing-2)",
+            display: "flex",
+            gap: "var(--spacing-2)",
+          }}
+        >
           <button
             onClick={async () => {
               if (token && title && title !== insight.title) {
@@ -74,18 +134,45 @@ const EditableTitle = ({
               }
             }}
             disabled={!title}
+            style={{
+              padding: "var(--spacing-2) var(--spacing-3)",
+              backgroundColor: "var(--color-base-500)",
+              color: "var(--color-text-inverse)",
+              border: "none",
+              borderRadius: "var(--radius-md)",
+              cursor: "pointer",
+              fontSize: "var(--font-size-sm)",
+            }}
           >
-            Submit
+            Save
           </button>
           <button
             onClick={() => {
               setTitle(insight.title);
               setEditingTitle(false);
             }}
+            style={{
+              padding: "var(--spacing-2) var(--spacing-3)",
+              backgroundColor: "var(--color-background-secondary)",
+              color: "var(--color-text-primary)",
+              border: "1px solid var(--color-border-primary)",
+              borderRadius: "var(--radius-md)",
+              cursor: "pointer",
+              fontSize: "var(--font-size-sm)",
+            }}
           >
             Cancel
           </button>
-        </p>
+          <span
+            style={{
+              fontSize: "var(--font-size-xs)",
+              color: "var(--color-text-muted)",
+              alignSelf: "center",
+            }}
+          >
+            Ctrl+Enter to save, Esc to cancel
+          </span>
+        </div>
       )}
     </h2>
   );

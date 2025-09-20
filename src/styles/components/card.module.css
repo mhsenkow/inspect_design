@@ -19,21 +19,13 @@
 
 /* Card Header */
 .cardHeader {
-  padding: var(--spacing-6);
+  padding: var(--spacing-2);
   border-bottom: 1px solid var(--color-border-primary);
   background-color: var(--color-background-secondary);
   position: relative;
 }
 
-.cardHeader::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, var(--color-base-500), var(--color-base-600));
-}
+
 
 .cardHeaderTitle {
   font-size: var(--font-size-lg);
