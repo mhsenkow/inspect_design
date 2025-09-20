@@ -466,6 +466,19 @@
   flex-direction: column;
 }
 
+.modalBody table thead th[style*="width: 120px"],
+.modalBody table tbody td[style*="width: 120px"] {
+  width: 120px !important;
+  min-width: 120px;
+  max-width: 120px;
+}
+
+.modalBody table thead th[style*="width: 1fr"],
+.modalBody table tbody td[style*="width: 1fr"] {
+  width: auto !important;
+  flex: 1;
+}
+
 .modalBody table tbody {
   flex: 1;
   overflow-y: auto;

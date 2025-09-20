@@ -4,6 +4,7 @@ import styles from "../../../styles/components/client-side-page.module.css";
 import cardStyles from "../../../styles/components/card.module.css";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import moment from "moment";
+import Link from "next/link";
 
 import {
   Fact,
@@ -404,7 +405,7 @@ const ClientSidePage = ({
                       : "No parent insights yet"}
                   </div>
                 </div>
-                <div className={cardStyles.contentCardBody}>
+                <div className={`${cardStyles.contentCardBody} ${cardStyles.contentCardBodyFlushTop}`}>
                   <FactsDataContext.Provider
                     value={{
                       data:
@@ -448,8 +449,61 @@ const ClientSidePage = ({
                         >
                       }
                       selectedActions={[]}
-                      hideHead={true}
                       enableReactionIcons={true}
+                      columns={[
+                        {
+                          name: "Updated",
+                          dataColumn: "updated_at",
+                          display: (insight: Fact): React.JSX.Element => (
+                            <span className="text-sm text-secondary font-mono">
+                              {insight.updated_at
+                                ? new Date(insight.updated_at).toLocaleDateString("en-US", {
+                                    month: "2-digit",
+                                    day: "2-digit",
+                                    year: "numeric",
+                                  })
+                                : "---"}
+                            </span>
+                          ),
+                        },
+                        {
+                          name: "Title",
+                          dataColumn: "title",
+                          display: (insight: Fact): React.JSX.Element => {
+                            // Handle different data structures for links
+                            let titleToShow = insight.title;
+                            let uidToUse = insight.uid;
+
+                            if ((insight as any).childInsight?.title && (insight as any).childInsight?.uid) {
+                              titleToShow = (insight as any).childInsight.title;
+                              uidToUse = (insight as any).childInsight.uid;
+                            } else if ((insight as any).parentInsight?.title && (insight as any).parentInsight?.uid) {
+                              titleToShow = (insight as any).parentInsight.title;
+                              uidToUse = (insight as any).parentInsight.uid;
+                            } else if ((insight as any).snippet?.title && (insight as any).snippet?.uid) {
+                              titleToShow = (insight as any).snippet.title;
+                              uidToUse = (insight as any).snippet.uid;
+                            }
+
+                            if (titleToShow && uidToUse) {
+                              return (
+                                <Link
+                                  href={`/insights/${uidToUse}`}
+                                  className="text-sm text-primary font-medium hover:text-primary-600 transition-colors duration-200"
+                                >
+                                  {titleToShow || "Untitled"}
+                                </Link>
+                              );
+                            }
+
+                            return (
+                              <span className="text-sm text-primary font-medium">
+                                {titleToShow || "Untitled"}
+                              </span>
+                            );
+                          },
+                        },
+                      ]}
                     />
                   </FactsDataContext.Provider>
                 </div>
@@ -567,7 +621,7 @@ const ClientSidePage = ({
                     : "No child insights yet"}
                 </div>
               </div>
-              <div className={cardStyles.contentCardBody}>
+              <div className={`${cardStyles.contentCardBody} ${cardStyles.contentCardBodyFlushTop}`}>
                 <FactsDataContext.Provider
                   value={{
                     data: insight.children.map((c) => ({
@@ -609,6 +663,60 @@ const ClientSidePage = ({
                     activeServerFunction={activeServerFunctionForChildInsights}
                     selectedActions={[]}
                     enableReactionIcons={true}
+                    columns={[
+                      {
+                        name: "Updated",
+                        dataColumn: "updated_at",
+                        display: (insight: Fact): React.JSX.Element => (
+                          <span className="text-sm text-secondary font-mono">
+                            {insight.updated_at
+                              ? new Date(insight.updated_at).toLocaleDateString("en-US", {
+                                  month: "2-digit",
+                                  day: "2-digit",
+                                  year: "numeric",
+                                })
+                              : "---"}
+                          </span>
+                        ),
+                      },
+                      {
+                        name: "Title",
+                        dataColumn: "title",
+                        display: (insight: Fact): React.JSX.Element => {
+                          // Handle different data structures for links
+                          let titleToShow = insight.title;
+                          let uidToUse = insight.uid;
+
+                          if ((insight as any).childInsight?.title && (insight as any).childInsight?.uid) {
+                            titleToShow = (insight as any).childInsight.title;
+                            uidToUse = (insight as any).childInsight.uid;
+                          } else if ((insight as any).parentInsight?.title && (insight as any).parentInsight?.uid) {
+                            titleToShow = (insight as any).parentInsight.title;
+                            uidToUse = (insight as any).parentInsight.uid;
+                          } else if ((insight as any).snippet?.title && (insight as any).snippet?.uid) {
+                            titleToShow = (insight as any).snippet.title;
+                            uidToUse = (insight as any).snippet.uid;
+                          }
+
+                          if (titleToShow && uidToUse) {
+                            return (
+                              <Link
+                                href={`/insights/${uidToUse}`}
+                                className="text-sm text-primary font-medium hover:text-primary-600 transition-colors duration-200"
+                              >
+                                {titleToShow || "Untitled"}
+                              </Link>
+                            );
+                          }
+
+                          return (
+                            <span className="text-sm text-primary font-medium">
+                              {titleToShow || "Untitled"}
+                            </span>
+                          );
+                        },
+                      },
+                    ]}
                   />
                 </FactsDataContext.Provider>
               </div>
@@ -728,7 +836,7 @@ const ClientSidePage = ({
                     : "No evidence yet"}
                 </div>
               </div>
-              <div className={cardStyles.contentCardBody}>
+              <div className={`${cardStyles.contentCardBody} ${cardStyles.contentCardBodyFlushTop}`}>
                 <InfiniteScrollLoader
                   data={liveSnippetData}
                   setData={
@@ -774,6 +882,60 @@ const ClientSidePage = ({
                     }
                     selectedActions={[]}
                     enableReactionIcons={true}
+                    columns={[
+                      {
+                        name: "Updated",
+                        dataColumn: "updated_at",
+                        display: (citation: Fact): React.JSX.Element => (
+                          <span className="text-sm text-secondary font-mono">
+                            {citation.updated_at
+                              ? new Date(citation.updated_at).toLocaleDateString("en-US", {
+                                  month: "2-digit",
+                                  day: "2-digit",
+                                  year: "numeric",
+                                })
+                              : "---"}
+                          </span>
+                        ),
+                      },
+                      {
+                        name: "Title",
+                        dataColumn: "title",
+                        display: (citation: Fact): React.JSX.Element => {
+                          // Handle different data structures for links
+                          let titleToShow = citation.title;
+                          let uidToUse = citation.uid;
+
+                          if ((citation as any).childInsight?.title && (citation as any).childInsight?.uid) {
+                            titleToShow = (citation as any).childInsight.title;
+                            uidToUse = (citation as any).childInsight.uid;
+                          } else if ((citation as any).parentInsight?.title && (citation as any).parentInsight?.uid) {
+                            titleToShow = (citation as any).parentInsight.title;
+                            uidToUse = (citation as any).parentInsight.uid;
+                          } else if ((citation as any).snippet?.title && (citation as any).snippet?.uid) {
+                            titleToShow = (citation as any).snippet.title;
+                            uidToUse = (citation as any).snippet.uid;
+                          }
+
+                          if (titleToShow && uidToUse) {
+                            return (
+                              <Link
+                                href={`/links/${uidToUse}`}
+                                className="text-sm text-primary font-medium hover:text-primary-600 transition-colors duration-200"
+                              >
+                                {titleToShow || "Untitled"}
+                              </Link>
+                            );
+                          }
+
+                          return (
+                            <span className="text-sm text-primary font-medium">
+                              {titleToShow || "Untitled"}
+                            </span>
+                          );
+                        },
+                      },
+                    ]}
                   />
                 </InfiniteScrollLoader>
               </div>

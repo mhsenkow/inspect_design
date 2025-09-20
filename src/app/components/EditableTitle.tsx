@@ -38,40 +38,107 @@ const EditableTitle = ({
   return (
     <h2 id="title" style={{ margin: 0 }}>
       {editingTitle && (
-        <textarea
-          id="titleBeingEdited"
-          style={{
-            margin: "0 auto",
-            width: "100%",
-            border: "2px solid var(--color-base-500)",
-            borderRadius: "var(--radius-md)",
-            padding: "var(--spacing-2)",
-            fontSize: "var(--font-size-lg)",
-            fontFamily: "inherit",
-            resize: "vertical",
-            minHeight: "60px",
-          }}
-          value={title}
-          onChange={(event) => setTitle(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === "Enter" && event.ctrlKey) {
-              // Ctrl+Enter to save
-              if (token && title && title !== insight.title) {
-                updateTitle(title, token).then((response) => {
-                  if (response.status === 200) {
-                    setEditingTitle(false);
-                  }
-                });
+        <div style={{ position: 'relative' }}>
+          <textarea
+            id="titleBeingEdited"
+            style={{
+              margin: "0 auto",
+              width: "100%",
+              border: "2px solid var(--color-base-500)",
+              borderRadius: "var(--radius-md)",
+              padding: "var(--spacing-2)",
+              paddingRight: "4rem",
+              fontSize: "var(--font-size-lg)",
+              fontFamily: "inherit",
+              resize: "vertical",
+              minHeight: "60px",
+            }}
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && event.ctrlKey) {
+                // Ctrl+Enter to save
+                if (token && title && title !== insight.title) {
+                  updateTitle(title, token).then((response) => {
+                    if (response.status === 200) {
+                      setEditingTitle(false);
+                    }
+                  });
+                }
+              } else if (event.key === "Escape") {
+                // Escape to cancel
+                setTitle(insight.title);
+                setEditingTitle(false);
               }
-            } else if (event.key === "Escape") {
-              // Escape to cancel
-              setTitle(insight.title);
-              setEditingTitle(false);
-            }
-          }}
-          autoFocus
-          rows={2}
-        />
+            }}
+            autoFocus
+            rows={2}
+          />
+          <div style={{ 
+            position: 'absolute', 
+            right: '0.5rem', 
+            top: '50%', 
+            transform: 'translateY(-50%)', 
+            display: 'flex', 
+            gap: '0.25rem' 
+          }}>
+            <button
+              onClick={() => {
+                setTitle(insight.title);
+                setEditingTitle(false);
+              }}
+              style={{
+                padding: '0.25rem',
+                color: 'var(--color-text-tertiary)',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '1rem',
+                transition: 'color var(--transition-base)'
+              }}
+              onMouseEnter={(e) => e.target.style.color = 'var(--color-text-secondary)'}
+              onMouseLeave={(e) => e.target.style.color = 'var(--color-text-tertiary)'}
+              title="Cancel"
+            >
+              ✕
+            </button>
+            <button
+              onClick={async () => {
+                if (token && title && title !== insight.title) {
+                  const response = await updateTitle(title, token);
+                  if (response.status !== 200) {
+                    throw response;
+                  }
+                  return setEditingTitle(false);
+                }
+              }}
+              disabled={!title}
+              style={{
+                padding: '0.25rem',
+                color: 'var(--color-base-500)',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '1rem',
+                transition: 'color var(--transition-base)',
+                opacity: !title ? 0.5 : 1
+              }}
+              onMouseEnter={(e) => {
+                if (!e.target.disabled) {
+                  e.target.style.color = 'var(--color-base-600)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!e.target.disabled) {
+                  e.target.style.color = 'var(--color-base-500)';
+                }
+              }}
+              title="Save"
+            >
+              ✓
+            </button>
+          </div>
+        </div>
       )}
       {!editingTitle && (
         <span
@@ -114,65 +181,6 @@ const EditableTitle = ({
             </span>
           )}
         </span>
-      )}
-      {editingTitle && (
-        <div
-          style={{
-            marginTop: "var(--spacing-2)",
-            display: "flex",
-            gap: "var(--spacing-2)",
-          }}
-        >
-          <button
-            onClick={async () => {
-              if (token && title && title !== insight.title) {
-                const response = await updateTitle(title, token);
-                if (response.status !== 200) {
-                  throw response;
-                }
-                return setEditingTitle(false);
-              }
-            }}
-            disabled={!title}
-            style={{
-              padding: "var(--spacing-2) var(--spacing-3)",
-              backgroundColor: "var(--color-base-500)",
-              color: "var(--color-text-inverse)",
-              border: "none",
-              borderRadius: "var(--radius-md)",
-              cursor: "pointer",
-              fontSize: "var(--font-size-sm)",
-            }}
-          >
-            Save
-          </button>
-          <button
-            onClick={() => {
-              setTitle(insight.title);
-              setEditingTitle(false);
-            }}
-            style={{
-              padding: "var(--spacing-2) var(--spacing-3)",
-              backgroundColor: "var(--color-background-secondary)",
-              color: "var(--color-text-primary)",
-              border: "1px solid var(--color-border-primary)",
-              borderRadius: "var(--radius-md)",
-              cursor: "pointer",
-              fontSize: "var(--font-size-sm)",
-            }}
-          >
-            Cancel
-          </button>
-          <span
-            style={{
-              fontSize: "var(--font-size-xs)",
-              color: "var(--color-text-muted)",
-              alignSelf: "center",
-            }}
-          >
-            Ctrl+Enter to save, Esc to cancel
-          </span>
-        </div>
       )}
     </h2>
   );

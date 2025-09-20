@@ -108,8 +108,22 @@
 /* Table header styling - applies to all tables */
 table {
   width: 100% !important;
-  table-layout: auto !important;
+  table-layout: fixed !important;
   border-collapse: collapse !important;
+}
+
+/* Column width controls for main page tables */
+table thead th[style*="width: 120px"],
+table tbody td[style*="width: 120px"] {
+  width: 120px !important;
+  min-width: 120px;
+  max-width: 120px;
+}
+
+table thead th[style*="width: 1fr"],
+table tbody td[style*="width: 1fr"] {
+  width: auto !important;
+  flex: 1;
 }
 
 table thead {

@@ -9,12 +9,8 @@ import { GetInsightsRouteResponse } from "../../api/insights/route";
 import {
   Modal,
   ModalBody,
-  ModalFooter,
-  TabNav,
-  TabContent,
   FormGroup,
   FormInput,
-  ModalButton,
   ModalContentSection,
 } from "../../components/Modal";
 
@@ -170,29 +166,73 @@ const AddChildInsightsDialog = ({
 
         <ModalContentSection title="Or: create a new insight to contain them">
           <FormGroup>
-            <FormInput
-              type="text"
-              placeholder="New insight name"
-              value={newInsightName}
-              onChange={(event) => setNewInsightName(event.target.value)}
-            />
+            <div style={{ position: 'relative' }}>
+              <FormInput
+                type="text"
+                placeholder="New insight name"
+                value={newInsightName}
+                onChange={(event) => setNewInsightName(event.target.value)}
+                style={{ paddingRight: '4rem' }}
+              />
+              <div style={{ 
+                position: 'absolute', 
+                right: '0.5rem', 
+                top: '50%', 
+                transform: 'translateY(-50%)', 
+                display: 'flex', 
+                gap: '0.25rem' 
+              }}>
+                <button
+                  onClick={handleClose}
+                  style={{
+                    padding: '0.25rem',
+                    color: 'var(--color-text-tertiary)',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '1rem',
+                    transition: 'color var(--transition-base)'
+                  }}
+                  onMouseEnter={(e) => e.target.style.color = 'var(--color-text-secondary)'}
+                  onMouseLeave={(e) => e.target.style.color = 'var(--color-text-tertiary)'}
+                  title="Cancel"
+                >
+                  ✕
+                </button>
+                <button
+                  onClick={handleSubmit}
+                  disabled={
+                    selectedChildInsights.length === 0 && !newInsightName.trim()
+                  }
+                  style={{
+                    padding: '0.25rem',
+                    color: 'var(--color-base-500)',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '1rem',
+                    transition: 'color var(--transition-base)',
+                    opacity: (selectedChildInsights.length === 0 && !newInsightName.trim()) ? 0.5 : 1
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!e.target.disabled) {
+                      e.target.style.color = 'var(--color-base-600)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!e.target.disabled) {
+                      e.target.style.color = 'var(--color-base-500)';
+                    }
+                  }}
+                  title="Save"
+                >
+                  ✓
+                </button>
+              </div>
+            </div>
           </FormGroup>
         </ModalContentSection>
       </ModalBody>
-      <ModalFooter>
-        <ModalButton variant="secondary" onClick={handleClose}>
-          Cancel
-        </ModalButton>
-        <ModalButton
-          variant="primary"
-          onClick={handleSubmit}
-          disabled={
-            selectedChildInsights.length === 0 && !newInsightName.trim()
-          }
-        >
-          Add
-        </ModalButton>
-      </ModalFooter>
     </Modal>
   );
 };

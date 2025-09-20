@@ -104,6 +104,10 @@
   padding: var(--spacing-6);
 }
 
+.contentCardBodyFlushTop {
+  padding: 0 var(--spacing-6) var(--spacing-6);
+}
+
 .contentCardFooter {
   padding: var(--spacing-6);
   border-top: 1px solid var(--color-border-primary);

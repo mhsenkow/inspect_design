@@ -238,7 +238,7 @@ const FactsTable = ({
         {!hideHead && (
           <thead>
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-inverse uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-semibold text-inverse uppercase tracking-wider" style={{ width: '40px' }}>
                 <input
                   type="checkbox"
                   name="selectAllFacts"
@@ -257,15 +257,32 @@ const FactsTable = ({
                 />
               </th>
               {columns &&
-                columns.map((column) => (
-                  <th
-                    className="px-4 py-3 text-left text-xs font-semibold text-inverse uppercase tracking-wider sortable cursor-pointer hover:text-secondary transition-colors duration-200"
-                    key={`Column: ${column.name}`}
-                    data-column={column.dataColumn}
-                  >
-                    {column.name}
-                  </th>
-                ))}
+                columns.map((column) => {
+                  // Set specific widths for common columns
+                  let columnWidth = 'auto';
+                  if (column.name === 'Updated') {
+                    columnWidth = '120px';
+                  } else if (column.name === 'Title') {
+                    columnWidth = '1fr';
+                  }
+                  
+                  return (
+                    <th
+                      className="px-4 py-3 text-left text-xs font-semibold text-inverse uppercase tracking-wider sortable cursor-pointer hover:text-secondary transition-colors duration-200"
+                      key={`Column: ${column.name}`}
+                      data-column={column.dataColumn}
+                      style={{ width: columnWidth }}
+                    >
+                      {column.name}
+                    </th>
+                  );
+                })}
+              {/* Add reaction icons header when custom columns are used */}
+              {columns && enableReactionIcons && (
+                <th className="px-4 py-3 text-left text-xs font-semibold text-inverse uppercase tracking-wider" style={{ width: '60px' }}>
+                  {/* Empty header - reaction icons are self-explanatory */}
+                </th>
+              )}
             </tr>
           </thead>
         )}
@@ -307,7 +324,7 @@ const FactsTable = ({
                     className={`${trClassName} border-b border-secondary last:border-b-0 hover:bg-secondary transition-colors duration-200 reaction-table-row overflow-visible`}
                     onClick={trOnClick}
                   >
-                    <td className="px-4 py-3 whitespace-nowrap">
+                    <td className="px-4 py-3 whitespace-nowrap" style={{ width: '40px' }}>
                       <input
                         type="checkbox"
                         name="selectedFact"
@@ -530,14 +547,106 @@ const FactsTable = ({
                       </>
                     )}
                     {columns &&
-                      columns.map((column) => (
-                        <td
-                          className="px-4 py-3 whitespace-nowrap text-sm text-secondary text-center"
-                          key={`Table column: ${column.name}`}
-                        >
-                          {column.display && column.display(fact)}
-                        </td>
-                      ))}
+                      columns.map((column) => {
+                        // Set specific widths for common columns to match headers
+                        let columnWidth = 'auto';
+                        if (column.name === 'Updated') {
+                          columnWidth = '120px';
+                        } else if (column.name === 'Title') {
+                          columnWidth = '1fr';
+                        }
+                        
+                        return (
+                          <td
+                            className="px-4 py-3 whitespace-nowrap text-sm text-secondary text-center"
+                            key={`Table column: ${column.name}`}
+                            style={{ width: columnWidth }}
+                          >
+                            {column.display && column.display(fact)}
+                          </td>
+                        );
+                      })}
+                    {/* Add reaction icons column when custom columns are used */}
+                    {columns && enableReactionIcons && loggedIn && (
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-secondary text-center reaction-cell-container" style={{ width: '60px' }}>
+                        <ReactionIcon
+                          reactions={fact.reactions || []}
+                          currentUserId={getCurrentUserId()}
+                          onReactionSubmit={async (reaction) => {
+                            if (token) {
+                              // Handle different data structures
+                              let insightId: number | undefined;
+                              let summaryId: number | undefined;
+
+                              if (
+                                factName === "childInsights" &&
+                                (fact as any).childInsight
+                              ) {
+                                // For child insights, use the childInsight.id
+                                insightId = (fact as any).childInsight.id;
+                                summaryId = undefined; // Child insights don't have summary_id
+                              } else if (
+                                factName === "parentInsights" &&
+                                (fact as any).parentInsight
+                              ) {
+                                // For parent insights, use the parentInsight.id
+                                insightId = (fact as any).parentInsight.id;
+                                summaryId = undefined; // Parent insights don't have summary_id
+                              } else if (
+                                factName === "snippet" &&
+                                (fact as any).summary_id
+                              ) {
+                                // For snippets/evidence, use the summary_id
+                                insightId = undefined;
+                                summaryId = (fact as any).summary_id;
+                              } else {
+                                // For regular insights, use the fact.id
+                                insightId = fact.id;
+                                summaryId = undefined;
+                              }
+
+                              try {
+                                const response = await fetch("/api/reactions", {
+                                  method: "POST",
+                                  headers: {
+                                    "Content-Type": "application/json",
+                                    "x-access-token": token,
+                                  },
+                                  body: JSON.stringify({
+                                    insight_id: insightId,
+                                    summary_id: summaryId,
+                                    reaction: reaction,
+                                  }),
+                                });
+
+                                if (response.ok) {
+                                  // Refresh the data to show the new reaction
+                                  const updatedData = data?.map((f) => {
+                                    if (f.id === fact.id) {
+                                      return {
+                                        ...f,
+                                        reactions: [
+                                          ...(f.reactions || []),
+                                          {
+                                            id: Date.now(), // Temporary ID
+                                            reaction: reaction,
+                                            user_id: getCurrentUserId(),
+                                          },
+                                        ],
+                                      };
+                                    }
+                                    return f;
+                                  });
+                                  setData(updatedData);
+                                }
+                              } catch (error) {
+                                console.error("Error submitting reaction:", error);
+                              }
+                            }
+                          }}
+                        />
+                      </td>
+                    )}
                   </tr>
                   {enableFeedback && (
                     <>
