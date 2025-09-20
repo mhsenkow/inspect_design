@@ -37,7 +37,10 @@
 
 /* Card Body */
 .cardBody {
-  padding: var(--spacing-6);
+  padding: var(--spacing-0);
+  margin: var(--spacing-4);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
 }
 
 /* Card Footer */
@@ -91,20 +94,10 @@
 }
 
 .contentCardHeader {
-  padding: var(--spacing-6);
+  padding: var(--spacing-2);
   border-bottom: 1px solid var(--color-border-primary);
   background-color: var(--color-background-secondary);
   position: relative;
-}
-
-.contentCardHeader::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, var(--color-base-500), var(--color-base-600));
 }
 
 .contentCardBody {
@@ -122,7 +115,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: var(--spacing-4);
+  margin-bottom: var(--spacing-1);
 }
 
 .sectionTitle {
@@ -136,7 +129,7 @@
 .sectionSubtitle {
   font-size: var(--font-size-sm);
   color: var(--color-text-tertiary);
-  margin-top: var(--spacing-2);
+  margin-top: var(--spacing-1);
   font-weight: var(--font-weight-normal);
 }
 
@@ -150,11 +143,11 @@
 .hierarchyIndicator {
   display: flex;
   align-items: center;
-  gap: var(--spacing-2);
+  gap: var(--spacing-1);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-tertiary);
-  margin-bottom: var(--spacing-3);
+  margin-bottom: var(--spacing-1);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
