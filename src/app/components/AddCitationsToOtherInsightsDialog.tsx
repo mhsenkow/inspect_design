@@ -174,7 +174,7 @@ const AddCitationsToOtherInsightsDialog = ({
                   {
                     name: "Citations",
                     display: (insight: Fact | Insight): React.JSX.Element => (
-                      <span className="badge text-bg-danger">
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-error-100 text-error-800">
                         {insight.evidence?.length || 0}
                       </span>
                     ),

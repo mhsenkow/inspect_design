@@ -236,9 +236,9 @@ const FactsTable = ({
         }}
       >
         {!hideHead && (
-          <thead className="bg-base-500 border-b border-base-600">
+          <thead>
             <tr>
-              <th className="px-8 py-5 text-left text-xs font-medium text-inverse uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-semibold text-inverse uppercase tracking-wider">
                 <input
                   type="checkbox"
                   name="selectAllFacts"
@@ -253,13 +253,13 @@ const FactsTable = ({
                       return toggleSelectedFacts(...filteredData);
                     }
                   }}
-                  className="rounded border-inverse text-inverse focus:ring-inverse"
+                  className="rounded border-primary text-primary focus:ring-primary"
                 />
               </th>
               {columns &&
                 columns.map((column) => (
                   <th
-                    className="px-8 py-5 text-left text-xs font-medium text-inverse uppercase tracking-wider sortable cursor-pointer hover:text-secondary transition-colors duration-200"
+                    className="px-4 py-3 text-left text-xs font-semibold text-inverse uppercase tracking-wider sortable cursor-pointer hover:text-secondary transition-colors duration-200"
                     key={`Column: ${column.name}`}
                     data-column={column.dataColumn}
                   >
@@ -307,7 +307,7 @@ const FactsTable = ({
                     className={`${trClassName} border-b border-secondary last:border-b-0 hover:bg-secondary transition-colors duration-200 reaction-table-row overflow-visible`}
                     onClick={trOnClick}
                   >
-                    <td className="px-8 py-5 whitespace-nowrap">
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <input
                         type="checkbox"
                         name="selectedFact"
@@ -331,7 +331,7 @@ const FactsTable = ({
                     {/* Only show hardcoded columns if no columns prop is provided */}
                     {!columns && (
                       <>
-                        <td className="px-8 py-5 whitespace-nowrap text-sm text-secondary font-mono">
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-secondary font-mono">
                           {(() => {
                             // Handle different data structures for different fact types
                             let dateToShow = null;
@@ -362,7 +362,7 @@ const FactsTable = ({
                               : "---";
                           })()}
                         </td>
-                        <td className="px-8 py-5 text-sm text-primary font-medium relative reaction-cell-container">
+                        <td className="px-4 py-3 text-sm text-primary font-medium relative reaction-cell-container">
                           <div className="flex items-center justify-between">
                             <div className="flex-1">
                               {!selectRows &&
@@ -532,7 +532,7 @@ const FactsTable = ({
                     {columns &&
                       columns.map((column) => (
                         <td
-                          className="px-8 py-5 whitespace-nowrap text-sm text-secondary text-center"
+                          className="px-4 py-3 whitespace-nowrap text-sm text-secondary text-center"
                           key={`Table column: ${column.name}`}
                         >
                           {column.display && column.display(fact)}
@@ -711,7 +711,7 @@ const FactsTable = ({
             <tr>
               <td
                 colSpan={columns ? columns.length + 1 : 3}
-                className="px-8 py-12 text-center text-text-tertiary"
+                className="px-4 py-12 text-center text-tertiary"
               >
                 <strong>Loading data...</strong>
               </td>
@@ -726,7 +726,7 @@ const FactsTable = ({
               <tr>
                 <td
                   colSpan={columns ? columns.length + 1 : 3}
-                  className="px-8 py-12 text-center text-text-tertiary"
+                  className="px-4 py-12 text-center text-tertiary"
                 >
                   <div>
                     <div className="text-lg mb-2">🔍</div>
@@ -750,7 +750,7 @@ const FactsTable = ({
               <tr>
                 <td
                   colSpan={columns ? columns.length + 1 : 3}
-                  className="px-8 py-12 text-center text-text-tertiary"
+                  className="px-4 py-12 text-center text-tertiary"
                 >
                   <div>
                     <div className="text-lg mb-2">📝</div>

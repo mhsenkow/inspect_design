@@ -55,7 +55,6 @@ const AddChildInsightsDialog = ({
     [],
   );
   const [newInsightName, setNewInsightName] = useState<string>("");
-  const [activeTab, setActiveTab] = useState("existing");
 
   useEffect(() => {
     fetch(
@@ -76,7 +75,6 @@ const AddChildInsightsDialog = ({
     setSelectedChildInsights([]);
     setDataFilter("");
     setNewInsightName("");
-    setActiveTab("existing");
   };
 
   const handleClose = useCallback(() => {
@@ -113,12 +111,16 @@ const AddChildInsightsDialog = ({
     return potentialInsightsWithoutLoops(insight, data);
   };
 
-  const tabs = [
-    {
-      id: "existing",
-      label: "Existing insights",
-      content: (
-        <ModalContentSection>
+  return (
+    <Modal
+      id={id}
+      title={`Add Child Insights to Insight: ${insight.title}`}
+      isOpen={isOpen}
+      onClose={handleClose}
+      size="large"
+    >
+      <ModalBody>
+        <ModalContentSection title="Then: choose one or more existing insight" className="flex-grow">
           <FactsTable
             data={childInsights}
             setData={
@@ -139,24 +141,34 @@ const AddChildInsightsDialog = ({
             selectRows={true}
             columns={[
               {
-                name: "📄",
-                dataColumn: "evidence",
+                name: "Updated",
+                dataColumn: "updated_at",
                 display: (insight: Fact | Insight): React.JSX.Element => (
-                  <span className="badge text-bg-danger">
-                    {insight.evidence?.length ?? 0}
+                  <span className="text-sm text-secondary font-mono">
+                    {insight.updated_at
+                      ? new Date(insight.updated_at).toLocaleDateString("en-US", {
+                          month: "2-digit",
+                          day: "2-digit",
+                          year: "numeric",
+                        })
+                      : "---"}
+                  </span>
+                ),
+              },
+              {
+                name: "Title",
+                dataColumn: "title",
+                display: (insight: Fact | Insight): React.JSX.Element => (
+                  <span className="text-sm text-primary font-medium">
+                    {insight.title || "Untitled"}
                   </span>
                 ),
               },
             ]}
           />
         </ModalContentSection>
-      ),
-    },
-    {
-      id: "new",
-      label: "New insight",
-      content: (
-        <ModalContentSection>
+
+        <ModalContentSection title="Or: create a new insight to contain them">
           <FormGroup>
             <FormInput
               type="text"
@@ -166,25 +178,6 @@ const AddChildInsightsDialog = ({
             />
           </FormGroup>
         </ModalContentSection>
-      ),
-    },
-  ];
-
-  return (
-    <Modal
-      id={id}
-      title={`Add Child Insights to Insight: ${insight.title}`}
-      isOpen={isOpen}
-      onClose={handleClose}
-      size="large"
-    >
-      <ModalBody>
-        <TabNav tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
-        {tabs.map((tab) => (
-          <TabContent key={tab.id} tabId={tab.id} activeTab={activeTab}>
-            {tab.content}
-          </TabContent>
-        ))}
       </ModalBody>
       <ModalFooter>
         <ModalButton variant="secondary" onClick={handleClose}>

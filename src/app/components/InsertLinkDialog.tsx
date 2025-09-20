@@ -220,7 +220,7 @@ const InsertLinkDialog = ({ html, setHtml }: Props) => {
                 </label>
               </label>
             </div>
-            <div style={{ height: "200px", overflow: "scroll" }}>
+            <div>
               {existingItemType == "insight" && !existingInsights && (
                 <ModalLoadingState message="Loading insights..." />
               )}

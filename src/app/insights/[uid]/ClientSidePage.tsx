@@ -17,8 +17,8 @@ import {
 } from "../../types";
 
 import FeedbackInputElement from "../../components/FeedbackInputElement";
+import ReactionButton from "../../components/ReactionButton";
 import { submitComment, submitReaction } from "../../functions";
-import FeedbackLink from "../../components/FeedbackLink";
 import FeedbackItem from "../../components/FeedbackItem";
 import HeaderItem from "../../components/HeaderItem";
 import SourceLogo from "../../components/SourceLogo";
@@ -789,48 +789,49 @@ const ClientSidePage = ({
                   <span className={cardStyles.hierarchyIcon}>💬</span>
                   Feedback
                 </div>
-                <h3 className={cardStyles.sectionTitle}>
-                  Reactions and comments:
-                </h3>
-                <FeedbackItem
-                  reactions={insightReactions || []}
-                  currentUserId={currentUser?.id}
-                  onReactionSubmit={async (reaction) => {
-                    if (token) {
-                      const result = await submitReaction(
-                        { reaction, insight_id: insight.id },
-                        token,
-                      );
-                      if (result) {
-                        // Remove any existing reaction from this user for this insight
-                        const existingReactions =
-                          insight.reactions?.filter(
-                            (r) => r.user_id !== currentUser?.id,
-                          ) || [];
-                        setInsight({
-                          ...insight,
-                          reactions: [
-                            ...existingReactions,
-                            result as FactReaction,
-                          ],
-                        });
-                      }
+                {/* Action Buttons */}
+                <div className="insight-feedback-actions">
+                  <button
+                    className="insight-feedback-button insight-feedback-button-comment"
+                    onClick={() =>
+                      currentUser
+                        ? setIsEditingComment(true)
+                        : confirmAndRegister()
                     }
-                  }}
-                  className="insight-feedback-item"
-                >
-                  <div className="flex items-center justify-center space-x-8">
-                    <FeedbackLink
-                      actionVerb="Comment"
-                      icon="💬"
-                      setOnClickFunction={() =>
-                        currentUser
-                          ? setIsEditingComment(true)
-                          : confirmAndRegister()
+                  >
+                    <span className="insight-feedback-icon">💬</span>
+                    <span className="insight-feedback-label">Comment</span>
+                  </button>
+                  <ReactionButton
+                    reactions={insightReactions || []}
+                    currentUserId={currentUser?.id}
+                    onReactionSubmit={async (reaction) => {
+                      if (token) {
+                        const result = await submitReaction(
+                          { reaction, insight_id: insight.id },
+                          token,
+                        );
+                        if (result) {
+                          // Remove any existing reaction from this user for this insight
+                          const existingReactions =
+                            insight.reactions?.filter(
+                              (r) => r.user_id !== currentUser?.id,
+                            ) || [];
+                          setInsight({
+                            ...insight,
+                            reactions: [
+                              ...existingReactions,
+                              result as FactReaction,
+                            ],
+                          });
+                        }
                       }
-                    />
-                  </div>
-                </FeedbackItem>
+                    }}
+                    className="insight-feedback-reaction-button"
+                    showLabel={true}
+                    label="React"
+                  />
+                </div>
               </div>
               <div className={cardStyles.contentCardBody}>
                 {/* Comments */}

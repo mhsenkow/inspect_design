@@ -63,7 +63,9 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
         aria-expanded={isPickerVisible}
         aria-haspopup="menu"
       >
-        <span className="reaction-button-icon">😲</span>
+        <span className="reaction-button-icon">
+          {hasUserReacted ? userReaction.reaction : "😲"}
+        </span>
         {showLabel && <span className="reaction-button-label">{label}</span>}
         {isSubmitting && <span className="reaction-button-loading">...</span>}
       </button>
