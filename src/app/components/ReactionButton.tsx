@@ -77,13 +77,6 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
         position="auto"
         buttonRef={buttonRef}
       />
-
-      {/* Show current reactions */}
-      <ReactionDisplay
-        reactions={reactions || []}
-        currentUserId={currentUserId}
-        className="reaction-display-inline"
-      />
     </div>
   );
 };

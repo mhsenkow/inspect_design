@@ -71,23 +71,15 @@ const FactsTable = ({
   }[];
   enableReactionIcons?: boolean;
 }): React.JSX.Element => {
-  const { token, loggedIn } = useUser();
+  const { token, loggedIn, user_id } = useUser();
   const [returnPath, setReturnPath] = useState<string>();
   useEffect(() => setReturnPath(window.location.pathname), []);
 
-  // Safe JWT parsing helper
+  // Simple user ID getter - use the user_id from useUser hook
   const getCurrentUserId = useCallback(() => {
-    if (!token) return undefined;
-    try {
-      const parts = token.split(".");
-      if (parts.length !== 3) return undefined;
-      const payload = JSON.parse(atob(parts[1]));
-      return payload.user_id;
-    } catch (error) {
-      console.warn("Failed to parse JWT token:", error);
-      return undefined;
-    }
-  }, [token]);
+    console.log("getCurrentUserId: Using user_id from useUser hook:", user_id);
+    return user_id;
+  }, [user_id]);
 
   const [loading, setLoading] = useState(false);
   const [fetchedDataFilter, setFetchedDataFilter] = useState<string>();
@@ -558,7 +550,9 @@ const FactsTable = ({
                         
                         return (
                           <td
-                            className="px-4 py-3 whitespace-nowrap text-sm text-secondary text-center"
+                            className={`px-4 py-3 whitespace-nowrap text-sm text-secondary ${
+                              column.name === 'Title' ? 'text-left' : 'text-center'
+                            }`}
                             key={`Table column: ${column.name}`}
                             style={{ width: columnWidth }}
                           >
@@ -569,9 +563,29 @@ const FactsTable = ({
                     {/* Add reaction icons column when custom columns are used */}
                     {columns && enableReactionIcons && loggedIn && (
                       <td className="px-4 py-3 whitespace-nowrap text-sm text-secondary text-center reaction-cell-container" style={{ width: '60px' }}>
+                        {(() => {
+                          console.log("Rendering reaction column for fact:", {
+                            factId: fact.id,
+                            factTitle: fact.title,
+                            hasReactions: !!fact.reactions,
+                            reactionsCount: fact.reactions?.length || 0,
+                            reactions: fact.reactions,
+                            fullFact: fact
+                          });
+                          return null;
+                        })()}
                         <ReactionIcon
                           reactions={fact.reactions || []}
-                          currentUserId={getCurrentUserId()}
+                          currentUserId={(() => {
+                            const userId = getCurrentUserId();
+                            console.log("getCurrentUserId result:", {
+                              userId,
+                              userIdType: typeof userId,
+                              token: token ? "present" : "missing",
+                              loggedIn
+                            });
+                            return userId;
+                          })()}
                           onReactionSubmit={async (reaction) => {
                             if (token) {
                               // Handle different data structures
@@ -603,6 +617,13 @@ const FactsTable = ({
                                 // For regular insights, use the fact.id
                                 insightId = fact.id;
                                 summaryId = undefined;
+                                console.log("Main page insight reaction submission:", {
+                                  factName,
+                                  factId: fact.id,
+                                  insightId,
+                                  summaryId,
+                                  factTitle: fact.title
+                                });
                               }
 
                               try {
@@ -621,23 +642,55 @@ const FactsTable = ({
 
                                 if (response.ok) {
                                   // Refresh the data to show the new reaction
+                                  const currentUserId = getCurrentUserId();
+                                  if (!currentUserId) return; // Don't update if no user ID
+                                  
+                                  console.log("Reaction submitted successfully, updating data:", {
+                                    factId: fact.id,
+                                    currentUserId,
+                                    reaction,
+                                    dataLength: data?.length
+                                  });
+                                  
                                   const updatedData = data?.map((f) => {
+                                    console.log("Checking fact for update:", {
+                                      factId: f.id,
+                                      targetFactId: fact.id,
+                                      matches: f.id === fact.id,
+                                      factTitle: f.title,
+                                      targetFactTitle: fact.title
+                                    });
+                                    
                                     if (f.id === fact.id) {
-                                      return {
+                                      // Remove any existing reaction from this user
+                                      const existingReactions = (f.reactions || []).filter(
+                                        (r) => r.user_id !== currentUserId
+                                      );
+                                      
+                                      const newFact = {
                                         ...f,
                                         reactions: [
-                                          ...(f.reactions || []),
+                                          ...existingReactions,
                                           {
                                             id: Date.now(), // Temporary ID
                                             reaction: reaction,
-                                            user_id: getCurrentUserId(),
+                                            user_id: currentUserId,
                                           },
                                         ],
                                       };
+                                      
+                                      console.log("Updated fact:", {
+                                        id: newFact.id,
+                                        title: newFact.title,
+                                        reactions: newFact.reactions
+                                      });
+                                      
+                                      return newFact;
                                     }
                                     return f;
                                   });
                                   setData(updatedData);
+                                  console.log("Data updated, new length:", updatedData?.length);
                                 }
                               } catch (error) {
                                 console.error("Error submitting reaction:", error);

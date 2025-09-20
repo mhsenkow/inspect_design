@@ -46,8 +46,19 @@ const ReactionIcon: React.FC<ReactionIconProps> = ({
   };
 
   // Check if current user has reacted
-  const userReaction = reactions?.find((r) => r.user_id === currentUserId);
+  const userReaction = reactions?.find((r) => r.user_id === Number(currentUserId));
   const hasUserReacted = !!userReaction;
+
+  // Debug logging
+  console.log("ReactionIcon debug:", {
+    reactions,
+    currentUserId,
+    userReaction,
+    hasUserReacted,
+    reactionCount: reactions?.length || 0,
+    reactionsArray: reactions,
+    currentUserIdType: typeof currentUserId
+  });
 
   return (
     <>

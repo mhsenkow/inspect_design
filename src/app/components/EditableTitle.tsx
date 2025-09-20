@@ -47,11 +47,11 @@ const EditableTitle = ({
               border: "2px solid var(--color-base-500)",
               borderRadius: "var(--radius-md)",
               padding: "var(--spacing-2)",
-              paddingRight: "4rem",
+              paddingRight: "var(--spacing-16)",
               fontSize: "var(--font-size-lg)",
               fontFamily: "inherit",
               resize: "vertical",
-              minHeight: "60px",
+              minHeight: "var(--spacing-16)",
             }}
             value={title}
             onChange={(event) => setTitle(event.target.value)}
@@ -76,11 +76,11 @@ const EditableTitle = ({
           />
           <div style={{ 
             position: 'absolute', 
-            right: '0.5rem', 
+            right: 'var(--spacing-2)', 
             top: '50%', 
             transform: 'translateY(-50%)', 
             display: 'flex', 
-            gap: '0.25rem' 
+            gap: 'var(--spacing-1)' 
           }}>
             <button
               onClick={() => {
@@ -88,12 +88,12 @@ const EditableTitle = ({
                 setEditingTitle(false);
               }}
               style={{
-                padding: '0.25rem',
+                padding: 'var(--spacing-1)',
                 color: 'var(--color-text-tertiary)',
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
-                fontSize: '1rem',
+                fontSize: 'var(--font-size-base)',
                 transition: 'color var(--transition-base)'
               }}
               onMouseEnter={(e) => e.target.style.color = 'var(--color-text-secondary)'}
@@ -114,12 +114,12 @@ const EditableTitle = ({
               }}
               disabled={!title}
               style={{
-                padding: '0.25rem',
+                padding: 'var(--spacing-1)',
                 color: 'var(--color-base-500)',
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
-                fontSize: '1rem',
+                fontSize: 'var(--font-size-base)',
                 transition: 'color var(--transition-base)',
                 opacity: !title ? 0.5 : 1
               }}

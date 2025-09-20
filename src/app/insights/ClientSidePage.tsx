@@ -339,6 +339,10 @@ const ClientSidePage = ({
                             title: insight.title,
                             updated_at: insight.updated_at,
                             hasUpdatedAt: !!insight.updated_at,
+                            hasReactions: !!insight.reactions,
+                            reactionsCount: insight.reactions?.length || 0,
+                            reactions: insight.reactions,
+                            fullInsight: insight
                           });
 
                           const dateStr = insight.updated_at
@@ -362,55 +366,13 @@ const ClientSidePage = ({
                         name: "Title",
                         dataColumn: "title",
                         display: (insight: Fact | Insight) => (
-                          <div className="flex items-center justify-between">
-                            <div className="flex-1">
-                              <Link
-                                href={`/insights/${insight.uid}`}
-                                className="text-primary hover:text-primary-600 transition-colors duration-200"
-                              >
-                                {insight.title}
-                              </Link>
-                              {/* Show existing reactions */}
-                              <span className="ml-2 text-muted">
-                                {insight.reactions &&
-                                  insight.reactions
-                                    .map((r) => r.reaction)
-                                    .join("")}
-                              </span>
-                            </div>
-                            {/* Reaction icon integrated here */}
-                            <div className="ml-2">
-                              <ReactionIcon
-                                reactions={insight.reactions || []}
-                                currentUserId={user_id}
-                                onReactionSubmit={async (reaction) => {
-                                  if (token) {
-                                    const result = await submitReaction(
-                                      {
-                                        reaction,
-                                        summary_id: undefined,
-                                        insight_id: insight.id,
-                                      },
-                                      token,
-                                    );
-                                    if (result) {
-                                      // Update the insight's reactions
-                                      const existingReactions =
-                                        insight.reactions?.filter(
-                                          (r) => r.user_id !== result.user_id,
-                                        ) || [];
-                                      insight.reactions = [
-                                        ...existingReactions,
-                                        result as FactReaction,
-                                      ];
-                                      // Trigger a re-render by updating the parent state
-                                      setLiveData([...liveData]);
-                                    }
-                                  }
-                                }}
-                                className="reaction-icon-cell"
-                              />
-                            </div>
+                          <div className="flex items-start">
+                            <Link
+                              href={`/insights/${insight.uid}`}
+                              className="text-primary hover:text-primary-600 transition-colors duration-200 text-left"
+                            >
+                              {insight.title}
+                            </Link>
                           </div>
                         ),
                       },
