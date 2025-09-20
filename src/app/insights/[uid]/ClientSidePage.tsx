@@ -213,105 +213,100 @@ const ClientSidePage = ({
       <div className={styles.mainContent}>
         <CurrentUserContext.Provider value={currentUser}>
           {/* Single Paper Container */}
-          <div className={cardStyles.card}>
+          <div className={`${cardStyles.card} insight-page-card`}>
             {/* Paper Header */}
-            <HeaderItem
-              reactions={insightReactions || []}
-              currentUserId={currentUser?.id}
-              onReactionSubmit={async (reaction) => {
-                if (token) {
-                  const result = await submitReaction(
-                    { reaction, insight_id: insight.id },
-                    token,
-                  );
-                  if (result) {
-                    // Remove any existing reaction from this user for this insight
-                    const existingReactions =
-                      insight.reactions?.filter(
-                        (r) => r.user_id !== currentUser?.id,
-                      ) || [];
-                    setInsight({
-                      ...insight,
-                      reactions: [...existingReactions, result as FactReaction],
-                    });
+            <div className="insight-header-container">
+              <HeaderItem
+                reactions={insightReactions || []}
+                currentUserId={currentUser?.id}
+                onReactionSubmit={async (reaction) => {
+                  if (token) {
+                    const result = await submitReaction(
+                      { reaction, insight_id: insight.id },
+                      token,
+                    );
+                    if (result) {
+                      // Remove any existing reaction from this user for this insight
+                      const existingReactions =
+                        insight.reactions?.filter(
+                          (r) => r.user_id !== currentUser?.id,
+                        ) || [];
+                      setInsight({
+                        ...insight,
+                        reactions: [
+                          ...existingReactions,
+                          result as FactReaction,
+                        ],
+                      });
+                    }
                   }
-                }
-              }}
-              className="insight-header-item"
-            >
-              <div
-                className={cardStyles.cardHeader}
-                style={{ paddingRight: 0 }}
+                }}
+                className="insight-header-item"
               >
-                <div className={styles.headerTop}>
-                  <div className={styles.headerLeft}>
-                    <div className={styles.sourceLogoContainer}>
-                      <SourceLogo fact={insight} />
+                <div
+                  className={cardStyles.cardHeader}
+                  style={{ paddingRight: 0 }}
+                >
+                  <div className={styles.headerTop}>
+                    <div className={styles.headerLeft}>
+                      <div className={styles.sourceLogoContainer}>
+                        <SourceLogo fact={insight} />
+                      </div>
+                      <div className={styles.headerInfo}>
+                        <EditableTitle
+                          insight={insight}
+                          apiRoot="/api/insights"
+                        />
+                        <div className={styles.headerSubtitle}>
+                          {createdOrUpdated}
+                        </div>
+                      </div>
                     </div>
-                    <div className={styles.headerInfo}>
-                      <EditableTitle
-                        insight={insight}
-                        apiRoot="/api/insights"
-                      />
-                      <div className={styles.headerSubtitle}>
-                        {createdOrUpdated}
+                    <div className={styles.headerRight}>
+                      <div className={styles.citationsCount}>
+                        📄 {liveSnippetData.length ?? 0} citations
                       </div>
                     </div>
                   </div>
-                  <div className={styles.headerRight}>
-                    <div className={styles.citationsCount}>
-                      📄 {liveSnippetData.length ?? 0} citations
-                    </div>
-                  </div>
                 </div>
-              </div>
-            </HeaderItem>
+              </HeaderItem>
 
-            {/* Actions Section */}
-            {isClient && currentUser && insight.user_id == currentUser.id && (
-              <div
-                className={cardStyles.cardBody}
-                style={{
-                  paddingBottom: "var(--spacing-4)",
-                  paddingRight: 0,
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  alignItems: "center",
-                  gap: "var(--spacing-2)",
-                }}
-              >
-                {!insight.is_public && (
+              {/* Action Buttons - Half on/Half off Bottom Edge */}
+              {isClient && currentUser && insight.user_id == currentUser.id && (
+                <div className="insight-header-actions">
+                  {!insight.is_public && (
+                    <button
+                      className="insight-action-button insight-action-button-publish"
+                      aria-label="Publish Insight"
+                      title="Publish Insight"
+                      onClick={async () => {
+                        if (token && confirm("Are you sure?")) {
+                          await publishInsights({ insights: [insight] }, token);
+                          setInsight({ ...insight, is_public: true });
+                        }
+                      }}
+                    >
+                      <span className="insight-action-icon">🌎</span>
+                      <span className="insight-action-label">Publish</span>
+                    </button>
+                  )}
                   <button
-                    className={styles.actionButton}
-                    aria-label="Publish Insight"
-                    title="Publish Insight"
+                    className="insight-action-button insight-action-button-delete"
+                    aria-label="Delete Insight"
+                    title="Delete Insight"
                     onClick={async () => {
                       if (token && confirm("Are you sure?")) {
-                        await publishInsights({ insights: [insight] }, token);
-                        setInsight({ ...insight, is_public: true });
+                        await deleteInsights({ insights: [insight] }, token);
+                        window.location.href = "/";
                       }
                     }}
                   >
-                    <span>🌎</span>
-                    <span className="text-xs">Publish</span>
+                    <span className="insight-action-icon">🗑️</span>
+                    <span className="insight-action-label">Delete</span>
                   </button>
-                )}
-                <button
-                  className="btn btn-sm btn-ghost text-text-secondary hover:text-text-primary hover:bg-background-secondary flex items-center gap-1"
-                  aria-label="Delete Insight"
-                  title="Delete Insight"
-                  onClick={async () => {
-                    if (token && confirm("Are you sure?")) {
-                      await deleteInsights({ insights: [insight] }, token);
-                      window.location.href = "/";
-                    }
-                  }}
-                >
-                  <span>🗑️</span>
-                  <span className="text-xs">Delete</span>
-                </button>
-              </div>
-            )}
+                </div>
+              )}
+            </div>
 
             {/* Parent Insights Section */}
             {(isClient

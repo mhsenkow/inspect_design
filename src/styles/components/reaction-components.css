@@ -299,6 +299,104 @@ td.overflow-visible {
 }
 
 /* ===================================
+   INSIGHT HEADER ACTIONS
+   =================================== */
+
+/* Insight header container */
+.insight-header-container {
+  position: relative;
+  overflow: visible;
+  z-index: 10;
+}
+
+/* Ensure the main card doesn't clip the action buttons */
+.insight-page-card {
+  overflow: visible !important;
+}
+
+/* Override margins for insight header to make it edge to edge */
+.insight-header-container .header-item-container {
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+  border-radius: 0 !important;
+  border-left: none !important;
+  border-right: none !important;
+  overflow: visible !important;
+}
+
+/* Action buttons positioned at bottom edge */
+.insight-header-actions {
+  position: absolute;
+  bottom: -12px;
+  right: var(--spacing-4);
+  display: flex;
+  gap: var(--spacing-2);
+  z-index: 50;
+  overflow: visible;
+}
+
+/* Individual action button styling */
+.insight-action-button {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  padding: var(--spacing-2) var(--spacing-3);
+  background-color: var(--color-background-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-base);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.insight-action-button:hover {
+  background-color: var(--color-background-secondary);
+  border-color: var(--color-border-secondary);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
+}
+
+.insight-action-button:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Publish button specific styling */
+.insight-action-button-publish {
+  color: var(--color-success);
+}
+
+.insight-action-button-publish:hover {
+  background-color: var(--color-success-light);
+  color: var(--color-success-dark);
+}
+
+/* Delete button specific styling */
+.insight-action-button-delete {
+  color: var(--color-danger);
+}
+
+.insight-action-button-delete:hover {
+  background-color: var(--color-danger-light);
+  color: var(--color-danger-dark);
+}
+
+/* Action button icons and labels */
+.insight-action-icon {
+  font-size: var(--font-size-base);
+  line-height: 1;
+}
+
+.insight-action-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+
+/* ===================================
    RESPONSIVE DESIGN
    =================================== */
 
