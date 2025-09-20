@@ -226,7 +226,7 @@ const ClientSidePage = ({
                   >
                     <span className={cardStyles.addButtonIcon}>+</span>
                     <span className={cardStyles.addButtonText}>
-                      Create New Insight
+                      New Insight
                     </span>
                   </button>
                   <button
