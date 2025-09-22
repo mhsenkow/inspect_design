@@ -315,3 +315,36 @@
   --font-size-4xl: 3rem; /* 48px */
   --font-size-5xl: 3.75rem; /* 60px */
 }
+
+/* ===================================
+   INSIGHTS TABLE ICON STACK
+   =================================== */
+
+/* Icon stack styling for insights table */
+.insights-icon-stack {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  flex-shrink: 0;
+}
+
+.insights-icon-stack .icon-small {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  opacity: 0.8;
+  transition: opacity var(--transition-base);
+}
+
+.insights-icon-stack .icon-small:hover {
+  opacity: 1;
+}
+
+.insights-icon-stack .icon-main {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+.insights-icon-stack .icon-count {
+  font-weight: var(--font-weight-medium);
+  margin-left: 2px;
+}

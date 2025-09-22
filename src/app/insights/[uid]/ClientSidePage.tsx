@@ -21,7 +21,7 @@ import FeedbackInputElement from "../../components/FeedbackInputElement";
 import ReactionButton from "../../components/ReactionButton";
 import { submitComment, submitReaction } from "../../functions";
 import FeedbackItem from "../../components/FeedbackItem";
-import HeaderItem from "../../components/HeaderItem";
+import ReactionIcon from "../../components/ReactionIcon";
 import SourceLogo from "../../components/SourceLogo";
 import useUser from "../../hooks/useUser";
 import EditableTitle from "../../components/EditableTitle";
@@ -215,100 +215,6 @@ const ClientSidePage = ({
         <CurrentUserContext.Provider value={currentUser}>
           {/* Single Paper Container */}
           <div className={`${cardStyles.card} insight-page-card`}>
-            {/* Paper Header */}
-            <div className="insight-header-container">
-              <HeaderItem
-                reactions={insightReactions || []}
-                currentUserId={currentUser?.id}
-                onReactionSubmit={async (reaction) => {
-                  if (token) {
-                    const result = await submitReaction(
-                      { reaction, insight_id: insight.id },
-                      token,
-                    );
-                    if (result) {
-                      // Remove any existing reaction from this user for this insight
-                      const existingReactions =
-                        insight.reactions?.filter(
-                          (r) => r.user_id !== currentUser?.id,
-                        ) || [];
-                      setInsight({
-                        ...insight,
-                        reactions: [
-                          ...existingReactions,
-                          result as FactReaction,
-                        ],
-                      });
-                    }
-                  }
-                }}
-                className="insight-header-item"
-              >
-                <div
-                  className={cardStyles.cardHeader}
-                  style={{ paddingRight: 0 }}
-                >
-                  <div className={styles.headerTop}>
-                    <div className={styles.headerLeft}>
-                      <div className={styles.sourceLogoContainer}>
-                        <SourceLogo fact={insight} />
-                      </div>
-                      <div className={styles.headerInfo}>
-                        <EditableTitle
-                          insight={insight}
-                          apiRoot="/api/insights"
-                        />
-                        <div className={styles.headerSubtitle}>
-                          {createdOrUpdated}
-                        </div>
-                      </div>
-                    </div>
-                    <div className={styles.headerRight}>
-                      <div className={styles.citationsCount}>
-                        📄 {liveSnippetData.length ?? 0} citations
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </HeaderItem>
-
-              {/* Action Buttons - Half on/Half off Bottom Edge */}
-              {isClient && currentUser && insight.user_id == currentUser.id && (
-                <div className="insight-header-actions">
-                  {!insight.is_public && (
-                    <button
-                      className="insight-action-button insight-action-button-publish"
-                      aria-label="Publish Insight"
-                      title="Publish Insight"
-                      onClick={async () => {
-                        if (token && confirm("Are you sure?")) {
-                          await publishInsights({ insights: [insight] }, token);
-                          setInsight({ ...insight, is_public: true });
-                        }
-                      }}
-                    >
-                      <span className="insight-action-icon">🌎</span>
-                      <span className="insight-action-label">Publish</span>
-                    </button>
-                  )}
-                  <button
-                    className="insight-action-button insight-action-button-delete"
-                    aria-label="Delete Insight"
-                    title="Delete Insight"
-                    onClick={async () => {
-                      if (token && confirm("Are you sure?")) {
-                        await deleteInsights({ insights: [insight] }, token);
-                        window.location.href = "/";
-                      }
-                    }}
-                  >
-                    <span className="insight-action-icon">🗑️</span>
-                    <span className="insight-action-label">Delete</span>
-                  </button>
-                </div>
-              )}
-            </div>
-
             {/* Parent Insights Section */}
             {(isClient
               ? loggedIn || insight.parents.length > 0
@@ -509,6 +415,170 @@ const ClientSidePage = ({
                 </div>
               </div>
             )}
+
+            {/* Paper Header */}
+            <div className="insight-header-container">
+              <div
+                className={cardStyles.cardHeader}
+                style={{ paddingRight: 0 }}
+              >
+                <div className={styles.headerTop}>
+                  <div className={styles.headerLeft}>
+                    <div className={styles.sourceLogoContainer}>
+                      <SourceLogo fact={insight} />
+                      <ReactionIcon
+                        reactions={insightReactions || []}
+                        currentUserId={currentUser?.id}
+                        onReactionSubmit={async (reaction) => {
+                          if (token) {
+                            const result = await submitReaction(
+                              { reaction, insight_id: insight.id },
+                              token,
+                            );
+                            if (result) {
+                              // Remove any existing reaction from this user for this insight
+                              const existingReactions =
+                                insight.reactions?.filter(
+                                  (r) => r.user_id !== currentUser?.id,
+                                ) || [];
+                              setInsight({
+                                ...insight,
+                                reactions: [
+                                  ...existingReactions,
+                                  result as FactReaction,
+                                ],
+                              });
+                            }
+                          }
+                        }}
+                        className="header-item-reaction-icon reaction-icon-solid"
+                      />
+                    </div>
+                    <div className={styles.headerInfo}>
+                      <EditableTitle
+                        insight={insight}
+                        apiRoot="/api/insights"
+                      />
+                      <div className={styles.headerSubtitle}>
+                        {createdOrUpdated}
+                      </div>
+                    </div>
+                  </div>
+                  <div className={styles.headerRight}>
+                    <div className="insights-icon-stack">
+                      {/* Parent insights count */}
+                      {(insight.parents?.length || 0) > 0 && (
+                        <span className="icon-small" title={`${insight.parents?.length || 0} parent insights`}>
+                          👨‍👩‍👧‍👦<span className="icon-count">{insight.parents?.length || 0}</span>
+                        </span>
+                      )}
+                      {/* Aggregated reactions */}
+                      {(() => {
+                        const reactionCounts: { [key: string]: number } = {};
+                        
+                        // Add reactions from the insight itself
+                        if (insight.reactions) {
+                          insight.reactions.forEach(reaction => {
+                            reactionCounts[reaction.reaction] = (reactionCounts[reaction.reaction] || 0) + 1;
+                          });
+                        }
+                        
+                        // Add reactions from parent insights
+                        if (insight.parents) {
+                          insight.parents.forEach(parentLink => {
+                            if (parentLink.parentInsight?.reactions) {
+                              parentLink.parentInsight.reactions.forEach(reaction => {
+                                reactionCounts[reaction.reaction] = (reactionCounts[reaction.reaction] || 0) + 1;
+                              });
+                            }
+                          });
+                        }
+                        
+                        // Add reactions from child insights
+                        if (insight.children) {
+                          insight.children.forEach(childLink => {
+                            if (childLink.childInsight?.reactions) {
+                              childLink.childInsight.reactions.forEach(reaction => {
+                                reactionCounts[reaction.reaction] = (reactionCounts[reaction.reaction] || 0) + 1;
+                              });
+                            }
+                          });
+                        }
+                        
+                        // Add reactions from evidence
+                        if (insight.evidence) {
+                          insight.evidence.forEach(evidence => {
+                            if (evidence.summary?.reactions) {
+                              evidence.summary.reactions.forEach(reaction => {
+                                reactionCounts[reaction.reaction] = (reactionCounts[reaction.reaction] || 0) + 1;
+                              });
+                            }
+                          });
+                        }
+                        
+                        return Object.keys(reactionCounts).length > 0 ? (
+                          <span className="icon-main" title="All reactions from parents, children, evidence, and this insight">
+                            {Object.entries(reactionCounts).map(([reaction, count]) => (
+                              <span key={reaction} className="inline-block mr-1">
+                                {reaction}{count > 1 ? count : ''}
+                              </span>
+                            ))}
+                          </span>
+                        ) : null;
+                      })()}
+                      {/* Child insights count */}
+                      {(insight.children?.length || 0) > 0 && (
+                        <span className="icon-small" title={`${insight.children?.length || 0} child insights`}>
+                          👶<span className="icon-count">{insight.children?.length || 0}</span>
+                        </span>
+                      )}
+                      {/* Evidence count */}
+                      {(liveSnippetData.length || 0) > 0 && (
+                        <span className="icon-small" title={`${liveSnippetData.length || 0} evidence items`}>
+                          📄<span className="icon-count">{liveSnippetData.length || 0}</span>
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons - Half on/Half off Bottom Edge */}
+              {isClient && currentUser && insight.user_id == currentUser.id && (
+                <div className="insight-header-actions">
+                  {!insight.is_public && (
+                    <button
+                      className="insight-action-button insight-action-button-publish"
+                      aria-label="Publish Insight"
+                      title="Publish Insight"
+                      onClick={async () => {
+                        if (token && confirm("Are you sure?")) {
+                          await publishInsights({ insights: [insight] }, token);
+                          setInsight({ ...insight, is_public: true });
+                        }
+                      }}
+                    >
+                      <span className="insight-action-icon">🌎</span>
+                      <span className="insight-action-label">Publish</span>
+                    </button>
+                  )}
+                  <button
+                    className="insight-action-button insight-action-button-delete"
+                    aria-label="Delete Insight"
+                    title="Delete Insight"
+                    onClick={async () => {
+                      if (token && confirm("Are you sure?")) {
+                        await deleteInsights({ insights: [insight] }, token);
+                        window.location.href = "/";
+                      }
+                    }}
+                  >
+                    <span className="insight-action-icon">🗑️</span>
+                    <span className="insight-action-label">Delete</span>
+                  </button>
+                </div>
+              )}
+            </div>
 
             {/* Child Insights Section */}
             <div

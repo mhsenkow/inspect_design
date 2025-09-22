@@ -37,9 +37,9 @@ export async function GET(req: NextRequest): Promise<GetInsightsRouteResponse> {
       .withGraphJoined(
         `[
       reactions,
-      ${includeParents ? "parents.parentInsight," : ""}
-      ${includeChildren ? "children.childInsight.evidence," : ""}
-      ${includeEvidence ? "evidence" : ""}
+      ${includeParents ? "parents.parentInsight.reactions," : ""}
+      ${includeChildren ? "children.childInsight.reactions," : ""}
+      ${includeEvidence ? "evidence.summary.reactions" : ""}
     ]`,
         { joinOperation: "leftJoin" }, // Use leftJoin to preserve all root insights
       )

@@ -325,7 +325,7 @@ const ClientSidePage = ({
                     }
                     unselectedActions={[]}
                     selectedActions={[]}
-                    enableReactionIcons={true}
+                    enableReactionIcons={false}
                     dataFilter={dataFilter}
                     setDataFilter={setDataFilter}
                     columns={[
@@ -365,50 +365,118 @@ const ClientSidePage = ({
                       {
                         name: "Title",
                         dataColumn: "title",
-                        display: (insight: Fact | Insight) => (
-                          <div className="flex items-start">
-                            <Link
-                              href={`/insights/${insight.uid}`}
-                              className="text-primary hover:text-primary-600 transition-colors duration-200 text-left"
-                            >
-                              {insight.title}
-                            </Link>
-                          </div>
-                        ),
-                      },
-                      {
-                        name: "📄",
-                        dataColumn: "evidence",
-                        display: (insight: Fact | Insight) => (
-                          <span className="badge text-bg-danger">
-                            {insight.evidence?.length || 0}
-                          </span>
-                        ),
-                      },
-                      {
-                        name: "👶",
-                        dataColumn: "children",
-                        display: (insight: Fact | Insight) => (
-                          <span className="badge text-bg-info">
-                            {insight.children?.length || 0}
-                          </span>
-                        ),
-                      },
-                      {
-                        name: "👨‍👩‍👧‍👦",
-                        dataColumn: "parents",
-                        display: (insight: Fact | Insight) => (
-                          <span className="badge text-bg-warning">
-                            {insight.parents?.length || 0}
-                          </span>
-                        ),
-                      },
-                      {
-                        name: "🌎",
-                        dataColumn: "is_public",
-                        display: (insight: Fact | Insight) => (
-                          <span>{insight.is_public ? "✅" : ""}</span>
-                        ),
+                        display: (insight: Fact | Insight) => {
+                          // Debug: log the insight structure to understand the data
+                          console.log("Insight data structure:", {
+                            id: insight.id,
+                            title: insight.title,
+                            hasReactions: !!insight.reactions,
+                            reactionsCount: insight.reactions?.length || 0,
+                            hasParents: !!insight.parents,
+                            parentsCount: insight.parents?.length || 0,
+                            hasChildren: !!insight.children,
+                            childrenCount: insight.children?.length || 0,
+                            hasEvidence: !!insight.evidence,
+                            evidenceCount: insight.evidence?.length || 0,
+                            fullInsight: insight
+                          });
+                          
+                          // Aggregate all reactions from all sources
+                          const aggregateReactions = () => {
+                            const reactionCounts: { [key: string]: number } = {};
+                            
+                            // Add reactions from the insight itself
+                            if (insight.reactions) {
+                              insight.reactions.forEach(reaction => {
+                                reactionCounts[reaction.reaction] = (reactionCounts[reaction.reaction] || 0) + 1;
+                              });
+                            }
+                            
+                            // Add reactions from parent insights (nested structure)
+                            if (insight.parents) {
+                              insight.parents.forEach(parentLink => {
+                                if (parentLink.parentInsight?.reactions) {
+                                  parentLink.parentInsight.reactions.forEach(reaction => {
+                                    reactionCounts[reaction.reaction] = (reactionCounts[reaction.reaction] || 0) + 1;
+                                  });
+                                }
+                              });
+                            }
+                            
+                            // Add reactions from child insights (nested structure)
+                            if (insight.children) {
+                              insight.children.forEach(childLink => {
+                                if (childLink.childInsight?.reactions) {
+                                  childLink.childInsight.reactions.forEach(reaction => {
+                                    reactionCounts[reaction.reaction] = (reactionCounts[reaction.reaction] || 0) + 1;
+                                  });
+                                }
+                              });
+                            }
+                            
+                            // Add reactions from evidence (nested structure)
+                            if (insight.evidence) {
+                              insight.evidence.forEach(evidence => {
+                                if (evidence.summary?.reactions) {
+                                  evidence.summary.reactions.forEach(reaction => {
+                                    reactionCounts[reaction.reaction] = (reactionCounts[reaction.reaction] || 0) + 1;
+                                  });
+                                }
+                              });
+                            }
+                            
+                            console.log("Aggregated reactions:", reactionCounts);
+                            return reactionCounts;
+                          };
+                          
+                          const aggregatedReactions = aggregateReactions();
+                          
+                          return (
+                            <div className="flex items-center justify-between w-full">
+                              <Link
+                                href={`/insights/${insight.uid}`}
+                                className="text-primary hover:text-primary-600 transition-colors duration-200 text-left flex-1"
+                              >
+                                {insight.title}
+                              </Link>
+                              <div className="insights-icon-stack">
+                                {/* Parent insights count - smaller icon */}
+                                {(insight.parents?.length || 0) > 0 && (
+                                  <span className="icon-small" title={`${insight.parents?.length || 0} parent insights`}>
+                                    👨‍👩‍👧‍👦<span className="icon-count">{insight.parents?.length || 0}</span>
+                                  </span>
+                                )}
+                                {/* Aggregated reactions - larger icons */}
+                                {Object.keys(aggregatedReactions).length > 0 && (
+                                  <span className="icon-main" title="All reactions from parents, children, evidence, and this insight">
+                                    {Object.entries(aggregatedReactions).map(([reaction, count]) => (
+                                      <span key={reaction} className="inline-block mr-1">
+                                        {reaction}{count > 1 ? count : ''}
+                                      </span>
+                                    ))}
+                                  </span>
+                                )}
+                                {/* Child/Evidence count - smaller icon */}
+                                {(insight.children?.length || 0) > 0 && (
+                                  <span className="icon-small" title={`${insight.children?.length || 0} child insights`}>
+                                    👶<span className="icon-count">{insight.children?.length || 0}</span>
+                                  </span>
+                                )}
+                                {(insight.evidence?.length || 0) > 0 && (
+                                  <span className="icon-small" title={`${insight.evidence?.length || 0} evidence items`}>
+                                    📄<span className="icon-count">{insight.evidence?.length || 0}</span>
+                                  </span>
+                                )}
+                                {/* Public indicator */}
+                                {insight.is_public && (
+                                  <span className="icon-small" title="Public insight">
+                                    🌎
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        },
                       },
                     ]}
                   />
