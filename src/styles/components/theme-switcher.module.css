@@ -41,17 +41,20 @@
 }
 
 .dropdownMenu {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  margin-top: var(--spacing-1);
+  position: fixed;
+  top: auto;
+  bottom: 80px;
+  left: 100px;
+  margin-top: 0;
   background-color: var(--color-background-primary);
   border: 1px solid var(--color-border-primary);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
-  z-index: var(--z-dropdown);
+  z-index: 1001;
   min-width: 16rem;
   padding: var(--spacing-2);
+  transform: none;
+  margin-left: 0;
 }
 
 .dropdownSection {
@@ -130,8 +133,8 @@
 /* Responsive adjustments */
 @media (max-width: 640px) {
   .dropdownMenu {
-    right: auto;
-    left: 0;
+    left: 80px;
+    bottom: 60px;
     min-width: 14rem;
   }
 }

@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 import moment from "moment";
+import cardStyles from "../../../styles/components/card.module.css";
 
 import { FactComment, FactReaction, Link, User } from "../../types";
 
@@ -35,205 +36,156 @@ const ClientSidePage = ({
   }, [link.created_at, link.updated_at]);
 
   return (
-    <div id="body">
+    <div className={cardStyles.linkPagePaper}>
       <CurrentUserContext.Provider value={currentUser || null}>
-        <div id="source">
-          <div style={{ display: "flex" }}>
-            <ReactionIcon
-              reactions={link.reactions || []}
-              currentUserId={currentUser?.id}
-              onReactionSubmit={async (reaction) => {
-                if (token) {
-                  const result = await submitReaction(
-                    { reaction, summary_id: link.id },
-                    token,
-                  );
-                  if (result) {
-                    // Remove any existing reaction from this user for this link
-                    const existingReactions =
-                      link.reactions?.filter(
-                        (r) => r.user_id !== result.user_id,
-                      ) || [];
-                    setLink({
-                      ...link,
-                      reactions: [...existingReactions, result as FactReaction],
-                    });
-                  }
-                }
-              }}
-              className="reaction-button-header"
-            />
-          </div>
-          <div id="created_at">
-            <p>{createdOrUpdated}</p>
-          </div>
-          <div style={{ height: "60px" }}>
-            <SourceLogo fact={link} />
-          </div>
-        </div>
-        <div
-          style={{
-            marginBlockStart: "0.83em",
-            marginBlockEnd: "0.83em",
-          }}
-        >
-          <p
-            style={{
-              width: "100%",
-              position: "relative",
-            }}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element -- because of domain filtering */}
-            <img
-              src={link.imageUrl || undefined}
-              alt="link image"
-              style={{ maxWidth: "800px", width: "100%" }}
-              // fill={true}
-            />
-          </p>
-          <h2 id="title" style={{ margin: "0px" }}>
-            <a href={link.url} target="_blank" rel="noreferrer" id="titleLink">
-              {link.title}
-            </a>
-          </h2>
-        </div>
-        {currentUser && isEditingComment && (
-          <FeedbackInputElement
-            actionType="comment"
-            submitFunc={(comment) => {
-              if (token) {
-                return submitComment({ comment, summary_id: link.id }, token);
-              }
-              return Promise.resolve();
-            }}
-            directions="Enter a text comment"
-            afterSubmit={(newObject) => {
-              if (newObject) {
-                if (!link.comments) {
-                  link.comments = [];
-                }
-                setLink({
-                  ...link,
-                  comments: [
-                    ...link.comments,
-                    {
-                      ...newObject,
-                      // avatar_uri: currentUser.avatar_uri,
-                    } as FactComment,
-                  ],
-                });
-              }
-            }}
-            closeFunc={() => setIsEditingComment(false)}
-          />
-        )}
-        {currentUser && (
-          <FeedbackItem
-            reactions={link.reactions || []}
-            currentUserId={currentUser?.id}
-            onReactionSubmit={async (reaction) => {
-              if (token) {
-                const result = await submitReaction(
-                  { reaction, summary_id: link.id },
-                  token,
-                );
-                if (result) {
-                  // Remove any existing reaction from this user for this link
-                  const existingReactions =
-                    link.reactions?.filter(
-                      (r) => r.user_id !== result.user_id,
-                    ) || [];
-                  setLink({
-                    ...link,
-                    reactions: [...existingReactions, result as FactReaction],
-                  });
-                }
-              }
-            }}
-            className="link-feedback-item"
-          >
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "space-around",
-                width: "100%",
-                margin: "10px",
-              }}
-            >
-              <FeedbackLink
-                actionVerb="Comment"
-                icon="💬"
-                setOnClickFunction={() => {
-                  setIsEditingComment(true);
-                }}
-              />
+        <div className={cardStyles.linkPageCard}>
+          {/* Link Header Section */}
+          <div className={cardStyles.linkHeaderSection}>
+            <div className={cardStyles.linkHeaderContainer}>
+              <div className={cardStyles.linkSourceLogoContainer}>
+                <SourceLogo fact={link} />
+                <ReactionIcon
+                  reactions={link.reactions || []}
+                  currentUserId={currentUser?.id}
+                  onReactionSubmit={async (reaction) => {
+                    if (token) {
+                      const result = await submitReaction(
+                        { reaction, summary_id: link.id },
+                        token,
+                      );
+                      if (result) {
+                        const existingReactions =
+                          link.reactions?.filter(
+                            (r) => r.user_id !== result.user_id,
+                          ) || [];
+                        setLink({
+                          ...link,
+                          reactions: [...existingReactions, result as FactReaction],
+                        });
+                      }
+                    }
+                  }}
+                  className="header-item-reaction-icon reaction-icon-solid"
+                />
+              </div>
+              <div className={cardStyles.linkTitleContainer}>
+                <h1 className={cardStyles.linkMainTitle}>
+                  <span className={cardStyles.linkIcon}>🔗</span>
+                  {link.title}
+                </h1>
+                <div className={cardStyles.linkMetadata}>
+                  <span className={cardStyles.linkTimestamp}>{createdOrUpdated}</span>
+                </div>
+              </div>
             </div>
-          </FeedbackItem>
-        )}
-        <div className="comments">
-          {link.comments &&
-            link.comments.map((comment) => (
-              // <div
-              //   className="comment"
-              //   key={`Comment #${comment.id}`}
-              //   data-id={comment.id}
-              // >
-              //   {comment.user?.username}
-              //   <div
-              //     style={{
-              //       float: "right",
-              //       display: "flex",
-              //       flexDirection: "column",
-              //     }}
-              //   >
-              //     {currentUser && (
-              //       <>
-              //         {currentUser.id == Number(comment.user_id) && (
-              //           <button
-              //             style={{ width: "32px", height: "30px" }}
-              //             aria-label="Delete Comment"
-              //             onClick={async () => {
-              //               if (token && confirm("Are you sure?")) {
-              //                 const worked = await deleteComment(
-              //                   { id: comment.id },
-              //                   token,
-              //                 );
-              //                 if (worked) {
-              //                   if (!link.comments) {
-              //                     link.comments = [];
-              //                   }
-              //                   setLink({
-              //                     ...link,
-              //                     comments: link.comments.filter(
-              //                       (c) => c.id !== comment.id,
-              //                     ),
-              //                   });
-              //                 }
-              //               }
-              //             }}
-              //           >
-              //             {TRASH_ICON}
-              //           </button>
-              //         )}
-              //       </>
-              //     )}
-              //   </div>
-              //   <div className="commenttext">
-              //     {comment.comment && parse(comment.comment)}
-              //   </div>
-              // </div>
-              <Comment
-                key={`Link Comment #${comment.id}`}
-                comment={comment}
-                removeCommentFunc={(id) => {
-                  setLink({
-                    ...link,
-                    comments: link.comments?.filter((c) => c.id !== id) ?? [],
-                  });
-                }}
-              />
-            ))}
+          </div>
+
+          {/* Link Visit Section */}
+          <div className={cardStyles.linkVisitSection}>
+            <div className={cardStyles.linkActions}>
+              <a 
+                href={link.url} 
+                target="_blank" 
+                rel="noreferrer"
+                className={cardStyles.linkVisitButton}
+              >
+                Visit Link →
+              </a>
+            </div>
+          </div>
+
+          {/* Link Content Section */}
+          <div className={cardStyles.linkContentSection}>
+            {link.imageUrl && (
+              <div className={cardStyles.linkImageContainer}>
+                <img
+                  src={link.imageUrl}
+                  alt="Link preview"
+                  className={cardStyles.linkImage}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Feedback Section */}
+          <div className={cardStyles.linkFeedbackSection}>
+            <div className={cardStyles.linkFeedbackHeader}>
+              <div className={cardStyles.hierarchyIndicator}>
+                <span className={cardStyles.hierarchyIcon}>💬</span>
+                Feedback
+              </div>
+            </div>
+            
+            <div className={cardStyles.linkFeedbackContent}>
+              {/* Comment Input */}
+              {currentUser && isEditingComment && (
+                <div className={cardStyles.linkCommentInput}>
+                  <FeedbackInputElement
+                    actionType="comment"
+                    submitFunc={(comment) => {
+                      if (token) {
+                        return submitComment({ comment, summary_id: link.id }, token);
+                      }
+                      return Promise.resolve();
+                    }}
+                    directions="Enter a text comment"
+                    afterSubmit={(newObject) => {
+                      if (newObject) {
+                        if (!link.comments) {
+                          link.comments = [];
+                        }
+                        setLink({
+                          ...link,
+                          comments: [
+                            ...link.comments,
+                            {
+                              ...newObject,
+                            } as FactComment,
+                          ],
+                        });
+                      }
+                    }}
+                    closeFunc={() => setIsEditingComment(false)}
+                  />
+                </div>
+              )}
+
+              {/* Comments List */}
+              <div className={cardStyles.linkCommentsList}>
+                {link.comments && link.comments.length > 0 ? (
+                  link.comments.map((comment) => (
+                    <Comment
+                      key={`Link Comment #${comment.id}`}
+                      comment={comment}
+                      removeCommentFunc={(id) => {
+                        setLink({
+                          ...link,
+                          comments: link.comments?.filter((c) => c.id !== id) ?? [],
+                        });
+                      }}
+                    />
+                  ))
+                ) : (
+                  <div className={cardStyles.linkNoComments}>
+                    <p>No comments yet. Be the first to share your thoughts!</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Add Comment Button */}
+              {currentUser && !isEditingComment && (
+                <div className={cardStyles.linkAddCommentSection}>
+                  <button
+                    onClick={() => setIsEditingComment(true)}
+                    className={cardStyles.linkAddCommentButton}
+                  >
+                    <span className={cardStyles.addButtonIcon}>💬</span>
+                    <span className={cardStyles.addButtonText}>Add Comment</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </CurrentUserContext.Provider>
     </div>

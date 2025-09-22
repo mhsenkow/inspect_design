@@ -18,9 +18,36 @@
 @import "./components/modal.module.css";
 @import "./components/reaction-components.css";
 @import "./components/flat-page-design.css";
+@import "./components/sidebar.module.css";
 
 /* Import theme variations */
 @import "./themes/theme-variations.css";
 
 /* Import legacy styles (to be migrated) */
 @import "./legacy/legacy-styles.css";
+
+/* Main Layout Adjustments for Sidebar */
+main {
+  margin-left: 80px;
+  padding: var(--spacing-6);
+  background-color: var(--color-background-secondary);
+  min-height: 100vh;
+}
+
+@media (max-width: 768px) {
+  main {
+    margin-left: 60px;
+    padding: var(--spacing-4);
+  }
+}
+
+/* Dark theme body improvements */
+.theme-dark body {
+  background-color: var(--color-background-primary);
+  color: var(--color-text-primary);
+}
+
+/* Dark theme main content improvements */
+.theme-dark main {
+  background-color: var(--color-background-primary);
+}

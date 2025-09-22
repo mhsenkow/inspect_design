@@ -157,28 +157,67 @@
 }
 
 /* ===================================
-   DARK THEME
+   DARK THEME - MODERN & HIGH CONTRAST
    =================================== */
 
 .theme-dark {
-  --color-text-primary: var(--color-neutral-50);
-  --color-text-secondary: var(--color-neutral-300);
-  --color-text-tertiary: var(--color-neutral-500);
-  --color-text-muted: var(--color-neutral-600);
-  --color-text-inverse: var(--color-neutral-900);
+  /* Modern Dark Color Palette */
+  --color-neutral-50: #fafafa;
+  --color-neutral-100: #f4f4f5;
+  --color-neutral-200: #e4e4e7;
+  --color-neutral-300: #d4d4d8;
+  --color-neutral-400: #a1a1aa;
+  --color-neutral-500: #71717a;
+  --color-neutral-600: #52525b;
+  --color-neutral-700: #3f3f46;
+  --color-neutral-800: #27272a;
+  --color-neutral-900: #18181b;
+  --color-neutral-950: #09090b;
 
-  --color-background-primary: var(--color-neutral-900);
-  --color-background-secondary: var(--color-neutral-800);
-  --color-background-tertiary: var(--color-neutral-700);
-  --color-background-inverse: var(--color-neutral-50);
+  /* Enhanced Base Colors for Dark Theme */
+  --color-base-50: #f0f4ff;
+  --color-base-100: #dbeafe;
+  --color-base-200: #bfdbfe;
+  --color-base-300: #93c5fd;
+  --color-base-400: #60a5fa;
+  --color-base-500: #3b82f6;
+  --color-base-600: #2563eb;
+  --color-base-700: #1d4ed8;
+  --color-base-800: #1e40af;
+  --color-base-900: #1e3a8a;
+  --color-base-950: #172554;
 
-  --color-border-primary: var(--color-neutral-700);
-  --color-border-secondary: var(--color-neutral-600);
-  --color-border-focus: var(--color-base-400);
+  /* High Contrast Text Colors */
+  --color-text-primary: #fafafa;
+  --color-text-secondary: #d4d4d8;
+  --color-text-tertiary: #a1a1aa;
+  --color-text-muted: #71717a;
+  --color-text-inverse: #09090b;
 
-  --color-link-primary: var(--color-base-400);
-  --color-link-hover: var(--color-base-300);
-  --color-link-active: var(--color-base-500);
+  /* Rich Dark Backgrounds */
+  --color-background-primary: #0a0a0a;
+  --color-background-secondary: #111111;
+  --color-background-tertiary: #1a1a1a;
+  --color-background-inverse: #fafafa;
+
+  /* Subtle but Visible Borders */
+  --color-border-primary: #27272a;
+  --color-border-secondary: #3f3f46;
+  --color-border-focus: #60a5fa;
+
+  /* Vibrant Link Colors */
+  --color-link-primary: #60a5fa;
+  --color-link-hover: #93c5fd;
+  --color-link-active: #3b82f6;
+
+  /* Enhanced Shadows for Dark Theme */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.4);
+  --shadow-base: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+  --shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.4), 0 8px 10px -6px rgb(0 0 0 / 0.4);
+  --shadow-xl: 0 25px 50px -12px rgb(0 0 0 / 0.5);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.5);
 }
 
 /* ===================================
