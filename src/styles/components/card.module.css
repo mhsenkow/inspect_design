@@ -50,6 +50,431 @@
   background-color: var(--color-background-secondary);
 }
 
+/* Feedback Input Component - In-page styling */
+.feedbackInputContainer {
+  background-color: var(--color-background-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-5);
+  margin: var(--spacing-4) 0;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+}
+
+.feedbackInputContainer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-base-400), var(--color-base-600));
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.feedbackInputHeader {
+  margin-bottom: var(--spacing-4);
+  text-align: center;
+}
+
+.feedbackInputTitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.feedbackInputContent {
+  margin-bottom: var(--spacing-4);
+}
+
+.feedbackReactionSelect {
+  font-size: var(--font-size-2xl);
+  padding: var(--spacing-2);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-md);
+  background-color: var(--color-background-primary);
+  color: var(--color-text-primary);
+  width: 100%;
+  text-align: center;
+}
+
+.feedbackInputActions {
+  display: flex;
+  gap: var(--spacing-3);
+  justify-content: flex-end;
+  margin-top: var(--spacing-4);
+}
+
+.feedbackInputButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  padding: var(--spacing-2) var(--spacing-4);
+  background-color: var(--color-background-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: var(--shadow-sm);
+  min-width: 80px;
+  justify-content: center;
+}
+
+.feedbackInputButton:hover:not(:disabled) {
+  background-color: var(--color-background-secondary);
+  border-color: var(--color-border-secondary);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.feedbackInputButton:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+.feedbackInputButtonPrimary {
+  background-color: var(--color-base-500);
+  border-color: var(--color-base-500);
+  color: var(--color-text-inverse);
+  font-weight: var(--font-weight-semibold);
+}
+
+.feedbackInputButtonPrimary:hover:not(:disabled) {
+  background-color: var(--color-base-600);
+  border-color: var(--color-base-600);
+  box-shadow: var(--shadow-md);
+  color: var(--color-text-inverse);
+}
+
+/* Rich Text Editor Styling */
+.richTextEditorContainer {
+  width: 100%;
+}
+
+.richTextEditorToolbar {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--spacing-3);
+}
+
+.richTextEditorToolbarButton {
+  width: 32px;
+  height: 32px;
+  position: relative;
+  background-color: var(--color-background-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.richTextEditorToolbarButton:hover {
+  background-color: var(--color-background-secondary);
+  border-color: var(--color-border-secondary);
+  box-shadow: var(--shadow-sm);
+}
+
+.richTextEditorTextArea {
+  width: 100%;
+  min-height: 120px;
+  padding: var(--spacing-3);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-md);
+  background-color: var(--color-background-primary);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+  text-align: left;
+  resize: vertical;
+  transition: all var(--transition-base);
+}
+
+.richTextEditorTextArea:focus {
+  outline: none;
+  border-color: var(--color-base-500);
+  box-shadow: 0 0 0 2px var(--color-base-100);
+}
+
+.richTextEditorTextArea:empty::before {
+  content: "Type your comment here...";
+  color: var(--color-text-tertiary);
+  font-style: italic;
+}
+
+/* Feedback Section - Half on/half off positioning */
+.feedbackSectionHalfOff {
+  position: relative;
+  margin-bottom: calc(var(--spacing-8) * -1);
+  padding-bottom: var(--spacing-8);
+}
+
+.feedbackSectionHalfOff::after {
+  content: '';
+  position: absolute;
+  bottom: calc(var(--spacing-8) * -1);
+  left: 0;
+  right: 0;
+  height: var(--spacing-8);
+  background-color: var(--color-background-primary);
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+  z-index: 1;
+}
+
+/* Comment Styling - Improved */
+.commentContainer {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-4);
+  padding: var(--spacing-3);
+  background-color: var(--color-background-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-primary);
+  position: relative;
+}
+
+.commentAvatar {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.commentAvatarImage {
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.commentAvatarPlaceholder {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--color-base-500);
+  color: var(--color-text-inverse);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.commentContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.commentHeader {
+  margin-bottom: var(--spacing-1);
+}
+
+.commentAuthor {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+}
+
+.commentText {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
+  color: var(--color-text-primary);
+}
+
+.commentActions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.commentDeleteButton {
+  width: 24px;
+  height: 24px;
+  background-color: var(--color-background-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xs);
+  opacity: 0.6;
+}
+
+.commentDeleteButton:hover {
+  background-color: var(--color-error-50);
+  border-color: var(--color-error-300);
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+/* Feedback Item Styling */
+.feedbackItemContainer {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-3);
+}
+
+.feedbackItemContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.feedbackItemActions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  align-items: center;
+  flex-shrink: 0;
+  margin-top: var(--spacing-2);
+}
+
+.feedbackItemReactionIcon {
+  position: static !important;
+  transform: none !important;
+  top: auto !important;
+  right: auto !important;
+  width: 24px;
+  height: 24px;
+  padding: var(--spacing-1);
+  background-color: var(--color-background-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-sm);
+  opacity: 0.6;
+  transition: all var(--transition-base);
+}
+
+.feedbackItemReactionIcon:hover {
+  opacity: 1;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Login Page Styling */
+.loginPageContainer {
+  min-height: 100vh;
+  background-color: var(--color-background-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-6);
+}
+
+.loginCard {
+  width: 100%;
+  max-width: 400px;
+  background-color: var(--color-background-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.loginCardHeader {
+  background: linear-gradient(135deg, var(--color-base-500), var(--color-base-600));
+  padding: var(--spacing-8) var(--spacing-6);
+  text-align: center;
+  color: var(--color-text-inverse);
+}
+
+.loginTitle {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  margin: 0 0 var(--spacing-2) 0;
+  color: var(--color-text-inverse);
+}
+
+.loginSubtitle {
+  font-size: var(--font-size-sm);
+  margin: 0;
+  opacity: 0.9;
+  color: var(--color-text-inverse);
+}
+
+.loginCardBody {
+  padding: var(--spacing-8) var(--spacing-6);
+}
+
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.formLabel {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.formInput {
+  width: 100%;
+  padding: var(--spacing-3);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-md);
+  background-color: var(--color-background-primary);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+  transition: all var(--transition-base);
+  font-family: var(--font-family-sans);
+}
+
+.formInput:focus {
+  outline: none;
+  border-color: var(--color-base-500);
+  box-shadow: 0 0 0 3px rgba(24, 119, 242, 0.1);
+}
+
+.formInput::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.loginButton {
+  width: 100%;
+  margin-top: var(--spacing-2);
+}
+
+.loginError {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3);
+  background-color: var(--color-error-50);
+  border: 1px solid var(--color-error-200);
+  border-radius: var(--radius-md);
+  color: var(--color-error-700);
+}
+
+.errorIcon {
+  font-size: var(--font-size-sm);
+  flex-shrink: 0;
+}
+
+.errorMessage {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
 /* Page Header Card - Special styling for main page headers */
 .pageHeaderCard {
   background-color: var(--color-background-primary);

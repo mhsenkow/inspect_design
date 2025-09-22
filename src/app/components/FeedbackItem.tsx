@@ -2,6 +2,7 @@
 
 import React from "react";
 import ReactionIcon from "./ReactionIcon";
+import cardStyles from "../../styles/components/card.module.css";
 
 interface FeedbackItemProps {
   reactions: Array<{ reaction: string; user_id?: number }>;
@@ -19,15 +20,17 @@ const FeedbackItem: React.FC<FeedbackItemProps> = ({
   children,
 }) => {
   return (
-    <div className={`feedback-item-container ${className}`}>
-      <div className="feedback-item-content">{children}</div>
+    <div className={`${cardStyles.feedbackItemContainer} ${className}`}>
+      <div className={cardStyles.feedbackItemContent}>{children}</div>
 
-      <ReactionIcon
-        reactions={reactions}
-        currentUserId={currentUserId}
-        onReactionSubmit={onReactionSubmit}
-        className="feedback-item-reaction-icon"
-      />
+      <div className={cardStyles.feedbackItemActions}>
+        <ReactionIcon
+          reactions={reactions}
+          currentUserId={currentUserId}
+          onReactionSubmit={onReactionSubmit}
+          className={cardStyles.feedbackItemReactionIcon}
+        />
+      </div>
     </div>
   );
 };

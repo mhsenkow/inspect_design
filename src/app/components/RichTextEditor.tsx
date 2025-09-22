@@ -1,6 +1,7 @@
 import Image from "next/image";
 import React, { useCallback, useEffect, useRef } from "react";
 import parse from "html-react-parser";
+import cardStyles from "../../styles/components/card.module.css";
 
 import InsertLinkDialog from "./InsertLinkDialog";
 import { INSERT_LINK_DIALOG_ID } from "../constants";
@@ -70,46 +71,14 @@ const RichTextEditor = ({ html, setHtml }: Props) => {
   }, [html]);
 
   return (
-    <div>
-      <div
-        style={{
-          marginBottom: "10px",
-          display: "flex",
-          justifyContent: "center",
-        }}
-        className="rich-text-editor-toolbar"
-      >
-        <button
-          onClick={() => insertLink()}
-          style={{ width: "30px", height: "30px", position: "relative" }}
-        >
-          <Image
-            src="/images/link-icon.png"
-            alt="Insert Link"
-            width={20}
-            height={20}
-            // TODO: get a better image that doesn't need to be resized
-            style={{
-              margin: "-3px 0 0 -3px",
-            }}
-          />
-        </button>
-      </div>
-
+    <div className={cardStyles.richTextEditorContainer}>
       <div
         ref={editableDiv}
         contentEditable={true}
         role="textbox"
         aria-label="Comment Text Div"
         suppressContentEditableWarning={true}
-        style={{
-          border: "1px solid black",
-          height: "200px",
-          width: "80%",
-          margin: "0 auto 10px",
-          padding: "5px",
-          textAlign: "left",
-        }}
+        className={cardStyles.richTextEditorTextArea}
         onInput={(event) => {
           cursor.current = getCaretPosition();
           const newHtml = (event.target as HTMLDivElement).innerHTML.replace(

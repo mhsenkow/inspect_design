@@ -1013,7 +1013,7 @@ const ClientSidePage = ({
 
             {/* Feedback Section */}
             <div
-              className={cardStyles.cardBody}
+              className={`${cardStyles.cardBody} ${cardStyles.feedbackSectionHalfOff}`}
               style={{ borderTop: "1px solid var(--color-border-primary)" }}
             >
               <div className={cardStyles.contentCardHeader}>
@@ -1066,6 +1066,32 @@ const ClientSidePage = ({
                 </div>
               </div>
               <div className={cardStyles.contentCardBody}>
+                {/* Comment Input - In-page */}
+                {isClient && currentUser && isEditingComment && (
+                  <FeedbackInputElement
+                    actionType="comment"
+                    submitFunc={(comment) => {
+                      if (token) {
+                        return submitComment(
+                          { comment, insight_id: insight.id },
+                          token,
+                        );
+                      }
+                      return Promise.resolve();
+                    }}
+                    directions="Enter a text comment"
+                    afterSubmit={(newObject) => {
+                      if (newObject) {
+                        setInsight({
+                          ...insight,
+                          comments: [...(insight.comments ?? []), newObject],
+                        });
+                      }
+                    }}
+                    closeFunc={() => setIsEditingComment(false)}
+                  />
+                )}
+                
                 {/* Comments */}
                 {insightComments && insightComments.length > 0 && (
                   <div className="space-y-3">
@@ -1110,7 +1136,7 @@ const ClientSidePage = ({
                     ))}
                   </div>
                 )}
-                {(!insightComments || insightComments.length === 0) && (
+                {(!insightComments || insightComments.length === 0) && !isEditingComment && (
                   <p className="text-text-tertiary text-center py-4">
                     No comments yet. Be the first to share your thoughts!
                   </p>
@@ -1119,31 +1145,6 @@ const ClientSidePage = ({
             </div>
           </div>
 
-          {/* Feedback Input Elements */}
-          {isClient && currentUser && isEditingComment && (
-            <FeedbackInputElement
-              actionType="comment"
-              submitFunc={(comment) => {
-                if (token) {
-                  return submitComment(
-                    { comment, insight_id: insight.id },
-                    token,
-                  );
-                }
-                return Promise.resolve();
-              }}
-              directions="Enter a text comment"
-              afterSubmit={(newObject) => {
-                if (newObject) {
-                  setInsight({
-                    ...insight,
-                    comments: [...(insight.comments ?? []), newObject],
-                  });
-                }
-              }}
-              closeFunc={() => setIsEditingComment(false)}
-            />
-          )}
 
           {/* Dialogs - Child Level */}
           {isClient && currentUser && insight.user_id == currentUser.id && (

@@ -1,6 +1,7 @@
 import React from "react";
 import Image from "next/image";
 import parse from "html-react-parser";
+import cardStyles from "../../styles/components/card.module.css";
 
 import { FactComment } from "../types";
 import useUser from "../hooks/useUser";
@@ -16,46 +17,52 @@ const Comment = ({ comment, removeCommentFunc }: Props) => {
   const { loggedIn, token, user_id } = useUser();
 
   return (
-    <div
-      className="comment"
-      key={`Comment #${comment.id}`}
-      data-id={comment.id}
-    >
-      <div
-        style={{
-          border: "1px solid var(--color-border-primary)",
-          textAlign: "center",
-          backgroundColor: "var(--color-background-secondary)",
-        }}
-      >
+    <div className={cardStyles.commentContainer}>
+      <div className={cardStyles.commentAvatar}>
         {comment.user!.avatar_uri && (
           <Image
             src={comment.user!.avatar_uri}
             alt="Comment user avatar"
-            width="20"
-            height="20"
+            width="32"
+            height="32"
+            className={cardStyles.commentAvatarImage}
           />
         )}
-        {!comment.user!.avatar_uri &&
-          comment.user!.username &&
-          comment.user!.username}
+        {!comment.user!.avatar_uri && comment.user!.username && (
+          <div className={cardStyles.commentAvatarPlaceholder}>
+            {comment.user!.username.charAt(0).toUpperCase()}
+          </div>
+        )}
       </div>
-      <div className="commenttext">{parse(comment.comment!)}</div>
+      
+      <div className={cardStyles.commentContent}>
+        <div className={cardStyles.commentHeader}>
+          <span className={cardStyles.commentAuthor}>
+            {comment.user!.username || "Anonymous"}
+          </span>
+        </div>
+        <div className={cardStyles.commentText}>
+          {parse(comment.comment!)}
+        </div>
+      </div>
+
       {loggedIn && user_id == comment.user_id && (
-        <button
-          className="delete-comment"
-          onClick={() => {
-            if (token && confirm("Are you sure?")) {
-              deleteComment(comment, token).then(() => {
-                removeCommentFunc(comment.id!);
-              });
-            }
-          }}
-          style={{ float: "right" }}
-          aria-label="Delete Comment"
-        >
-          {TRASH_ICON}
-        </button>
+        <div className={cardStyles.commentActions}>
+          <button
+            className={cardStyles.commentDeleteButton}
+            onClick={() => {
+              if (token && confirm("Are you sure?")) {
+                deleteComment(comment, token).then(() => {
+                  removeCommentFunc(comment.id!);
+                });
+              }
+            }}
+            aria-label="Delete Comment"
+            title="Delete Comment"
+          >
+            {TRASH_ICON}
+          </button>
+        </div>
       )}
     </div>
   );

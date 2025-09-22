@@ -2,6 +2,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import RichTextEditor from "./RichTextEditor";
 import { FactComment, FactReaction } from "../types";
+import cardStyles from "../../styles/components/card.module.css";
 
 const FeedbackInputElement = ({
   actionType,
@@ -40,20 +41,11 @@ const FeedbackInputElement = ({
   }, [closeFunc]);
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        textAlign: "center",
-        width: "100%",
-      }}
-    >
-      <p>{directions}</p>
-      <div>
+    <div className={cardStyles.feedbackInputContainer}>
+      <div className={cardStyles.feedbackInputContent}>
         {actionType == "reaction" && (
           <select
-            style={{ fontSize: 50 }}
+            className={cardStyles.feedbackReactionSelect}
             value={html}
             onChange={(event) => setHtml(event.target.value)}
             aria-label="Select Reaction"
@@ -65,8 +57,12 @@ const FeedbackInputElement = ({
           <RichTextEditor html={html} setHtml={setHtml} />
         )}
       </div>
-      <div>
-        <button type="button" onClick={closeFeedbackInputElement}>
+      <div className={cardStyles.feedbackInputActions}>
+        <button 
+          type="button" 
+          onClick={closeFeedbackInputElement}
+          className={cardStyles.feedbackInputButton}
+        >
           Cancel
         </button>
         <button
@@ -81,6 +77,7 @@ const FeedbackInputElement = ({
               }
             }
           }}
+          className={`${cardStyles.feedbackInputButton} ${cardStyles.feedbackInputButtonPrimary}`}
         >
           Submit
         </button>

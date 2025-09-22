@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import cardStyles from "../../styles/components/card.module.css";
 
 import { handleLogin } from "./LoginPageFunctions";
 import useUser from "../hooks/useUser";
@@ -49,29 +50,36 @@ const LoginPage = (): React.JSX.Element => {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-100 flex items-center justify-center p-6">
-      <div className="card w-full max-w-lg">
-        <div className="card-body p-8">
-          <h2 className="text-3xl font-bold text-center mb-8">
-            Login to Inspect
-          </h2>
-          <form name="loginInfo" onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <label htmlFor="email" className="form-label">
-                Email:
+    <div className={cardStyles.loginPageContainer}>
+      <div className={cardStyles.loginCard}>
+        <div className={cardStyles.loginCardHeader}>
+          <h1 className={cardStyles.loginTitle}>Login to Inspect</h1>
+          <p className={cardStyles.loginSubtitle}>
+            Sign in to access your insights and continue your research
+          </p>
+        </div>
+        
+        <div className={cardStyles.loginCardBody}>
+          <form name="loginInfo" onSubmit={handleSubmit} className={cardStyles.loginForm}>
+            <div className={cardStyles.formGroup}>
+              <label htmlFor="email" className={cardStyles.formLabel}>
+                Email Address
               </label>
               <input
                 id="email"
-                type="text"
+                type="email"
                 name="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                className="form-input"
+                className={cardStyles.formInput}
+                placeholder="Enter your email"
+                required
               />
             </div>
-            <div className="mb-6">
-              <label htmlFor="password" className="form-label">
-                Password:
+            
+            <div className={cardStyles.formGroup}>
+              <label htmlFor="password" className={cardStyles.formLabel}>
+                Password
               </label>
               <input
                 id="password"
@@ -79,23 +87,26 @@ const LoginPage = (): React.JSX.Element => {
                 name="password"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
-                className="form-input"
+                className={cardStyles.formInput}
+                placeholder="Enter your password"
+                required
               />
             </div>
+            
+            {error && (
+              <div className={cardStyles.loginError}>
+                <div className={cardStyles.errorIcon}>⚠️</div>
+                <div className={cardStyles.errorMessage}>{error}</div>
+              </div>
+            )}
+            
             <button
               type="submit"
               disabled={!(email && password)}
-              className="btn btn-primary w-full py-4 text-lg font-medium"
+              className={`btn btn-primary btn-lg ${cardStyles.loginButton}`}
             >
-              Login
+              Sign In
             </button>
-            {error && (
-              <div className="alert alert-error">
-                <div className="alert-content">
-                  <div className="alert-message">{error}</div>
-                </div>
-              </div>
-            )}
           </form>
         </div>
       </div>
