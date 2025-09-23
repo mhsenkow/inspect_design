@@ -61,12 +61,7 @@ const Sidebar = ({ loggedIn }: { loggedIn: boolean }): React.JSX.Element => {
           onClick={() => open(origin, "_self")}
         >
           <div className={sidebarStyles.logoIcon}>
-            <Image
-              src="/images/icon.png"
-              width="24"
-              height="24"
-              alt="Inspect logo"
-            />
+            <span style={{ fontSize: "20px" }}>🔍</span>
           </div>
           <span className={sidebarStyles.logoText}>INSPECT</span>
         </Link>

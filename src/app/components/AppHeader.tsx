@@ -12,12 +12,7 @@ const AppHeader = (): React.JSX.Element => {
         className="pointer"
         onClick={() => open(origin, "_self")}
       >
-        <Image
-          src="/images/icon.png"
-          width="60"
-          height="60"
-          alt="Inspect logo"
-        />{" "}
+        <span style={{ fontSize: "48px" }}>🔍</span>{" "}
         <br />
         <strong>INSPECT</strong>
       </div>
