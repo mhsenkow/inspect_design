@@ -286,7 +286,7 @@ const ClientSidePage = ({
                 limit={LIMIT}
                 getDataFunction={async (offset, token) => {
                   const queryParams = new URLSearchParams(
-                    `offset=${offset}&limit=${LIMIT}&parents=true&children=true&evidence=true`,
+                    `offset=${offset}&limit=${LIMIT}&parents=true&children=true&evidence=true&comments=true`,
                   );
                   queryParams.sort();
                   const response = await fetch(
@@ -333,18 +333,6 @@ const ClientSidePage = ({
                         name: "Updated",
                         dataColumn: "updated_at",
                         display: (insight: Fact | Insight) => {
-                          // Debug: log the insight data to see what's available
-                          console.log("Insight data:", {
-                            id: insight.id,
-                            title: insight.title,
-                            updated_at: insight.updated_at,
-                            hasUpdatedAt: !!insight.updated_at,
-                            hasReactions: !!insight.reactions,
-                            reactionsCount: insight.reactions?.length || 0,
-                            reactions: insight.reactions,
-                            fullInsight: insight
-                          });
-
                           const dateStr = insight.updated_at
                             ? new Date(insight.updated_at).toLocaleDateString(
                                 "en-US",
@@ -366,21 +354,83 @@ const ClientSidePage = ({
                         name: "Title",
                         dataColumn: "title",
                         display: (insight: Fact | Insight) => {
-                          // Debug: log the insight structure to understand the data
-                          console.log("Insight data structure:", {
-                            id: insight.id,
-                            title: insight.title,
-                            hasReactions: !!insight.reactions,
-                            reactionsCount: insight.reactions?.length || 0,
-                            hasParents: !!insight.parents,
-                            parentsCount: insight.parents?.length || 0,
-                            hasChildren: !!insight.children,
-                            childrenCount: insight.children?.length || 0,
-                            hasEvidence: !!insight.evidence,
-                            evidenceCount: insight.evidence?.length || 0,
-                            fullInsight: insight
-                          });
-                          
+                          return (
+                            <Link
+                              href={`/insights/${insight.uid}`}
+                              className="text-primary hover:text-primary-600 transition-colors duration-200 text-left"
+                            >
+                              {insight.title}
+                            </Link>
+                          );
+                        },
+                      },
+                      {
+                        name: "🌍",
+                        dataColumn: "is_public",
+                        display: (insight: Fact | Insight) => {
+                          const isPublished = (insight as Insight).is_public;
+                          return (
+                            <span 
+                              className={`icon-small ${isPublished ? 'text-success' : 'text-muted'}`} 
+                              title={isPublished ? 'Published (Global)' : 'Not Published'}
+                            >
+                              {isPublished ? '🌍' : '📝'}
+                            </span>
+                          );
+                        },
+                      },
+                      {
+                        name: "👨‍👩‍👧‍👦",
+                        dataColumn: "parents",
+                        display: (insight: Fact | Insight) => {
+                          const count = insight.parents?.length || 0;
+                          return (
+                            <span className="icon-small" title={`${count} parent insights`}>
+                              👨‍👩‍👧‍👦<span className="icon-count">{count}</span>
+                            </span>
+                          );
+                        },
+                      },
+                      {
+                        name: "👶",
+                        dataColumn: "children",
+                        display: (insight: Fact | Insight) => {
+                          const count = insight.children?.length || 0;
+                          return (
+                            <span className="icon-small" title={`${count} child insights`}>
+                              👶<span className="icon-count">{count}</span>
+                            </span>
+                          );
+                        },
+                      },
+                      {
+                        name: "📄",
+                        dataColumn: "evidence",
+                        display: (insight: Fact | Insight) => {
+                          const count = insight.evidence?.length || 0;
+                          return (
+                            <span className="icon-small" title={`${count} evidence items`}>
+                              📄<span className="icon-count">{count}</span>
+                            </span>
+                          );
+                        },
+                      },
+                      {
+                        name: "💬",
+                        dataColumn: "comments",
+                        display: (insight: Fact | Insight) => {
+                          const count = insight.comments?.length || 0;
+                          return (
+                            <span className="icon-small" title={`${count} comments`}>
+                              💬<span className="icon-count">{count}</span>
+                            </span>
+                          );
+                        },
+                      },
+                      {
+                        name: "❤️",
+                        dataColumn: "reactions",
+                        display: (insight: Fact | Insight) => {
                           // Aggregate all reactions from all sources
                           const aggregateReactions = () => {
                             const reactionCounts: { [key: string]: number } = {};
@@ -425,56 +475,24 @@ const ClientSidePage = ({
                               });
                             }
                             
-                            console.log("Aggregated reactions:", reactionCounts);
                             return reactionCounts;
                           };
                           
                           const aggregatedReactions = aggregateReactions();
+                          const totalReactions = Object.values(aggregatedReactions).reduce((sum, count) => sum + count, 0);
                           
                           return (
-                            <div className="flex items-center justify-between w-full">
-                              <Link
-                                href={`/insights/${insight.uid}`}
-                                className="text-primary hover:text-primary-600 transition-colors duration-200 text-left flex-1"
-                              >
-                                {insight.title}
-                              </Link>
-                              <div className="insights-icon-stack">
-                                {/* Parent insights count - smaller icon */}
-                                {(insight.parents?.length || 0) > 0 && (
-                                  <span className="icon-small" title={`${insight.parents?.length || 0} parent insights`}>
-                                    👨‍👩‍👧‍👦<span className="icon-count">{insight.parents?.length || 0}</span>
+                            <span className="icon-main" title="All reactions from parents, children, evidence, and this insight">
+                              {totalReactions > 0 ? (
+                                Object.entries(aggregatedReactions).map(([reaction, count]) => (
+                                  <span key={reaction} className="inline-block mr-1">
+                                    {reaction}{count > 1 ? count : ''}
                                   </span>
-                                )}
-                                {/* Aggregated reactions - larger icons */}
-                                {Object.keys(aggregatedReactions).length > 0 && (
-                                  <span className="icon-main" title="All reactions from parents, children, evidence, and this insight">
-                                    {Object.entries(aggregatedReactions).map(([reaction, count]) => (
-                                      <span key={reaction} className="inline-block mr-1">
-                                        {reaction}{count > 1 ? count : ''}
-                                      </span>
-                                    ))}
-                                  </span>
-                                )}
-                                {/* Child/Evidence count - smaller icon */}
-                                {(insight.children?.length || 0) > 0 && (
-                                  <span className="icon-small" title={`${insight.children?.length || 0} child insights`}>
-                                    👶<span className="icon-count">{insight.children?.length || 0}</span>
-                                  </span>
-                                )}
-                                {(insight.evidence?.length || 0) > 0 && (
-                                  <span className="icon-small" title={`${insight.evidence?.length || 0} evidence items`}>
-                                    📄<span className="icon-count">{insight.evidence?.length || 0}</span>
-                                  </span>
-                                )}
-                                {/* Public indicator */}
-                                {insight.is_public && (
-                                  <span className="icon-small" title="Public insight">
-                                    🌎
-                                  </span>
-                                )}
-                              </div>
-                            </div>
+                                ))
+                              ) : (
+                                <span className="text-muted">0</span>
+                              )}
+                            </span>
                           );
                         },
                       },

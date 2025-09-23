@@ -20,7 +20,7 @@
   background-color: var(--color-background-primary);
   border: 1px solid var(--color-border-primary);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-2xl);
+  box-shadow: var(--shadow-elevated);
   width: 100%;
   max-width: 48rem; /* 768px */
   height: 70vh; /* Fixed height */
@@ -179,7 +179,7 @@
 .formInput:focus {
   outline: none;
   border-color: var(--color-base-500);
-  box-shadow: 0 0 0 3px rgba(var(--color-base-500-rgb), 0.1);
+  box-shadow: var(--shadow-focus);
 }
 
 .formInput::placeholder {
@@ -224,11 +224,11 @@
   text-decoration: none;
   white-space: nowrap;
   min-height: 2.5rem;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-xs);
 }
 
 .modalButton:hover:not(:disabled) {
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
   transform: translateY(-1px);
 }
 
@@ -381,7 +381,7 @@
   }
   
   .tabNavButton {
-    padding: var(--spacing-2) var(--spacing-3);
+    padding: var(--spacing-2) var(--spacing-2);
     font-size: var(--font-size-xs);
   }
 }
@@ -507,7 +507,7 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   border-bottom: 2px solid var(--color-base-600);
-  padding: var(--spacing-3) var(--spacing-4);
+  padding: var(--spacing-2) var(--spacing-2);
   position: relative;
 }
 
@@ -531,7 +531,7 @@
 }
 
 .modalBody table tbody td {
-  padding: var(--spacing-3) var(--spacing-4);
+  padding: var(--spacing-2) var(--spacing-2);
   border-bottom: 1px solid var(--color-border-primary);
 }
 

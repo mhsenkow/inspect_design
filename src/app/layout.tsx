@@ -21,7 +21,7 @@ const Dashboard = async ({ children }: Props): Promise<React.JSX.Element> => {
       <head>
         <Script src="/bootstrap.bundle.js" />
       </head>
-      <body className="bg-secondary min-h-screen">
+      <body className="min-h-screen">
         {/* Sidebar */}
         <Sidebar loggedIn={loggedIn} />
 

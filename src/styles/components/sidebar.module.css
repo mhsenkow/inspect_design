@@ -44,7 +44,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-xs);
 }
 
 .logoText {
@@ -81,13 +81,13 @@
   background-color: var(--color-background-primary);
   border-color: var(--color-border-primary);
   transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-xs);
 }
 
 .navItemActive {
   background-color: var(--color-base-100);
   border-color: var(--color-base-300);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-xs);
 }
 
 .navItemDisabled {
@@ -163,7 +163,7 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-xs);
 }
 
 .avatarImage {
@@ -250,12 +250,12 @@
   border-radius: var(--radius-md);
   text-decoration: none;
   transition: all var(--transition-base);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-xs);
 }
 
 .brandLink:hover {
   transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
   background-color: var(--color-base-100);
 }
 
@@ -293,7 +293,7 @@
   .sidebar {
     background-color: var(--color-background-secondary);
     border-right-color: var(--color-border-primary);
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow-sm);
   }
   
   .logoIcon,
@@ -301,17 +301,17 @@
   .brandLink {
     background-color: var(--color-background-tertiary);
     border-color: var(--color-border-primary);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-xs);
   }
   
   .navItem:hover:not(.navItemDisabled) {
     background-color: var(--color-background-tertiary);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-xs);
   }
   
   .navItemActive {
     background-color: var(--color-base-900);
     border-color: var(--color-base-700);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-sm);
   }
 }

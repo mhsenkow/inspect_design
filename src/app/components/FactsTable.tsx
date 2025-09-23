@@ -256,6 +256,10 @@ const FactsTable = ({
                     columnWidth = '120px';
                   } else if (column.name === 'Title') {
                     columnWidth = '1fr';
+                  } else if (column.name === '🌍') {
+                    columnWidth = '80px';
+                  } else if (column.name === '👨‍👩‍👧‍👦' || column.name === '👶' || column.name === '📄' || column.name === '💬' || column.name === '❤️') {
+                    columnWidth = '80px';
                   }
                   
                   return (
@@ -546,6 +550,10 @@ const FactsTable = ({
                           columnWidth = '120px';
                         } else if (column.name === 'Title') {
                           columnWidth = '1fr';
+                        } else if (column.name === '🌍') {
+                          columnWidth = '80px';
+                        } else if (column.name === '👨‍👩‍👧‍👦' || column.name === '👶' || column.name === '📄' || column.name === '💬' || column.name === '❤️') {
+                          columnWidth = '80px';
                         }
                         
                         return (

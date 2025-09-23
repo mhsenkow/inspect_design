@@ -9,7 +9,7 @@
   border-radius: var(--radius-xl);
   overflow: hidden;
   transition: all var(--transition-base);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-base);
   position: relative;
 }
 
@@ -57,7 +57,7 @@
   border-radius: var(--radius-lg);
   padding: var(--spacing-5);
   margin: var(--spacing-4) 0;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-base);
   position: relative;
 }
 
@@ -121,7 +121,7 @@
   transition: all var(--transition-base);
   text-decoration: none;
   white-space: nowrap;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-xs);
   min-width: 80px;
   justify-content: center;
 }
@@ -129,13 +129,13 @@
 .feedbackInputButton:hover:not(:disabled) {
   background-color: var(--color-background-secondary);
   border-color: var(--color-border-secondary);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
   transform: translateY(-1px);
 }
 
 .feedbackInputButton:active:not(:disabled) {
   transform: translateY(0);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-xs);
 }
 
 .feedbackInputButtonPrimary {
@@ -148,7 +148,7 @@
 .feedbackInputButtonPrimary:hover:not(:disabled) {
   background-color: var(--color-base-600);
   border-color: var(--color-base-600);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
   color: var(--color-text-inverse);
 }
 
@@ -180,7 +180,7 @@
 .richTextEditorToolbarButton:hover {
   background-color: var(--color-background-secondary);
   border-color: var(--color-border-secondary);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-xs);
 }
 
 .richTextEditorTextArea {
@@ -201,7 +201,7 @@
 .richTextEditorTextArea:focus {
   outline: none;
   border-color: var(--color-base-500);
-  box-shadow: 0 0 0 2px var(--color-base-100);
+  box-shadow: var(--shadow-focus);
 }
 
 .richTextEditorTextArea:empty::before {
@@ -380,7 +380,7 @@
   background-color: var(--color-background-primary);
   border: 1px solid var(--color-border-primary);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-xl);
   overflow: hidden;
 }
 
@@ -442,7 +442,7 @@
 .formInput:focus {
   outline: none;
   border-color: var(--color-base-500);
-  box-shadow: 0 0 0 3px rgba(24, 119, 242, 0.1);
+  box-shadow: var(--shadow-focus);
 }
 
 .formInput::placeholder {
@@ -488,7 +488,7 @@
   background-color: var(--color-background-primary);
   border: 1px solid var(--color-border-primary);
   border-radius: var(--radius-xl);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-base);
   overflow: hidden;
 }
 
@@ -497,7 +497,7 @@
   background-color: var(--color-background-primary);
   border: 2px solid var(--color-border-primary);
   border-radius: var(--radius-xl);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
   position: relative;
   z-index: 10;
 }
@@ -566,7 +566,7 @@
   border: 1px solid var(--color-border-primary);
   border-radius: var(--radius-lg);
   margin: var(--spacing-4);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-xs);
 }
 
 .linkVisitSection .linkActions {
@@ -583,7 +583,7 @@
   border-radius: var(--radius-lg);
   margin: var(--spacing-4);
   overflow: hidden;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-xs);
 }
 
 .linkImageContainer {
@@ -611,13 +611,13 @@
   border-radius: var(--radius-lg);
   font-weight: var(--font-weight-semibold);
   transition: all var(--transition-base);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-xs);
 }
 
 .linkVisitButton:hover {
   background-color: var(--color-base-600);
   transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Link Feedback Section - Flat Card Style */
@@ -626,7 +626,7 @@
   border: 1px solid var(--color-border-primary);
   border-radius: var(--radius-lg);
   margin: var(--spacing-4);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-xs);
 }
 
 .linkFeedbackHeader {
@@ -676,14 +676,14 @@
   font-weight: var(--font-weight-medium);
   cursor: pointer;
   transition: all var(--transition-base);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-xs);
 }
 
 .linkAddCommentButton:hover {
   background-color: var(--color-background-tertiary);
   border-color: var(--color-border-secondary);
   transform: translateY(-1px);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Page Header Card - Special styling for main page headers */
@@ -693,7 +693,7 @@
   border-radius: var(--radius-xl);
   overflow: hidden;
   margin-bottom: var(--spacing-6);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-base);
   position: relative;
 }
 
@@ -721,7 +721,7 @@
   overflow: hidden;
   transition: all var(--transition-base);
   margin-bottom: var(--spacing-6);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-base);
   position: relative;
 }
 
@@ -836,13 +836,13 @@
   background-color: var(--color-base-500);
   border-color: var(--color-base-500);
   color: var(--color-text-inverse);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-xs);
 }
 
 .actionButtonPrimary:hover:not(:disabled) {
   background-color: var(--color-base-600);
   border-color: var(--color-base-600);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
   transform: translateY(-1px);
 }
 
@@ -885,19 +885,19 @@
   transition: all var(--transition-base);
   text-decoration: none;
   white-space: nowrap;
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
 }
 
 .addButton:hover:not(:disabled) {
   background-color: var(--color-background-secondary);
   border-color: var(--color-border-secondary);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-md);
   transform: translateY(-1px);
 }
 
 .addButton:active:not(:disabled) {
   transform: translateY(0);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-xs);
 }
 
 .addButtonIcon {

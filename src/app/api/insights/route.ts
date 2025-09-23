@@ -19,6 +19,7 @@ export async function GET(req: NextRequest): Promise<GetInsightsRouteResponse> {
   const includeParents = Boolean(req.nextUrl.searchParams.get("parents"));
   const includeChildren = Boolean(req.nextUrl.searchParams.get("children"));
   const includeEvidence = Boolean(req.nextUrl.searchParams.get("evidence"));
+  const includeComments = Boolean(req.nextUrl.searchParams.get("comments"));
 
   if (authUser) {
     const baseQuery = InsightModel.query()
@@ -37,6 +38,7 @@ export async function GET(req: NextRequest): Promise<GetInsightsRouteResponse> {
       .withGraphJoined(
         `[
       reactions,
+      ${includeComments ? "comments," : ""}
       ${includeParents ? "parents.parentInsight.reactions," : ""}
       ${includeChildren ? "children.childInsight.reactions," : ""}
       ${includeEvidence ? "evidence.summary.reactions" : ""}

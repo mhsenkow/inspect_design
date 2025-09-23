@@ -26,6 +26,17 @@
 /* Import legacy styles (to be migrated) */
 @import "./legacy/legacy-styles.css";
 
+/* Base HTML and Body Background - Ensure Consistent Background */
+html {
+  background-color: var(--color-background-secondary);
+}
+
+body {
+  background-color: var(--color-background-secondary);
+  margin: 0;
+  padding: 0;
+}
+
 /* Main Layout Adjustments for Sidebar */
 main {
   margin-left: 80px;
@@ -41,13 +52,16 @@ main {
   }
 }
 
-/* Dark theme body improvements */
+/* Dark theme improvements - Ensure all elements have consistent background */
+.theme-dark html {
+  background-color: var(--color-background-primary);
+}
+
 .theme-dark body {
   background-color: var(--color-background-primary);
   color: var(--color-text-primary);
 }
 
-/* Dark theme main content improvements */
 .theme-dark main {
   background-color: var(--color-background-primary);
 }

@@ -40,13 +40,13 @@
   background-color: var(--color-base-500);
   border-color: var(--color-base-500);
   color: var(--color-text-inverse);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-xs);
 }
 
 .btn-primary:hover:not(:disabled) {
   background-color: var(--color-base-600);
   border-color: var(--color-base-600);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-primary:active:not(:disabled) {
@@ -59,14 +59,14 @@
   background-color: var(--color-background-secondary);
   border-color: var(--color-border-primary);
   color: var(--color-text-primary);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-xs);
 }
 
 .btn-secondary:hover:not(:disabled) {
   background-color: var(--color-background-tertiary);
   border-color: var(--color-border-secondary);
   color: var(--color-text-primary);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-secondary:active:not(:disabled) {
@@ -105,7 +105,7 @@
   background-color: var(--color-base-50);
   border-color: var(--color-base-600);
   color: var(--color-base-600);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-xs);
 }
 
 .btn-outline:active:not(:disabled) {
@@ -117,26 +117,26 @@
   background-color: var(--color-error-500);
   border-color: var(--color-error-500);
   color: var(--color-text-inverse);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-xs);
 }
 
 .btn-danger:hover:not(:disabled) {
   background-color: var(--color-error-600);
   border-color: var(--color-error-600);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-inverse {
   background-color: var(--color-background-inverse);
   border-color: var(--color-background-inverse);
   color: var(--color-text-primary);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-xs);
 }
 
 .btn-inverse:hover:not(:disabled) {
   background-color: var(--color-neutral-100);
   border-color: var(--color-neutral-100);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-inverse:active:not(:disabled) {

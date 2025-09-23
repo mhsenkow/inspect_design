@@ -19,7 +19,7 @@ const InsightsPage = async (): Promise<React.JSX.Element> => {
     : null;
 
   const insightSearchParams = new URLSearchParams(
-    "offset=0&limit=20&parents=true&children=true&evidence=true",
+    "offset=0&limit=20&parents=true&children=true&evidence=true&comments=true",
   );
   insightSearchParams.sort();
   const insights = await getInsights(origin, token, insightSearchParams);

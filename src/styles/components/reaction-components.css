@@ -18,7 +18,7 @@
   transition: all var(--transition-base);
   z-index: 30 !important; /* Higher z-index to ensure visibility */
   opacity: 0.3; /* Base transparency - will be overridden by state classes */
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-xs);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -42,7 +42,7 @@
 .reaction-icon.reaction-icon-solid {
   opacity: 1 !important; /* Solid for user's selected emoji */
   background-color: var(--color-background-primary);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
 }
 
 /* ===================================
@@ -63,7 +63,7 @@
   background-color: var(--color-background-primary);
   border: 1px solid var(--color-border-primary);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-xl);
   animation: reactionPickerSlideIn 0.1s ease-out;
 }
 
@@ -256,7 +256,7 @@ td.overflow-visible {
 .feedback-item-reaction-icon.reaction-icon-solid {
   opacity: 1 !important; /* Solid for user's selected emoji */
   background-color: var(--color-background-primary);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
 }
 
 /* ===================================
@@ -297,7 +297,7 @@ td.overflow-visible {
 .header-item-reaction-icon.reaction-icon-solid {
   opacity: 1 !important; /* Solid for user's selected emoji */
   background-color: var(--color-background-primary);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
 }
 
 /* ===================================
@@ -347,7 +347,7 @@ td.overflow-visible {
   background-color: var(--color-background-primary);
   border: 1px solid var(--color-border-primary);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
   transition: all var(--transition-base);
   cursor: pointer;
   font-size: var(--font-size-sm);
@@ -358,13 +358,13 @@ td.overflow-visible {
 .insight-action-button:hover {
   background-color: var(--color-background-secondary);
   border-color: var(--color-border-secondary);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-md);
   transform: translateY(-1px);
 }
 
 .insight-action-button:active {
   transform: translateY(0);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-xs);
 }
 
 /* Publish button specific styling */
@@ -450,7 +450,7 @@ td.overflow-visible {
   background-color: var(--color-background-primary);
   border: 1px solid var(--color-border-primary);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-xs);
   transition: all var(--transition-base);
   cursor: pointer;
   font-size: var(--font-size-sm);
@@ -463,13 +463,13 @@ td.overflow-visible {
 .insight-feedback-button:hover {
   background-color: var(--color-background-secondary);
   border-color: var(--color-border-secondary);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
   transform: translateY(-1px);
 }
 
 .insight-feedback-button:active {
   transform: translateY(0);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-xs);
 }
 
 /* Comment button specific styling */
@@ -521,7 +521,7 @@ td.overflow-visible {
   background-color: var(--color-background-primary) !important;
   border: 1px solid var(--color-border-primary) !important;
   border-radius: var(--radius-md) !important;
-  box-shadow: var(--shadow-sm) !important;
+  box-shadow: var(--shadow-xs) !important;
   transition: all var(--transition-base) !important;
   cursor: pointer !important;
   font-size: var(--font-size-sm) !important;
@@ -537,13 +537,13 @@ td.overflow-visible {
   background-color: var(--color-base-50) !important;
   color: var(--color-base-700) !important;
   border-color: var(--color-border-secondary) !important;
-  box-shadow: var(--shadow-md) !important;
+  box-shadow: var(--shadow-sm) !important;
   transform: translateY(-1px) !important;
 }
 
 .insight-feedback-reaction-button .reaction-button:active {
   transform: translateY(0) !important;
-  box-shadow: var(--shadow-sm) !important;
+  box-shadow: var(--shadow-xs) !important;
 }
 
 .insight-feedback-reaction-button .reaction-button-icon {
