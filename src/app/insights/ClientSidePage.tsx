@@ -2,7 +2,7 @@
 
 import styles from "../../styles/components/main-insights-page.module.css";
 import cardStyles from "../../styles/components/card.module.css";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import ReactionIcon from "../components/ReactionIcon";
 import { submitReaction } from "../functions";
@@ -63,6 +63,37 @@ const ClientSidePage = ({
       }
     | undefined
   >();
+
+  // Handle server function execution when FactsListView is not mounted (empty state)
+  useEffect(() => {
+    if (
+      liveData.length === 0 &&
+      serverFunctionInputForInsightsList &&
+      activeServerFunctionForInsightsList &&
+      token
+    ) {
+      // Check if it's an InsightsAPISchema (has 'insights' property)
+      if ('insights' in serverFunctionInputForInsightsList) {
+        activeServerFunctionForInsightsList
+          .function(serverFunctionInputForInsightsList as InsightsAPISchema, token)
+          .then((response: FLVResponse | FLVResponse[] | void) => {
+            if (Array.isArray(response)) {
+              const newInsights = response.flatMap((r) => r.facts as Insight[]);
+              setLiveData([...liveData, ...newInsights]);
+            } else if (response) {
+              setLiveData([...liveData, ...(response.facts as Insight[])]);
+            }
+          });
+        setServerFunctionInputForInsightsList(undefined);
+        setActiveServerFunctionForInsightsList(undefined);
+      }
+    }
+  }, [
+    liveData,
+    serverFunctionInputForInsightsList,
+    activeServerFunctionForInsightsList,
+    token,
+  ]);
 
   const promptForNewInsightName = () => {
     const title = prompt("New insight:");
@@ -510,14 +541,17 @@ const ClientSidePage = ({
                       {loggedIn && (
                         <button
                           onClick={promptForNewInsightName}
-                          className={cardStyles.addButton}
+                          className={cardStyles.actionButtonPrimary}
+                          style={{
+                            fontSize: "var(--font-size-base)",
+                            padding: "var(--spacing-3) var(--spacing-6)",
+                            marginTop: "var(--spacing-2)",
+                          }}
                           aria-label="Create Your First Insight"
                           title="Create Your First Insight"
                         >
-                          <span className={cardStyles.addButtonIcon}>+</span>
-                          <span className={cardStyles.addButtonText}>
-                            Create Your First Insight
-                          </span>
+                          <span style={{ fontSize: "var(--font-size-lg)" }}>+</span>
+                          <span>Create Your First Insight</span>
                         </button>
                       )}
                     </div>

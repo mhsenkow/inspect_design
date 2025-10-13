@@ -355,7 +355,7 @@ const ClientSidePage = ({
                         >
                       }
                       selectedActions={[]}
-                      enableReactionIcons={true}
+                      enableReactionIcons={false}
                       columns={[
                         {
                           name: "Updated",
@@ -426,33 +426,6 @@ const ClientSidePage = ({
                   <div className={styles.headerLeft}>
                     <div className={styles.sourceLogoContainer}>
                       <SourceLogo fact={insight} />
-                      <ReactionIcon
-                        reactions={insightReactions || []}
-                        currentUserId={currentUser?.id}
-                        onReactionSubmit={async (reaction) => {
-                          if (token) {
-                            const result = await submitReaction(
-                              { reaction, insight_id: insight.id },
-                              token,
-                            );
-                            if (result) {
-                              // Remove any existing reaction from this user for this insight
-                              const existingReactions =
-                                insight.reactions?.filter(
-                                  (r) => r.user_id !== currentUser?.id,
-                                ) || [];
-                              setInsight({
-                                ...insight,
-                                reactions: [
-                                  ...existingReactions,
-                                  result as FactReaction,
-                                ],
-                              });
-                            }
-                          }
-                        }}
-                        className="header-item-reaction-icon reaction-icon-solid"
-                      />
                     </div>
                     <div className={styles.headerInfo}>
                       <EditableTitle
@@ -465,6 +438,33 @@ const ClientSidePage = ({
                     </div>
                   </div>
                   <div className={styles.headerRight}>
+                    <ReactionIcon
+                      reactions={insightReactions || []}
+                      currentUserId={currentUser?.id}
+                      onReactionSubmit={async (reaction) => {
+                        if (token) {
+                          const result = await submitReaction(
+                            { reaction, insight_id: insight.id },
+                            token,
+                          );
+                          if (result) {
+                            // Remove any existing reaction from this user for this insight
+                            const existingReactions =
+                              insight.reactions?.filter(
+                                (r) => r.user_id !== currentUser?.id,
+                              ) || [];
+                            setInsight({
+                              ...insight,
+                              reactions: [
+                                ...existingReactions,
+                                result as FactReaction,
+                              ],
+                            });
+                          }
+                        }
+                      }}
+                      className="header-item-reaction-icon reaction-icon-solid"
+                    />
                     <div className="insights-icon-stack">
                       {/* Parent insights count */}
                       {(insight.parents?.length || 0) > 0 && (
@@ -732,7 +732,7 @@ const ClientSidePage = ({
                     }
                     activeServerFunction={activeServerFunctionForChildInsights}
                     selectedActions={[]}
-                    enableReactionIcons={true}
+                    enableReactionIcons={false}
                     columns={[
                       {
                         name: "Updated",
@@ -951,7 +951,7 @@ const ClientSidePage = ({
                       >
                     }
                     selectedActions={[]}
-                    enableReactionIcons={true}
+                    enableReactionIcons={false}
                     columns={[
                       {
                         name: "Updated",
@@ -1034,35 +1034,6 @@ const ClientSidePage = ({
                     <span className="insight-feedback-icon">💬</span>
                     <span className="insight-feedback-label">Comment</span>
                   </button>
-                  <ReactionButton
-                    reactions={insightReactions || []}
-                    currentUserId={currentUser?.id}
-                    onReactionSubmit={async (reaction) => {
-                      if (token) {
-                        const result = await submitReaction(
-                          { reaction, insight_id: insight.id },
-                          token,
-                        );
-                        if (result) {
-                          // Remove any existing reaction from this user for this insight
-                          const existingReactions =
-                            insight.reactions?.filter(
-                              (r) => r.user_id !== currentUser?.id,
-                            ) || [];
-                          setInsight({
-                            ...insight,
-                            reactions: [
-                              ...existingReactions,
-                              result as FactReaction,
-                            ],
-                          });
-                        }
-                      }
-                    }}
-                    className="insight-feedback-reaction-button"
-                    showLabel={true}
-                    label="React"
-                  />
                 </div>
               </div>
               <div className={cardStyles.contentCardBody}>

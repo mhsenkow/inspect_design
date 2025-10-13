@@ -9,8 +9,12 @@ import { GetInsightsRouteResponse } from "../../api/insights/route";
 import {
   Modal,
   ModalBody,
+  ModalFooter,
+  TabNav,
+  TabContent,
   FormGroup,
   FormInput,
+  ModalButton,
   ModalContentSection,
 } from "../../components/Modal";
 
@@ -51,6 +55,7 @@ const AddChildInsightsDialog = ({
     [],
   );
   const [newInsightName, setNewInsightName] = useState<string>("");
+  const [activeTab, setActiveTab] = useState("existing");
 
   useEffect(() => {
     fetch(
@@ -71,6 +76,7 @@ const AddChildInsightsDialog = ({
     setSelectedChildInsights([]);
     setDataFilter("");
     setNewInsightName("");
+    setActiveTab("existing");
   };
 
   const handleClose = useCallback(() => {
@@ -107,16 +113,12 @@ const AddChildInsightsDialog = ({
     return potentialInsightsWithoutLoops(insight, data);
   };
 
-  return (
-    <Modal
-      id={id}
-      title={`Add Child Insights to Insight: ${insight.title}`}
-      isOpen={isOpen}
-      onClose={handleClose}
-      size="large"
-    >
-      <ModalBody>
-        <ModalContentSection title="Then: choose one or more existing insight" className="flex-grow">
+  const tabs = [
+    {
+      id: "existing",
+      label: "Existing insights",
+      content: (
+        <ModalContentSection>
           <FactsTable
             data={childInsights}
             setData={
@@ -163,76 +165,54 @@ const AddChildInsightsDialog = ({
             ]}
           />
         </ModalContentSection>
-
-        <ModalContentSection title="Or: create a new insight to contain them">
+      ),
+    },
+    {
+      id: "new",
+      label: "Create new",
+      content: (
+        <ModalContentSection>
           <FormGroup>
-            <div style={{ position: 'relative' }}>
-              <FormInput
-                type="text"
-                placeholder="New insight name"
-                value={newInsightName}
-                onChange={(event) => setNewInsightName(event.target.value)}
-                style={{ paddingRight: '4rem' }}
-              />
-              <div style={{ 
-                position: 'absolute', 
-                right: '0.5rem', 
-                top: '50%', 
-                transform: 'translateY(-50%)', 
-                display: 'flex', 
-                gap: '0.25rem' 
-              }}>
-                <button
-                  onClick={handleClose}
-                  style={{
-                    padding: '0.25rem',
-                    color: 'var(--color-text-tertiary)',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontSize: '1rem',
-                    transition: 'color var(--transition-base)'
-                  }}
-                  onMouseEnter={(e) => e.target.style.color = 'var(--color-text-secondary)'}
-                  onMouseLeave={(e) => e.target.style.color = 'var(--color-text-tertiary)'}
-                  title="Cancel"
-                >
-                  ✕
-                </button>
-                <button
-                  onClick={handleSubmit}
-                  disabled={
-                    selectedChildInsights.length === 0 && !newInsightName.trim()
-                  }
-                  style={{
-                    padding: '0.25rem',
-                    color: 'var(--color-base-500)',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontSize: '1rem',
-                    transition: 'color var(--transition-base)',
-                    opacity: (selectedChildInsights.length === 0 && !newInsightName.trim()) ? 0.5 : 1
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!e.target.disabled) {
-                      e.target.style.color = 'var(--color-base-600)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!e.target.disabled) {
-                      e.target.style.color = 'var(--color-base-500)';
-                    }
-                  }}
-                  title="Save"
-                >
-                  ✓
-                </button>
-              </div>
-            </div>
+            <FormInput
+              type="text"
+              placeholder="New insight name"
+              value={newInsightName}
+              onChange={(event) => setNewInsightName(event.target.value)}
+            />
           </FormGroup>
         </ModalContentSection>
+      ),
+    },
+  ];
+
+  return (
+    <Modal
+      id={id}
+      title={`Add Child Insights to Insight: ${insight.title}`}
+      isOpen={isOpen}
+      onClose={handleClose}
+      size="large"
+    >
+      <ModalBody>
+        <TabNav tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+        {tabs.map((tab) => (
+          <TabContent key={tab.id} tabId={tab.id} activeTab={activeTab}>
+            {tab.content}
+          </TabContent>
+        ))}
       </ModalBody>
+      <ModalFooter>
+        <ModalButton variant="secondary" onClick={handleClose}>
+          Cancel
+        </ModalButton>
+        <ModalButton
+          variant="primary"
+          onClick={handleSubmit}
+          disabled={selectedChildInsights.length === 0 && !newInsightName}
+        >
+          Add
+        </ModalButton>
+      </ModalFooter>
     </Modal>
   );
 };

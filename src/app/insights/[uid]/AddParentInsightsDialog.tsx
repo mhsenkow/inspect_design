@@ -54,6 +54,7 @@ const AddParentInsightsDialog = ({
     Insight[]
   >([]);
   const [newInsightName, setNewInsightName] = useState<string>("");
+  const [activeTab, setActiveTab] = useState("existing");
 
   useEffect(() => {
     fetch("/api/insights?offset=0&limit=20&parents=true&children=true")
@@ -72,6 +73,7 @@ const AddParentInsightsDialog = ({
     setSelectedParentInsights([]);
     setDataFilter("");
     setNewInsightName("");
+    setActiveTab("existing");
   };
 
   const handleClose = useCallback(() => {
@@ -108,16 +110,12 @@ const AddParentInsightsDialog = ({
     return potentialInsightsWithoutLoops(insight, data);
   };
 
-  return (
-    <Modal
-      id={id}
-      title={`Add Parent Insights to Insight: ${insight.title}`}
-      isOpen={isOpen}
-      onClose={handleClose}
-      size="large"
-    >
-      <ModalBody>
-        <ModalContentSection title="Then: choose one or more existing insight" className="flex-grow">
+  const tabs = [
+    {
+      id: "existing",
+      label: "Existing insights",
+      content: (
+        <ModalContentSection>
           <FactsTable
             data={insights}
             setData={
@@ -164,8 +162,13 @@ const AddParentInsightsDialog = ({
             ]}
           />
         </ModalContentSection>
-
-        <ModalContentSection title="Or: create a new insight to contain them">
+      ),
+    },
+    {
+      id: "new",
+      label: "Create new",
+      content: (
+        <ModalContentSection>
           <FormGroup>
             <FormInput
               type="text"
@@ -175,6 +178,25 @@ const AddParentInsightsDialog = ({
             />
           </FormGroup>
         </ModalContentSection>
+      ),
+    },
+  ];
+
+  return (
+    <Modal
+      id={id}
+      title={`Add Parent Insights to Insight: ${insight.title}`}
+      isOpen={isOpen}
+      onClose={handleClose}
+      size="large"
+    >
+      <ModalBody>
+        <TabNav tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+        {tabs.map((tab) => (
+          <TabContent key={tab.id} tabId={tab.id} activeTab={activeTab}>
+            {tab.content}
+          </TabContent>
+        ))}
       </ModalBody>
       <ModalFooter>
         <ModalButton variant="secondary" onClick={handleClose}>
@@ -185,7 +207,7 @@ const AddParentInsightsDialog = ({
           onClick={handleSubmit}
           disabled={!newInsightName && selectedParentInsights.length === 0}
         >
-          Submit
+          Add
         </ModalButton>
       </ModalFooter>
     </Modal>
