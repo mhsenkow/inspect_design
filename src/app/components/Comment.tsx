@@ -34,16 +34,14 @@ const Comment = ({ comment, removeCommentFunc }: Props) => {
           </div>
         )}
       </div>
-      
+
       <div className={cardStyles.commentContent}>
         <div className={cardStyles.commentHeader}>
           <span className={cardStyles.commentAuthor}>
             {comment.user!.username || "Anonymous"}
           </span>
         </div>
-        <div className={cardStyles.commentText}>
-          {parse(comment.comment!)}
-        </div>
+        <div className={cardStyles.commentText}>{parse(comment.comment!)}</div>
       </div>
 
       {loggedIn && user_id == comment.user_id && (

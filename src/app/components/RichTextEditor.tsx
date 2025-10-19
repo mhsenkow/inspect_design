@@ -1,10 +1,8 @@
-import Image from "next/image";
 import React, { useCallback, useEffect, useRef } from "react";
 import parse from "html-react-parser";
 import cardStyles from "../../styles/components/card.module.css";
 
 import InsertLinkDialog from "./InsertLinkDialog";
-import { INSERT_LINK_DIALOG_ID } from "../constants";
 
 interface Props {
   html: string;
@@ -31,15 +29,6 @@ const RichTextEditor = ({ html, setHtml }: Props) => {
     }
     return false;
   }, []);
-
-  const insertLink = () => {
-    const dialog = document.getElementById(
-      INSERT_LINK_DIALOG_ID,
-    ) as HTMLDialogElement;
-    if (dialog) {
-      dialog.showModal();
-    }
-  };
 
   const getCaretPosition = () => {
     const selection = window.getSelection();

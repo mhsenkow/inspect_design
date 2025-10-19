@@ -3,7 +3,13 @@
 import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 
-import { Fact, FactReaction, InsightEvidence } from "../types";
+import {
+  Fact,
+  FactReaction,
+  InsightEvidence,
+  Insight,
+  Link as LinkType,
+} from "../types";
 import { encodeStringURI } from "../hooks/functions";
 import {
   debounce,
@@ -230,7 +236,10 @@ const FactsTable = ({
         {!hideHead && (
           <thead>
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-inverse uppercase tracking-wider" style={{ width: '40px' }}>
+              <th
+                className="px-4 py-3 text-left text-xs font-semibold text-inverse uppercase tracking-wider"
+                style={{ width: "40px" }}
+              >
                 <input
                   type="checkbox"
                   name="selectAllFacts"
@@ -251,17 +260,23 @@ const FactsTable = ({
               {columns &&
                 columns.map((column) => {
                   // Set specific widths for common columns
-                  let columnWidth = 'auto';
-                  if (column.name === 'Updated') {
-                    columnWidth = '120px';
-                  } else if (column.name === 'Title') {
-                    columnWidth = '1fr';
-                  } else if (column.name === '🌍') {
-                    columnWidth = '80px';
-                  } else if (column.name === '👨‍👩‍👧‍👦' || column.name === '👶' || column.name === '📄' || column.name === '💬' || column.name === '❤️') {
-                    columnWidth = '80px';
+                  let columnWidth = "auto";
+                  if (column.name === "Updated") {
+                    columnWidth = "120px";
+                  } else if (column.name === "Title") {
+                    columnWidth = "1fr";
+                  } else if (column.name === "🌍") {
+                    columnWidth = "80px";
+                  } else if (
+                    column.name === "👨‍👩‍👧‍👦" ||
+                    column.name === "👶" ||
+                    column.name === "📄" ||
+                    column.name === "💬" ||
+                    column.name === "❤️"
+                  ) {
+                    columnWidth = "80px";
                   }
-                  
+
                   return (
                     <th
                       className="px-4 py-3 text-left text-xs font-semibold text-inverse uppercase tracking-wider sortable cursor-pointer hover:text-secondary transition-colors duration-200"
@@ -275,7 +290,10 @@ const FactsTable = ({
                 })}
               {/* Add reaction icons header when custom columns are used */}
               {columns && enableReactionIcons && (
-                <th className="px-4 py-3 text-left text-xs font-semibold text-inverse uppercase tracking-wider" style={{ width: '60px' }}>
+                <th
+                  className="px-4 py-3 text-left text-xs font-semibold text-inverse uppercase tracking-wider"
+                  style={{ width: "60px" }}
+                >
                   {/* Empty header - reaction icons are self-explanatory */}
                 </th>
               )}
@@ -320,7 +338,10 @@ const FactsTable = ({
                     className={`${trClassName} border-b border-secondary last:border-b-0 hover:bg-secondary transition-colors duration-200 reaction-table-row overflow-visible`}
                     onClick={trOnClick}
                   >
-                    <td className="px-4 py-3 whitespace-nowrap" style={{ width: '40px' }}>
+                    <td
+                      className="px-4 py-3 whitespace-nowrap"
+                      style={{ width: "40px" }}
+                    >
                       <input
                         type="checkbox"
                         name="selectedFact"
@@ -351,16 +372,19 @@ const FactsTable = ({
 
                             if (fact.updated_at) {
                               dateToShow = fact.updated_at;
-                            } else if ((fact as any).childInsight?.updated_at) {
-                              dateToShow = (fact as any).childInsight
+                            } else if (
+                              (fact as Insight).childInsight?.updated_at
+                            ) {
+                              dateToShow = (fact as Insight).childInsight
                                 .updated_at;
                             } else if (
-                              (fact as any).parentInsight?.updated_at
+                              (fact as Insight).parentInsight?.updated_at
                             ) {
-                              dateToShow = (fact as any).parentInsight
+                              dateToShow = (fact as Insight).parentInsight
                                 .updated_at;
-                            } else if ((fact as any).snippet?.updated_at) {
-                              dateToShow = (fact as any).snippet.updated_at;
+                            } else if ((fact as LinkType).snippet?.updated_at) {
+                              dateToShow = (fact as LinkType).snippet
+                                .updated_at;
                             }
 
                             return dateToShow
@@ -388,25 +412,28 @@ const FactsTable = ({
                                     titleToShow = fact.title;
                                     uidToUse = fact.uid;
                                   } else if (
-                                    (fact as any).childInsight?.title &&
-                                    (fact as any).childInsight?.uid
+                                    (fact as Insight).childInsight?.title &&
+                                    (fact as Insight).childInsight?.uid
                                   ) {
-                                    titleToShow = (fact as any).childInsight
+                                    titleToShow = (fact as Insight).childInsight
                                       .title;
-                                    uidToUse = (fact as any).childInsight.uid;
+                                    uidToUse = (fact as Insight).childInsight
+                                      .uid;
                                   } else if (
-                                    (fact as any).parentInsight?.title &&
-                                    (fact as any).parentInsight?.uid
+                                    (fact as Insight).parentInsight?.title &&
+                                    (fact as Insight).parentInsight?.uid
                                   ) {
-                                    titleToShow = (fact as any).parentInsight
+                                    titleToShow = (fact as Insight)
+                                      .parentInsight.title;
+                                    uidToUse = (fact as Insight).parentInsight
+                                      .uid;
+                                  } else if (
+                                    (fact as LinkType).snippet?.title &&
+                                    (fact as LinkType).snippet?.uid
+                                  ) {
+                                    titleToShow = (fact as LinkType).snippet
                                       .title;
-                                    uidToUse = (fact as any).parentInsight.uid;
-                                  } else if (
-                                    (fact as any).snippet?.title &&
-                                    (fact as any).snippet?.uid
-                                  ) {
-                                    titleToShow = (fact as any).snippet.title;
-                                    uidToUse = (fact as any).snippet.uid;
+                                    uidToUse = (fact as LinkType).snippet.uid;
                                   }
 
                                   if (titleToShow && uidToUse) {
@@ -432,12 +459,13 @@ const FactsTable = ({
                                 (() => {
                                   // Handle different data structures for selectRows
                                   if (fact.title) return fact.title;
-                                  if ((fact as any).childInsight?.title)
-                                    return (fact as any).childInsight.title;
-                                  if ((fact as any).parentInsight?.title)
-                                    return (fact as any).parentInsight.title;
-                                  if ((fact as any).snippet?.title)
-                                    return (fact as any).snippet.title;
+                                  if ((fact as Insight).childInsight?.title)
+                                    return (fact as Insight).childInsight.title;
+                                  if ((fact as Insight).parentInsight?.title)
+                                    return (fact as Insight).parentInsight
+                                      .title;
+                                  if ((fact as LinkType).snippet?.title)
+                                    return (fact as LinkType).snippet.title;
                                   return null;
                                 })()}
                               {/* FIXME: updates several times until reactions is an empty array */}
@@ -490,18 +518,19 @@ const FactsTable = ({
 
                                     if (
                                       factName === "childInsights" &&
-                                      (fact as any).childInsight
+                                      (fact as Insight).childInsight
                                     ) {
                                       // For child insights, use the childInsight.id
-                                      insightId = (fact as any).childInsight.id;
+                                      insightId = (fact as Insight).childInsight
+                                        .id;
                                       summaryId = undefined; // Child insights don't have summary_id
                                     } else if (
                                       factName === "parentInsights" &&
-                                      (fact as any).parentInsight
+                                      (fact as Insight).parentInsight
                                     ) {
                                       // For parent insights, use the parentInsight.id
-                                      insightId = (fact as any).parentInsight
-                                        .id;
+                                      insightId = (fact as Insight)
+                                        .parentInsight.id;
                                       summaryId = undefined; // Parent insights don't have summary_id
                                     } else if (factName === "insight") {
                                       // For main page insights, use fact.id as insight_id
@@ -545,21 +574,29 @@ const FactsTable = ({
                     {columns &&
                       columns.map((column) => {
                         // Set specific widths for common columns to match headers
-                        let columnWidth = 'auto';
-                        if (column.name === 'Updated') {
-                          columnWidth = '120px';
-                        } else if (column.name === 'Title') {
-                          columnWidth = '1fr';
-                        } else if (column.name === '🌍') {
-                          columnWidth = '80px';
-                        } else if (column.name === '👨‍👩‍👧‍👦' || column.name === '👶' || column.name === '📄' || column.name === '💬' || column.name === '❤️') {
-                          columnWidth = '80px';
+                        let columnWidth = "auto";
+                        if (column.name === "Updated") {
+                          columnWidth = "120px";
+                        } else if (column.name === "Title") {
+                          columnWidth = "1fr";
+                        } else if (column.name === "🌍") {
+                          columnWidth = "80px";
+                        } else if (
+                          column.name === "👨‍👩‍👧‍👦" ||
+                          column.name === "👶" ||
+                          column.name === "📄" ||
+                          column.name === "💬" ||
+                          column.name === "❤️"
+                        ) {
+                          columnWidth = "80px";
                         }
-                        
+
                         return (
                           <td
                             className={`px-4 py-3 whitespace-nowrap text-sm text-secondary ${
-                              column.name === 'Title' ? 'text-left' : 'text-center'
+                              column.name === "Title"
+                                ? "text-left"
+                                : "text-center"
                             }`}
                             key={`Table column: ${column.name}`}
                             style={{ width: columnWidth }}
@@ -570,7 +607,10 @@ const FactsTable = ({
                       })}
                     {/* Add reaction icons column when custom columns are used */}
                     {columns && enableReactionIcons && loggedIn && (
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-secondary text-center reaction-cell-container" style={{ width: '60px' }}>
+                      <td
+                        className="px-4 py-3 whitespace-nowrap text-sm text-secondary text-center reaction-cell-container"
+                        style={{ width: "60px" }}
+                      >
                         {(() => {
                           console.log("Rendering reaction column for fact:", {
                             factId: fact.id,
@@ -578,7 +618,7 @@ const FactsTable = ({
                             hasReactions: !!fact.reactions,
                             reactionsCount: fact.reactions?.length || 0,
                             reactions: fact.reactions,
-                            fullFact: fact
+                            fullFact: fact,
                           });
                           return null;
                         })()}
@@ -590,7 +630,7 @@ const FactsTable = ({
                               userId,
                               userIdType: typeof userId,
                               token: token ? "present" : "missing",
-                              loggedIn
+                              loggedIn,
                             });
                             return userId;
                           })()}
@@ -602,36 +642,39 @@ const FactsTable = ({
 
                               if (
                                 factName === "childInsights" &&
-                                (fact as any).childInsight
+                                (fact as Insight).childInsight
                               ) {
                                 // For child insights, use the childInsight.id
-                                insightId = (fact as any).childInsight.id;
+                                insightId = (fact as Insight).childInsight.id;
                                 summaryId = undefined; // Child insights don't have summary_id
                               } else if (
                                 factName === "parentInsights" &&
-                                (fact as any).parentInsight
+                                (fact as Insight).parentInsight
                               ) {
                                 // For parent insights, use the parentInsight.id
-                                insightId = (fact as any).parentInsight.id;
+                                insightId = (fact as Insight).parentInsight.id;
                                 summaryId = undefined; // Parent insights don't have summary_id
                               } else if (
                                 factName === "snippet" &&
-                                (fact as any).summary_id
+                                (fact as Fact).summary_id
                               ) {
                                 // For snippets/evidence, use the summary_id
                                 insightId = undefined;
-                                summaryId = (fact as any).summary_id;
+                                summaryId = (fact as Fact).summary_id;
                               } else {
                                 // For regular insights, use the fact.id
                                 insightId = fact.id;
                                 summaryId = undefined;
-                                console.log("Main page insight reaction submission:", {
-                                  factName,
-                                  factId: fact.id,
-                                  insightId,
-                                  summaryId,
-                                  factTitle: fact.title
-                                });
+                                console.log(
+                                  "Main page insight reaction submission:",
+                                  {
+                                    factName,
+                                    factId: fact.id,
+                                    insightId,
+                                    summaryId,
+                                    factTitle: fact.title,
+                                  },
+                                );
                               }
 
                               try {
@@ -652,29 +695,34 @@ const FactsTable = ({
                                   // Refresh the data to show the new reaction
                                   const currentUserId = getCurrentUserId();
                                   if (!currentUserId) return; // Don't update if no user ID
-                                  
-                                  console.log("Reaction submitted successfully, updating data:", {
-                                    factId: fact.id,
-                                    currentUserId,
-                                    reaction,
-                                    dataLength: data?.length
-                                  });
-                                  
+
+                                  console.log(
+                                    "Reaction submitted successfully, updating data:",
+                                    {
+                                      factId: fact.id,
+                                      currentUserId,
+                                      reaction,
+                                      dataLength: data?.length,
+                                    },
+                                  );
+
                                   const updatedData = data?.map((f) => {
                                     console.log("Checking fact for update:", {
                                       factId: f.id,
                                       targetFactId: fact.id,
                                       matches: f.id === fact.id,
                                       factTitle: f.title,
-                                      targetFactTitle: fact.title
+                                      targetFactTitle: fact.title,
                                     });
-                                    
+
                                     if (f.id === fact.id) {
                                       // Remove any existing reaction from this user
-                                      const existingReactions = (f.reactions || []).filter(
-                                        (r) => r.user_id !== currentUserId
+                                      const existingReactions = (
+                                        f.reactions || []
+                                      ).filter(
+                                        (r) => r.user_id !== currentUserId,
                                       );
-                                      
+
                                       const newFact = {
                                         ...f,
                                         reactions: [
@@ -686,22 +734,28 @@ const FactsTable = ({
                                           },
                                         ],
                                       };
-                                      
+
                                       console.log("Updated fact:", {
                                         id: newFact.id,
                                         title: newFact.title,
-                                        reactions: newFact.reactions
+                                        reactions: newFact.reactions,
                                       });
-                                      
+
                                       return newFact;
                                     }
                                     return f;
                                   });
                                   setData(updatedData);
-                                  console.log("Data updated, new length:", updatedData?.length);
+                                  console.log(
+                                    "Data updated, new length:",
+                                    updatedData?.length,
+                                  );
                                 }
                               } catch (error) {
-                                console.error("Error submitting reaction:", error);
+                                console.error(
+                                  "Error submitting reaction:",
+                                  error,
+                                );
                               }
                             }
                           }}
@@ -772,7 +826,6 @@ const FactsTable = ({
                                     }
                                     return Promise.resolve();
                                   }}
-                                  directions="Select an emoji character"
                                   afterSubmit={(newObject) => {
                                     if (newObject) {
                                       if (!fact.reactions) {
@@ -813,7 +866,6 @@ const FactsTable = ({
                                   }
                                   return Promise.resolve();
                                 }}
-                                directions="Enter a text comment"
                                 afterSubmit={(newObject) => {
                                   if (newObject) {
                                     if (!fact.comments) {

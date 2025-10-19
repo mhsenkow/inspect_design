@@ -2,14 +2,13 @@
 
 import React, { useMemo, useState } from "react";
 import moment from "moment";
+import Image from "next/image";
 import cardStyles from "../../../styles/components/card.module.css";
 
 import { FactComment, FactReaction, Link, User } from "../../types";
 
 import FeedbackInputElement from "../../components/FeedbackInputElement";
 import { submitComment, submitReaction } from "../../functions";
-import FeedbackLink from "../../components/FeedbackLink";
-import FeedbackItem from "../../components/FeedbackItem";
 import ReactionIcon from "../../components/ReactionIcon";
 import useUser from "../../hooks/useUser";
 import SourceLogo from "../../components/SourceLogo";
@@ -60,7 +59,10 @@ const ClientSidePage = ({
                           ) || [];
                         setLink({
                           ...link,
-                          reactions: [...existingReactions, result as FactReaction],
+                          reactions: [
+                            ...existingReactions,
+                            result as FactReaction,
+                          ],
                         });
                       }
                     }
@@ -74,7 +76,9 @@ const ClientSidePage = ({
                   {link.title}
                 </h1>
                 <div className={cardStyles.linkMetadata}>
-                  <span className={cardStyles.linkTimestamp}>{createdOrUpdated}</span>
+                  <span className={cardStyles.linkTimestamp}>
+                    {createdOrUpdated}
+                  </span>
                 </div>
               </div>
             </div>
@@ -83,9 +87,9 @@ const ClientSidePage = ({
           {/* Link Visit Section */}
           <div className={cardStyles.linkVisitSection}>
             <div className={cardStyles.linkActions}>
-              <a 
-                href={link.url} 
-                target="_blank" 
+              <a
+                href={link.url}
+                target="_blank"
                 rel="noreferrer"
                 className={cardStyles.linkVisitButton}
               >
@@ -98,10 +102,12 @@ const ClientSidePage = ({
           <div className={cardStyles.linkContentSection}>
             {link.imageUrl && (
               <div className={cardStyles.linkImageContainer}>
-                <img
+                <Image
                   src={link.imageUrl}
                   alt="Link preview"
                   className={cardStyles.linkImage}
+                  width={300}
+                  height={200}
                 />
               </div>
             )}
@@ -115,7 +121,7 @@ const ClientSidePage = ({
                 Feedback
               </div>
             </div>
-            
+
             <div className={cardStyles.linkFeedbackContent}>
               {/* Comment Input */}
               {currentUser && isEditingComment && (
@@ -124,11 +130,13 @@ const ClientSidePage = ({
                     actionType="comment"
                     submitFunc={(comment) => {
                       if (token) {
-                        return submitComment({ comment, summary_id: link.id }, token);
+                        return submitComment(
+                          { comment, summary_id: link.id },
+                          token,
+                        );
                       }
                       return Promise.resolve();
                     }}
-                    directions="Enter a text comment"
                     afterSubmit={(newObject) => {
                       if (newObject) {
                         if (!link.comments) {
@@ -160,7 +168,8 @@ const ClientSidePage = ({
                       removeCommentFunc={(id) => {
                         setLink({
                           ...link,
-                          comments: link.comments?.filter((c) => c.id !== id) ?? [],
+                          comments:
+                            link.comments?.filter((c) => c.id !== id) ?? [],
                         });
                       }}
                     />
@@ -180,7 +189,9 @@ const ClientSidePage = ({
                     className={cardStyles.linkAddCommentButton}
                   >
                     <span className={cardStyles.addButtonIcon}>💬</span>
-                    <span className={cardStyles.addButtonText}>Add Comment</span>
+                    <span className={cardStyles.addButtonText}>
+                      Add Comment
+                    </span>
                   </button>
                 </div>
               )}

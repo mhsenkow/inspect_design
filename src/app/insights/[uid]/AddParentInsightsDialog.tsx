@@ -141,11 +141,14 @@ const AddParentInsightsDialog = ({
                 display: (insight: Fact | Insight): React.JSX.Element => (
                   <span className="text-sm text-secondary font-mono">
                     {insight.updated_at
-                      ? new Date(insight.updated_at).toLocaleDateString("en-US", {
-                          month: "2-digit",
-                          day: "2-digit",
-                          year: "numeric",
-                        })
+                      ? new Date(insight.updated_at).toLocaleDateString(
+                          "en-US",
+                          {
+                            month: "2-digit",
+                            day: "2-digit",
+                            year: "numeric",
+                          },
+                        )
                       : "---"}
                   </span>
                 ),

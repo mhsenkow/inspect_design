@@ -4,15 +4,13 @@ import styles from "../../styles/components/main-insights-page.module.css";
 import cardStyles from "../../styles/components/card.module.css";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import ReactionIcon from "../components/ReactionIcon";
-import { submitReaction } from "../functions";
 
 import {
   Fact,
-  FactReaction,
   FLVResponse,
   Insight,
   InsightEvidence,
+  InsightLink,
   ServerFunction,
   User,
 } from "../types";
@@ -27,7 +25,6 @@ import { createLink } from "../hooks/functions";
 import {
   createInsights,
   deleteInsights,
-  publishInsights,
   InsightsAPISchema,
 } from "../components/InsightsAPI";
 import {
@@ -44,7 +41,7 @@ const ClientSidePage = ({
   insights: Insight[];
   currentUser: User | null;
 }): React.JSX.Element => {
-  const { token, user_id } = useUser();
+  const { token } = useUser();
   const [liveData, setLiveData] = useState(insights);
   const [selectedInsights, setSelectedInsights] = useState<Insight[]>([]);
   const [isSaveLinkDialogOpen, setIsSaveLinkDialogOpen] = useState(false);
@@ -73,9 +70,12 @@ const ClientSidePage = ({
       token
     ) {
       // Check if it's an InsightsAPISchema (has 'insights' property)
-      if ('insights' in serverFunctionInputForInsightsList) {
+      if ("insights" in serverFunctionInputForInsightsList) {
         activeServerFunctionForInsightsList
-          .function(serverFunctionInputForInsightsList as InsightsAPISchema, token)
+          .function(
+            serverFunctionInputForInsightsList as InsightsAPISchema,
+            token,
+          )
           .then((response: FLVResponse | FLVResponse[] | void) => {
             if (Array.isArray(response)) {
               const newInsights = response.flatMap((r) => r.facts as Insight[]);
@@ -401,11 +401,15 @@ const ClientSidePage = ({
                         display: (insight: Fact | Insight) => {
                           const isPublished = (insight as Insight).is_public;
                           return (
-                            <span 
-                              className={`icon-small ${isPublished ? 'text-success' : 'text-muted'}`} 
-                              title={isPublished ? 'Published (Global)' : 'Not Published'}
+                            <span
+                              className={`icon-small ${isPublished ? "text-success" : "text-muted"}`}
+                              title={
+                                isPublished
+                                  ? "Published (Global)"
+                                  : "Not Published"
+                              }
                             >
-                              {isPublished ? '🌍' : '📝'}
+                              {isPublished ? "🌍" : "📝"}
                             </span>
                           );
                         },
@@ -416,7 +420,10 @@ const ClientSidePage = ({
                         display: (insight: Fact | Insight) => {
                           const count = insight.parents?.length || 0;
                           return (
-                            <span className="icon-small" title={`${count} parent insights`}>
+                            <span
+                              className="icon-small"
+                              title={`${count} parent insights`}
+                            >
                               👨‍👩‍👧‍👦<span className="icon-count">{count}</span>
                             </span>
                           );
@@ -428,7 +435,10 @@ const ClientSidePage = ({
                         display: (insight: Fact | Insight) => {
                           const count = insight.children?.length || 0;
                           return (
-                            <span className="icon-small" title={`${count} child insights`}>
+                            <span
+                              className="icon-small"
+                              title={`${count} child insights`}
+                            >
                               👶<span className="icon-count">{count}</span>
                             </span>
                           );
@@ -440,7 +450,10 @@ const ClientSidePage = ({
                         display: (insight: Fact | Insight) => {
                           const count = insight.evidence?.length || 0;
                           return (
-                            <span className="icon-small" title={`${count} evidence items`}>
+                            <span
+                              className="icon-small"
+                              title={`${count} evidence items`}
+                            >
                               📄<span className="icon-count">{count}</span>
                             </span>
                           );
@@ -452,7 +465,10 @@ const ClientSidePage = ({
                         display: (insight: Fact | Insight) => {
                           const count = insight.comments?.length || 0;
                           return (
-                            <span className="icon-small" title={`${count} comments`}>
+                            <span
+                              className="icon-small"
+                              title={`${count} comments`}
+                            >
                               💬<span className="icon-count">{count}</span>
                             </span>
                           );
@@ -464,62 +480,94 @@ const ClientSidePage = ({
                         display: (insight: Fact | Insight) => {
                           // Aggregate all reactions from all sources
                           const aggregateReactions = () => {
-                            const reactionCounts: { [key: string]: number } = {};
-                            
+                            const reactionCounts: { [key: string]: number } =
+                              {};
+
                             // Add reactions from the insight itself
                             if (insight.reactions) {
-                              insight.reactions.forEach(reaction => {
-                                reactionCounts[reaction.reaction] = (reactionCounts[reaction.reaction] || 0) + 1;
+                              insight.reactions.forEach((reaction) => {
+                                reactionCounts[reaction.reaction] =
+                                  (reactionCounts[reaction.reaction] || 0) + 1;
                               });
                             }
-                            
+
                             // Add reactions from parent insights (nested structure)
                             if (insight.parents) {
-                              insight.parents.forEach(parentLink => {
-                                if (parentLink.parentInsight?.reactions) {
-                                  parentLink.parentInsight.reactions.forEach(reaction => {
-                                    reactionCounts[reaction.reaction] = (reactionCounts[reaction.reaction] || 0) + 1;
-                                  });
-                                }
-                              });
+                              insight.parents.forEach(
+                                (parentLink: InsightLink) => {
+                                  if (parentLink.parentInsight?.reactions) {
+                                    parentLink.parentInsight.reactions.forEach(
+                                      (reaction) => {
+                                        reactionCounts[reaction.reaction] =
+                                          (reactionCounts[reaction.reaction] ||
+                                            0) + 1;
+                                      },
+                                    );
+                                  }
+                                },
+                              );
                             }
-                            
+
                             // Add reactions from child insights (nested structure)
                             if (insight.children) {
-                              insight.children.forEach(childLink => {
-                                if (childLink.childInsight?.reactions) {
-                                  childLink.childInsight.reactions.forEach(reaction => {
-                                    reactionCounts[reaction.reaction] = (reactionCounts[reaction.reaction] || 0) + 1;
-                                  });
-                                }
-                              });
+                              insight.children.forEach(
+                                (childLink: InsightLink) => {
+                                  if (childLink.childInsight?.reactions) {
+                                    childLink.childInsight.reactions.forEach(
+                                      (reaction) => {
+                                        reactionCounts[reaction.reaction] =
+                                          (reactionCounts[reaction.reaction] ||
+                                            0) + 1;
+                                      },
+                                    );
+                                  }
+                                },
+                              );
                             }
-                            
+
                             // Add reactions from evidence (nested structure)
                             if (insight.evidence) {
-                              insight.evidence.forEach(evidence => {
-                                if (evidence.summary?.reactions) {
-                                  evidence.summary.reactions.forEach(reaction => {
-                                    reactionCounts[reaction.reaction] = (reactionCounts[reaction.reaction] || 0) + 1;
-                                  });
+                              insight.evidence.forEach((evidence) => {
+                                const evidenceSummary = (
+                                  evidence as InsightEvidence
+                                ).summary;
+                                if (evidenceSummary?.reactions) {
+                                  evidenceSummary.reactions.forEach(
+                                    (reaction) => {
+                                      reactionCounts[reaction.reaction] =
+                                        (reactionCounts[reaction.reaction] ||
+                                          0) + 1;
+                                    },
+                                  );
                                 }
                               });
                             }
-                            
+
                             return reactionCounts;
                           };
-                          
+
                           const aggregatedReactions = aggregateReactions();
-                          const totalReactions = Object.values(aggregatedReactions).reduce((sum, count) => sum + count, 0);
-                          
+                          const totalReactions = Object.values(
+                            aggregatedReactions,
+                          ).reduce((sum, count) => sum + count, 0);
+
                           return (
-                            <span className="icon-main" title="All reactions from parents, children, evidence, and this insight">
+                            <span
+                              className="icon-main"
+                              title="All reactions from parents, children, evidence, and this insight"
+                            >
                               {totalReactions > 0 ? (
-                                Object.entries(aggregatedReactions).map(([reaction, count]) => (
-                                  <span key={reaction} className="inline-block mr-1">
-                                    {reaction}{count > 1 ? count : ''}
-                                  </span>
-                                ))
+                                Object.entries(aggregatedReactions).map(
+                                  ([reaction, count]) => (
+                                    <span
+                                      key={reaction}
+                                      className="inline-block mr-1"
+                                    >
+                                      {reaction}
+                                      {count > 1 ? count : ""}
+                                    </span>
+                                  ),
+                                )
                               ) : (
                                 <span className="text-muted">0</span>
                               )}
@@ -550,7 +598,9 @@ const ClientSidePage = ({
                           aria-label="Create Your First Insight"
                           title="Create Your First Insight"
                         >
-                          <span style={{ fontSize: "var(--font-size-lg)" }}>+</span>
+                          <span style={{ fontSize: "var(--font-size-lg)" }}>
+                            +
+                          </span>
                           <span>Create Your First Insight</span>
                         </button>
                       )}

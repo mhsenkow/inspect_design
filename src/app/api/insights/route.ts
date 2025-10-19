@@ -89,14 +89,14 @@ export async function POST(
     }
 
     // First create the insight without evidence
-    const newInsight = await InsightModel.query()
+    const newInsight = await (InsightModel.query() as any)
       .insert({
         user_id: authUser.user_id,
         uid,
         title,
         created_at: knex.fn.now(),
         updated_at: knex.fn.now(),
-      } as any)
+      })
       .withGraphFetched("evidence");
 
     // Then add evidence if provided

@@ -38,7 +38,7 @@ const EditableTitle = ({
   return (
     <h2 id="title" style={{ margin: 0 }}>
       {editingTitle && (
-        <div style={{ position: 'relative' }}>
+        <div style={{ position: "relative" }}>
           <textarea
             id="titleBeingEdited"
             style={{
@@ -74,30 +74,38 @@ const EditableTitle = ({
             autoFocus
             rows={2}
           />
-          <div style={{ 
-            position: 'absolute', 
-            right: 'var(--spacing-2)', 
-            top: '50%', 
-            transform: 'translateY(-50%)', 
-            display: 'flex', 
-            gap: 'var(--spacing-1)' 
-          }}>
+          <div
+            style={{
+              position: "absolute",
+              right: "var(--spacing-2)",
+              top: "50%",
+              transform: "translateY(-50%)",
+              display: "flex",
+              gap: "var(--spacing-1)",
+            }}
+          >
             <button
               onClick={() => {
                 setTitle(insight.title);
                 setEditingTitle(false);
               }}
               style={{
-                padding: 'var(--spacing-1)',
-                color: 'var(--color-text-tertiary)',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: 'var(--font-size-base)',
-                transition: 'color var(--transition-base)'
+                padding: "var(--spacing-1)",
+                color: "var(--color-text-tertiary)",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                fontSize: "var(--font-size-base)",
+                transition: "color var(--transition-base)",
               }}
-              onMouseEnter={(e) => e.target.style.color = 'var(--color-text-secondary)'}
-              onMouseLeave={(e) => e.target.style.color = 'var(--color-text-tertiary)'}
+              onMouseEnter={(e) =>
+                ((e.target as HTMLElement).style.color =
+                  "var(--color-text-secondary)")
+              }
+              onMouseLeave={(e) =>
+                ((e.target as HTMLElement).style.color =
+                  "var(--color-text-tertiary)")
+              }
               title="Cancel"
             >
               ✕
@@ -114,23 +122,25 @@ const EditableTitle = ({
               }}
               disabled={!title}
               style={{
-                padding: 'var(--spacing-1)',
-                color: 'var(--color-base-500)',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: 'var(--font-size-base)',
-                transition: 'color var(--transition-base)',
-                opacity: !title ? 0.5 : 1
+                padding: "var(--spacing-1)",
+                color: "var(--color-base-500)",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                fontSize: "var(--font-size-base)",
+                transition: "color var(--transition-base)",
+                opacity: !title ? 0.5 : 1,
               }}
               onMouseEnter={(e) => {
-                if (!e.target.disabled) {
-                  e.target.style.color = 'var(--color-base-600)';
+                if (!(e.target as HTMLButtonElement).disabled) {
+                  (e.target as HTMLElement).style.color =
+                    "var(--color-base-600)";
                 }
               }}
               onMouseLeave={(e) => {
-                if (!e.target.disabled) {
-                  e.target.style.color = 'var(--color-base-500)';
+                if (!(e.target as HTMLButtonElement).disabled) {
+                  (e.target as HTMLElement).style.color =
+                    "var(--color-base-500)";
                 }
               }}
               title="Save"

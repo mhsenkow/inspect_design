@@ -18,7 +18,6 @@ const ReactionPicker: React.FC<ReactionPickerProps> = ({
   buttonRef,
 }) => {
   const [hoveredEmoji, setHoveredEmoji] = useState<string | null>(null);
-  const [actualPosition, setActualPosition] = useState<"top" | "bottom">("top");
   const [pickerStyle, setPickerStyle] = useState<React.CSSProperties>({});
   const pickerRef = useRef<HTMLDivElement>(null);
 
@@ -59,7 +58,6 @@ const ReactionPicker: React.FC<ReactionPickerProps> = ({
 
           if (spaceAbove >= pickerHeight + 10 || spaceAbove > spaceBelow) {
             // Position above
-            setActualPosition("top");
             setPickerStyle({
               position: "fixed",
               left: `${leftPosition}px`,
@@ -68,7 +66,6 @@ const ReactionPicker: React.FC<ReactionPickerProps> = ({
             });
           } else {
             // Position below
-            setActualPosition("bottom");
             setPickerStyle({
               position: "fixed",
               left: `${leftPosition}px`,

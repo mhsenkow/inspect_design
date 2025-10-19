@@ -71,9 +71,13 @@ const RegisterPage = (): React.JSX.Element => {
             Join Datagotchi Labs and start exploring insights
           </p>
         </div>
-        
+
         <div className={cardStyles.loginCardBody}>
-          <form name="registerInfo" onSubmit={handleSubmit} className={cardStyles.loginForm}>
+          <form
+            name="registerInfo"
+            onSubmit={handleSubmit}
+            className={cardStyles.loginForm}
+          >
             <div className={cardStyles.formGroup}>
               <label htmlFor="email" className={cardStyles.formLabel}>
                 Email Address
@@ -89,7 +93,7 @@ const RegisterPage = (): React.JSX.Element => {
                 required
               />
             </div>
-            
+
             <div className={cardStyles.formGroup}>
               <label htmlFor="username" className={cardStyles.formLabel}>
                 Username
@@ -105,7 +109,7 @@ const RegisterPage = (): React.JSX.Element => {
                 required
               />
             </div>
-            
+
             <div className={cardStyles.formGroup}>
               <label htmlFor="password" className={cardStyles.formLabel}>
                 Password
@@ -121,20 +125,20 @@ const RegisterPage = (): React.JSX.Element => {
                 required
               />
             </div>
-            
+
             {error && (
               <div className={cardStyles.loginError}>
                 <div className={cardStyles.errorIcon}>⚠️</div>
                 <div className={cardStyles.errorMessage}>{error}</div>
               </div>
             )}
-            
+
             <button
               type="submit"
               disabled={!(email && username && password) || isLoading}
-              className={`btn btn-primary btn-lg ${cardStyles.loginButton} ${isLoading ? 'btn-loading' : ''}`}
+              className={`btn btn-primary btn-lg ${cardStyles.loginButton} ${isLoading ? "btn-loading" : ""}`}
             >
-              {isLoading ? 'Creating Account...' : 'Create Account'}
+              {isLoading ? "Creating Account..." : "Create Account"}
             </button>
           </form>
         </div>

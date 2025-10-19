@@ -8,13 +8,11 @@ const FeedbackInputElement = ({
   actionType,
   submitFunc,
   closeFunc,
-  directions,
   afterSubmit,
 }: {
   actionType: "reaction" | "comment";
   submitFunc?: (token: string) => Promise<FactComment | FactReaction | void>;
   closeFunc: () => void;
-  directions: string;
   afterSubmit: (response?: FactComment | FactReaction | void) => void;
 }): React.JSX.Element => {
   const [html, setHtml] = useState<string>("");
@@ -58,8 +56,8 @@ const FeedbackInputElement = ({
         )}
       </div>
       <div className={cardStyles.feedbackInputActions}>
-        <button 
-          type="button" 
+        <button
+          type="button"
           onClick={closeFeedbackInputElement}
           className={cardStyles.feedbackInputButton}
         >

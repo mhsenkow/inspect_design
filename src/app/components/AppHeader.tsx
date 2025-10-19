@@ -12,8 +12,7 @@ const AppHeader = (): React.JSX.Element => {
         className="pointer"
         onClick={() => open(origin, "_self")}
       >
-        <span style={{ fontSize: "48px" }}>🔍</span>{" "}
-        <br />
+        <span style={{ fontSize: "48px" }}>🔍</span> <br />
         <strong>INSPECT</strong>
       </div>
       <div>

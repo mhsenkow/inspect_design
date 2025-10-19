@@ -58,9 +58,13 @@ const LoginPage = (): React.JSX.Element => {
             Sign in to access your insights and continue your research
           </p>
         </div>
-        
+
         <div className={cardStyles.loginCardBody}>
-          <form name="loginInfo" onSubmit={handleSubmit} className={cardStyles.loginForm}>
+          <form
+            name="loginInfo"
+            onSubmit={handleSubmit}
+            className={cardStyles.loginForm}
+          >
             <div className={cardStyles.formGroup}>
               <label htmlFor="email" className={cardStyles.formLabel}>
                 Email Address
@@ -76,7 +80,7 @@ const LoginPage = (): React.JSX.Element => {
                 required
               />
             </div>
-            
+
             <div className={cardStyles.formGroup}>
               <label htmlFor="password" className={cardStyles.formLabel}>
                 Password
@@ -92,14 +96,14 @@ const LoginPage = (): React.JSX.Element => {
                 required
               />
             </div>
-            
+
             {error && (
               <div className={cardStyles.loginError}>
                 <div className={cardStyles.errorIcon}>⚠️</div>
                 <div className={cardStyles.errorMessage}>{error}</div>
               </div>
             )}
-            
+
             <button
               type="submit"
               disabled={!(email && password)}

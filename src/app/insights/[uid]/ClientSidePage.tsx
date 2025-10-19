@@ -18,7 +18,6 @@ import {
 } from "../../types";
 
 import FeedbackInputElement from "../../components/FeedbackInputElement";
-import ReactionButton from "../../components/ReactionButton";
 import { submitComment, submitReaction } from "../../functions";
 import FeedbackItem from "../../components/FeedbackItem";
 import ReactionIcon from "../../components/ReactionIcon";
@@ -311,7 +310,9 @@ const ClientSidePage = ({
                       : "No parent insights yet"}
                   </div>
                 </div>
-                <div className={`${cardStyles.contentCardBody} ${cardStyles.contentCardBodyFlushTop}`}>
+                <div
+                  className={`${cardStyles.contentCardBody} ${cardStyles.contentCardBodyFlushTop}`}
+                >
                   <FactsDataContext.Provider
                     value={{
                       data:
@@ -363,7 +364,9 @@ const ClientSidePage = ({
                           display: (insight: Fact): React.JSX.Element => (
                             <span className="text-sm text-secondary font-mono">
                               {insight.updated_at
-                                ? new Date(insight.updated_at).toLocaleDateString("en-US", {
+                                ? new Date(
+                                    insight.updated_at,
+                                  ).toLocaleDateString("en-US", {
                                     month: "2-digit",
                                     day: "2-digit",
                                     year: "numeric",
@@ -380,13 +383,23 @@ const ClientSidePage = ({
                             let titleToShow = insight.title;
                             let uidToUse = insight.uid;
 
-                            if ((insight as any).childInsight?.title && (insight as any).childInsight?.uid) {
+                            if (
+                              (insight as any).childInsight?.title &&
+                              (insight as any).childInsight?.uid
+                            ) {
                               titleToShow = (insight as any).childInsight.title;
                               uidToUse = (insight as any).childInsight.uid;
-                            } else if ((insight as any).parentInsight?.title && (insight as any).parentInsight?.uid) {
-                              titleToShow = (insight as any).parentInsight.title;
+                            } else if (
+                              (insight as any).parentInsight?.title &&
+                              (insight as any).parentInsight?.uid
+                            ) {
+                              titleToShow = (insight as any).parentInsight
+                                .title;
                               uidToUse = (insight as any).parentInsight.uid;
-                            } else if ((insight as any).snippet?.title && (insight as any).snippet?.uid) {
+                            } else if (
+                              (insight as any).snippet?.title &&
+                              (insight as any).snippet?.uid
+                            ) {
                               titleToShow = (insight as any).snippet.title;
                               uidToUse = (insight as any).snippet.uid;
                             }
@@ -468,74 +481,114 @@ const ClientSidePage = ({
                     <div className="insights-icon-stack">
                       {/* Parent insights count */}
                       {(insight.parents?.length || 0) > 0 && (
-                        <span className="icon-small" title={`${insight.parents?.length || 0} parent insights`}>
-                          👨‍👩‍👧‍👦<span className="icon-count">{insight.parents?.length || 0}</span>
+                        <span
+                          className="icon-small"
+                          title={`${insight.parents?.length || 0} parent insights`}
+                        >
+                          👨‍👩‍👧‍👦
+                          <span className="icon-count">
+                            {insight.parents?.length || 0}
+                          </span>
                         </span>
                       )}
                       {/* Aggregated reactions */}
                       {(() => {
                         const reactionCounts: { [key: string]: number } = {};
-                        
+
                         // Add reactions from the insight itself
                         if (insight.reactions) {
-                          insight.reactions.forEach(reaction => {
-                            reactionCounts[reaction.reaction] = (reactionCounts[reaction.reaction] || 0) + 1;
+                          insight.reactions.forEach((reaction) => {
+                            reactionCounts[reaction.reaction] =
+                              (reactionCounts[reaction.reaction] || 0) + 1;
                           });
                         }
-                        
+
                         // Add reactions from parent insights
                         if (insight.parents) {
-                          insight.parents.forEach(parentLink => {
+                          insight.parents.forEach((parentLink) => {
                             if (parentLink.parentInsight?.reactions) {
-                              parentLink.parentInsight.reactions.forEach(reaction => {
-                                reactionCounts[reaction.reaction] = (reactionCounts[reaction.reaction] || 0) + 1;
-                              });
+                              parentLink.parentInsight.reactions.forEach(
+                                (reaction) => {
+                                  reactionCounts[reaction.reaction] =
+                                    (reactionCounts[reaction.reaction] || 0) +
+                                    1;
+                                },
+                              );
                             }
                           });
                         }
-                        
+
                         // Add reactions from child insights
                         if (insight.children) {
-                          insight.children.forEach(childLink => {
+                          insight.children.forEach((childLink) => {
                             if (childLink.childInsight?.reactions) {
-                              childLink.childInsight.reactions.forEach(reaction => {
-                                reactionCounts[reaction.reaction] = (reactionCounts[reaction.reaction] || 0) + 1;
-                              });
+                              childLink.childInsight.reactions.forEach(
+                                (reaction) => {
+                                  reactionCounts[reaction.reaction] =
+                                    (reactionCounts[reaction.reaction] || 0) +
+                                    1;
+                                },
+                              );
                             }
                           });
                         }
-                        
+
                         // Add reactions from evidence
                         if (insight.evidence) {
-                          insight.evidence.forEach(evidence => {
-                            if (evidence.summary?.reactions) {
-                              evidence.summary.reactions.forEach(reaction => {
-                                reactionCounts[reaction.reaction] = (reactionCounts[reaction.reaction] || 0) + 1;
+                          insight.evidence.forEach((evidence) => {
+                            const evidenceSummary = (
+                              evidence as InsightEvidence
+                            ).summary;
+                            if (evidenceSummary?.reactions) {
+                              evidenceSummary.reactions.forEach((reaction) => {
+                                reactionCounts[reaction.reaction] =
+                                  (reactionCounts[reaction.reaction] || 0) + 1;
                               });
                             }
                           });
                         }
-                        
+
                         return Object.keys(reactionCounts).length > 0 ? (
-                          <span className="icon-main" title="All reactions from parents, children, evidence, and this insight">
-                            {Object.entries(reactionCounts).map(([reaction, count]) => (
-                              <span key={reaction} className="inline-block mr-1">
-                                {reaction}{count > 1 ? count : ''}
-                              </span>
-                            ))}
+                          <span
+                            className="icon-main"
+                            title="All reactions from parents, children, evidence, and this insight"
+                          >
+                            {Object.entries(reactionCounts).map(
+                              ([reaction, count]) => (
+                                <span
+                                  key={reaction}
+                                  className="inline-block mr-1"
+                                >
+                                  {reaction}
+                                  {count > 1 ? count : ""}
+                                </span>
+                              ),
+                            )}
                           </span>
                         ) : null;
                       })()}
                       {/* Child insights count */}
                       {(insight.children?.length || 0) > 0 && (
-                        <span className="icon-small" title={`${insight.children?.length || 0} child insights`}>
-                          👶<span className="icon-count">{insight.children?.length || 0}</span>
+                        <span
+                          className="icon-small"
+                          title={`${insight.children?.length || 0} child insights`}
+                        >
+                          👶
+                          <span className="icon-count">
+                            {insight.children?.length || 0}
+                          </span>
                         </span>
                       )}
                       {/* Evidence count */}
                       {(liveSnippetData.length || 0) > 0 && (
-                        <span className="icon-small" title={`${liveSnippetData.length || 0} evidence items`}>
-                          📄<span className="icon-count">{liveSnippetData.length || 0}</span>
+                        <span
+                          className="icon-small"
+                          title={`${liveSnippetData.length || 0} evidence items`}
+                        >
+                          📄
+                          <span className="icon-count">
+                            {liveSnippetData.length || 0}
+                          </span>
                         </span>
                       )}
                     </div>
@@ -691,7 +744,9 @@ const ClientSidePage = ({
                     : "No child insights yet"}
                 </div>
               </div>
-              <div className={`${cardStyles.contentCardBody} ${cardStyles.contentCardBodyFlushTop}`}>
+              <div
+                className={`${cardStyles.contentCardBody} ${cardStyles.contentCardBodyFlushTop}`}
+              >
                 <FactsDataContext.Provider
                   value={{
                     data: insight.children.map((c) => ({
@@ -740,11 +795,14 @@ const ClientSidePage = ({
                         display: (insight: Fact): React.JSX.Element => (
                           <span className="text-sm text-secondary font-mono">
                             {insight.updated_at
-                              ? new Date(insight.updated_at).toLocaleDateString("en-US", {
-                                  month: "2-digit",
-                                  day: "2-digit",
-                                  year: "numeric",
-                                })
+                              ? new Date(insight.updated_at).toLocaleDateString(
+                                  "en-US",
+                                  {
+                                    month: "2-digit",
+                                    day: "2-digit",
+                                    year: "numeric",
+                                  },
+                                )
                               : "---"}
                           </span>
                         ),
@@ -757,13 +815,22 @@ const ClientSidePage = ({
                           let titleToShow = insight.title;
                           let uidToUse = insight.uid;
 
-                          if ((insight as any).childInsight?.title && (insight as any).childInsight?.uid) {
+                          if (
+                            (insight as any).childInsight?.title &&
+                            (insight as any).childInsight?.uid
+                          ) {
                             titleToShow = (insight as any).childInsight.title;
                             uidToUse = (insight as any).childInsight.uid;
-                          } else if ((insight as any).parentInsight?.title && (insight as any).parentInsight?.uid) {
+                          } else if (
+                            (insight as any).parentInsight?.title &&
+                            (insight as any).parentInsight?.uid
+                          ) {
                             titleToShow = (insight as any).parentInsight.title;
                             uidToUse = (insight as any).parentInsight.uid;
-                          } else if ((insight as any).snippet?.title && (insight as any).snippet?.uid) {
+                          } else if (
+                            (insight as any).snippet?.title &&
+                            (insight as any).snippet?.uid
+                          ) {
                             titleToShow = (insight as any).snippet.title;
                             uidToUse = (insight as any).snippet.uid;
                           }
@@ -906,7 +973,9 @@ const ClientSidePage = ({
                     : "No evidence yet"}
                 </div>
               </div>
-              <div className={`${cardStyles.contentCardBody} ${cardStyles.contentCardBodyFlushTop}`}>
+              <div
+                className={`${cardStyles.contentCardBody} ${cardStyles.contentCardBodyFlushTop}`}
+              >
                 <InfiniteScrollLoader
                   data={liveSnippetData}
                   setData={
@@ -959,7 +1028,9 @@ const ClientSidePage = ({
                         display: (citation: Fact): React.JSX.Element => (
                           <span className="text-sm text-secondary font-mono">
                             {citation.updated_at
-                              ? new Date(citation.updated_at).toLocaleDateString("en-US", {
+                              ? new Date(
+                                  citation.updated_at,
+                                ).toLocaleDateString("en-US", {
                                   month: "2-digit",
                                   day: "2-digit",
                                   year: "numeric",
@@ -976,13 +1047,22 @@ const ClientSidePage = ({
                           let titleToShow = citation.title;
                           let uidToUse = citation.uid;
 
-                          if ((citation as any).childInsight?.title && (citation as any).childInsight?.uid) {
+                          if (
+                            (citation as any).childInsight?.title &&
+                            (citation as any).childInsight?.uid
+                          ) {
                             titleToShow = (citation as any).childInsight.title;
                             uidToUse = (citation as any).childInsight.uid;
-                          } else if ((citation as any).parentInsight?.title && (citation as any).parentInsight?.uid) {
+                          } else if (
+                            (citation as any).parentInsight?.title &&
+                            (citation as any).parentInsight?.uid
+                          ) {
                             titleToShow = (citation as any).parentInsight.title;
                             uidToUse = (citation as any).parentInsight.uid;
-                          } else if ((citation as any).snippet?.title && (citation as any).snippet?.uid) {
+                          } else if (
+                            (citation as any).snippet?.title &&
+                            (citation as any).snippet?.uid
+                          ) {
                             titleToShow = (citation as any).snippet.title;
                             uidToUse = (citation as any).snippet.uid;
                           }
@@ -1050,7 +1130,6 @@ const ClientSidePage = ({
                       }
                       return Promise.resolve();
                     }}
-                    directions="Enter a text comment"
                     afterSubmit={(newObject) => {
                       if (newObject) {
                         setInsight({
@@ -1062,7 +1141,7 @@ const ClientSidePage = ({
                     closeFunc={() => setIsEditingComment(false)}
                   />
                 )}
-                
+
                 {/* Comments */}
                 {insightComments && insightComments.length > 0 && (
                   <div className="space-y-3">
@@ -1107,15 +1186,15 @@ const ClientSidePage = ({
                     ))}
                   </div>
                 )}
-                {(!insightComments || insightComments.length === 0) && !isEditingComment && (
-                  <p className="text-text-tertiary text-center py-4">
-                    No comments yet. Be the first to share your thoughts!
-                  </p>
-                )}
+                {(!insightComments || insightComments.length === 0) &&
+                  !isEditingComment && (
+                    <p className="text-text-tertiary text-center py-4">
+                      No comments yet. Be the first to share your thoughts!
+                    </p>
+                  )}
               </div>
             </div>
           </div>
-
 
           {/* Dialogs - Child Level */}
           {isClient && currentUser && insight.user_id == currentUser.id && (

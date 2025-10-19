@@ -2,7 +2,6 @@
 
 import React, { useState, useRef } from "react";
 import ReactionPicker from "./ReactionPicker";
-import ReactionDisplay from "./ReactionDisplay";
 
 interface ReactionButtonProps {
   reactions: Array<{ reaction: string; user_id?: number }>;

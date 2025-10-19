@@ -12,13 +12,13 @@ const Sidebar = ({ loggedIn }: { loggedIn: boolean }): React.JSX.Element => {
   const [origin, setOrigin] = useState<string>();
   const [returnPath, setReturnPath] = useState<string>();
   const pathname = usePathname();
-  
+
   useEffect(() => {
     setOrigin(window.location.origin);
     setReturnPath(window.location.pathname);
   }, []);
 
-  const { logout, currentUser } = useUser();
+  const { logout, user_id, username } = useUser();
 
   const navigationItems = [
     {
@@ -26,37 +26,37 @@ const Sidebar = ({ loggedIn }: { loggedIn: boolean }): React.JSX.Element => {
       href: "/insights",
       icon: "📊",
       active: pathname === "/insights" || pathname.startsWith("/insights/"),
-      enabled: true
+      enabled: true,
     },
     {
       name: "Comments",
       href: "/comments",
       icon: "💬",
       active: pathname === "/comments",
-      enabled: false
+      enabled: false,
     },
     {
       name: "Collections",
       href: "/collections",
       icon: "📁",
       active: pathname === "/collections",
-      enabled: false
+      enabled: false,
     },
     {
       name: "Analytics",
       href: "/analytics",
       icon: "📈",
       active: pathname === "/analytics",
-      enabled: false
-    }
+      enabled: false,
+    },
   ];
 
   return (
     <aside className={sidebarStyles.sidebar}>
       {/* Logo Section */}
       <div className={sidebarStyles.logoSection}>
-        <Link 
-          href="/" 
+        <Link
+          href="/"
           className={sidebarStyles.logoLink}
           onClick={() => open(origin, "_self")}
         >
@@ -72,7 +72,7 @@ const Sidebar = ({ loggedIn }: { loggedIn: boolean }): React.JSX.Element => {
         {navigationItems.map((item) => (
           <div
             key={item.name}
-            className={`${sidebarStyles.navItem} ${item.active ? sidebarStyles.navItemActive : ''} ${!item.enabled ? sidebarStyles.navItemDisabled : ''}`}
+            className={`${sidebarStyles.navItem} ${item.active ? sidebarStyles.navItemActive : ""} ${!item.enabled ? sidebarStyles.navItemDisabled : ""}`}
             title={item.name}
           >
             {item.enabled ? (
@@ -98,18 +98,12 @@ const Sidebar = ({ loggedIn }: { loggedIn: boolean }): React.JSX.Element => {
           {loggedIn ? (
             <div className={sidebarStyles.userMenu}>
               <div className={sidebarStyles.userAvatar}>
-                {currentUser?.avatar_uri ? (
-                  <Image
-                    src={currentUser.avatar_uri}
-                    width="32"
-                    height="32"
-                    alt="User avatar"
-                    className={sidebarStyles.avatarImage}
-                  />
-                ) : (
+                {user_id ? (
                   <span className={sidebarStyles.avatarInitials}>
-                    {currentUser?.username?.charAt(0).toUpperCase() || "U"}
+                    {username?.charAt(0).toUpperCase() || "U"}
                   </span>
+                ) : (
+                  <span className={sidebarStyles.avatarInitials}>U</span>
                 )}
               </div>
               <div className={sidebarStyles.userActions}>
@@ -128,13 +122,13 @@ const Sidebar = ({ loggedIn }: { loggedIn: boolean }): React.JSX.Element => {
             <div className={sidebarStyles.authButtons}>
               <Link
                 href={`/login?return=${returnPath}`}
-                className={`${sidebarStyles.authButton} ${pathname === "/login" ? sidebarStyles.authButtonActive : ''}`}
+                className={`${sidebarStyles.authButton} ${pathname === "/login" ? sidebarStyles.authButtonActive : ""}`}
               >
                 Login
               </Link>
               <Link
                 href={`/register?return=${returnPath}`}
-                className={`${sidebarStyles.authButton} ${pathname === "/register" ? sidebarStyles.authButtonActive : ''}`}
+                className={`${sidebarStyles.authButton} ${pathname === "/register" ? sidebarStyles.authButtonActive : ""}`}
               >
                 Register
               </Link>
@@ -144,9 +138,9 @@ const Sidebar = ({ loggedIn }: { loggedIn: boolean }): React.JSX.Element => {
 
         {/* Datagotchi Link */}
         <div className={sidebarStyles.brandSection}>
-          <Link 
-            href="https://datagotchi.net" 
-            target="_blank" 
+          <Link
+            href="https://datagotchi.net"
+            target="_blank"
             rel="noreferrer"
             className={sidebarStyles.brandLink}
             title="Datagotchi Labs"
