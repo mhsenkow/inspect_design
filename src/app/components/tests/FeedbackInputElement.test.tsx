@@ -13,17 +13,17 @@ describe("FeedbackInputElement", () => {
     jest.clearAllMocks();
   });
 
-  it("renders directions", () => {
+  it("renders submit and cancel buttons", () => {
     const { getByText } = render(
       <FeedbackInputElement
         actionType="reaction"
         submitFunc={mockSubmitFunc}
         closeFunc={mockCloseFunc}
-        directions="Please provide your feedback"
         afterSubmit={mockAfterSubmit}
       />,
     );
-    expect(getByText("Please provide your feedback")).toBeInTheDocument();
+    expect(getByText("Submit")).toBeInTheDocument();
+    expect(getByText("Cancel")).toBeInTheDocument();
   });
 
   it("renders reaction options when actionType is 'reaction'", () => {
@@ -32,7 +32,6 @@ describe("FeedbackInputElement", () => {
         actionType="reaction"
         submitFunc={mockSubmitFunc}
         closeFunc={mockCloseFunc}
-        directions="Please provide your feedback"
         afterSubmit={mockAfterSubmit}
       />,
     );
@@ -45,7 +44,6 @@ describe("FeedbackInputElement", () => {
         actionType="comment"
         submitFunc={mockSubmitFunc}
         closeFunc={mockCloseFunc}
-        directions="Please provide your feedback"
         afterSubmit={mockAfterSubmit}
       />,
     );
@@ -58,7 +56,6 @@ describe("FeedbackInputElement", () => {
         actionType="reaction"
         submitFunc={mockSubmitFunc}
         closeFunc={mockCloseFunc}
-        directions="Please provide your feedback"
         afterSubmit={mockAfterSubmit}
       />,
     );
@@ -73,7 +70,6 @@ describe("FeedbackInputElement", () => {
         actionType="reaction"
         submitFunc={mockSubmitFunc}
         closeFunc={mockCloseFunc}
-        directions="Please provide your feedback"
         afterSubmit={mockAfterSubmit}
       />,
     );
