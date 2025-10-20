@@ -41,7 +41,7 @@ const FactsTable = ({
   columns,
   queryFunction,
   dataFilter,
-  setDataFilter,
+  setDataFilter: _setDataFilter,
   disabledIds,
   selectRows = false,
   hideHead = false,

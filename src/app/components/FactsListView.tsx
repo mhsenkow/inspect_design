@@ -160,6 +160,7 @@ const FactsListView = ({
     setData,
     setSelectedFacts,
     setServerFunctionInput,
+    setDataFilter,
     updateExistingFact,
   ]);
 

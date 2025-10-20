@@ -1,8 +1,6 @@
 import { Model, QueryBuilder } from "objection";
 
 import { EvidenceRecord } from "../../types";
-import { SummaryModel } from "../models/summaries";
-import { InsightModel } from "./insights";
 
 export class EvidenceModel extends Model implements EvidenceRecord {
   static tableName = "evidence";
@@ -13,7 +11,7 @@ export class EvidenceModel extends Model implements EvidenceRecord {
 
   // static idColumn = ["summary_id", "insight_id"];
 
-  summary!: SummaryModel;
+  summary!: any;
   title!: string;
   uid?: string;
   // logo_uri!: number;
@@ -56,7 +54,8 @@ export class EvidenceModel extends Model implements EvidenceRecord {
     return {
       summary: {
         relation: Model.BelongsToOneRelation,
-        modelClass: SummaryModel,
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        modelClass: require("./summaries").SummaryModel,
         join: {
           from: "evidence.summary_id",
           to: "summaries.id",
@@ -64,7 +63,8 @@ export class EvidenceModel extends Model implements EvidenceRecord {
       },
       insight: {
         relation: Model.BelongsToOneRelation,
-        modelClass: InsightModel,
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        modelClass: require("./insights").InsightModel,
         join: {
           from: "evidence.insight_id",
           to: "insights.id",

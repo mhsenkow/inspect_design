@@ -29,8 +29,6 @@ export class ReactionModel extends Model implements FactReaction {
   comment_id?: number;
 
   static get relationMappings() {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const InsightModel = require("./insights");
     return {
       user: {
         relation: Model.HasOneRelation,
@@ -42,7 +40,8 @@ export class ReactionModel extends Model implements FactReaction {
       },
       insight: {
         relation: Model.HasOneRelation,
-        modelClass: InsightModel,
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        modelClass: require("./insights").InsightModel,
         join: {
           from: "reactions.insight_id",
           to: "insights.id",

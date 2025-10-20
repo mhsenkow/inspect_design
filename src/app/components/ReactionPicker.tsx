@@ -14,7 +14,7 @@ const ReactionPicker: React.FC<ReactionPickerProps> = ({
   onReactionSelect,
   onClose,
   isVisible,
-  position = "auto",
+  position: _position = "auto",
   buttonRef,
 }) => {
   const [hoveredEmoji, setHoveredEmoji] = useState<string | null>(null);
