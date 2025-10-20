@@ -624,6 +624,34 @@ td.reaction-cell-container {
 }
 
 /* ===================================
+   REACTION SUMMARY
+   =================================== */
+
+.reaction-summary {
+  display: inline-block;
+  margin-right: var(--spacing-2);
+  padding: var(--spacing-1) var(--spacing-2);
+  background-color: var(--color-background-secondary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  cursor: help;
+  transition: all var(--transition-base);
+}
+
+.reaction-summary:hover {
+  background-color: var(--color-background-primary);
+  border-color: var(--color-border-secondary);
+  color: var(--color-text-primary);
+}
+
+.reaction-summary-text {
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+
+/* ===================================
    SIZE-BASED REACTION COUNTING
    =================================== */
 

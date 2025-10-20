@@ -169,10 +169,51 @@ const FactsTable = ({
   const [sortFunction, setSortFunction] = useState<
     (a: Fact, b: Fact) => number
   >(() => noSort);
+
+  // Custom reaction sorting function
+  const getReactionSortFunction = (
+    dir: "asc" | "desc",
+    reactionType?: string,
+  ) => {
+    return (a: Fact, b: Fact) => {
+      const aReactions = a.reactions || [];
+      const bReactions = b.reactions || [];
+
+      let aCount = aReactions.length;
+      let bCount = bReactions.length;
+
+      // If specific reaction type is specified, count only that type
+      if (reactionType) {
+        aCount = aReactions.filter((r) => r.reaction === reactionType).length;
+        bCount = bReactions.filter((r) => r.reaction === reactionType).length;
+      }
+
+      if (dir === "asc") {
+        return aCount - bCount;
+      } else {
+        return bCount - aCount;
+      }
+    };
+  };
+
   useEffect(() => {
     if (sortDir) {
-      const func = getSortFunction<Fact>(sortDir);
-      setSortFunction(() => func);
+      // Handle custom reaction sorting
+      if (sortDir.column === "reactions") {
+        const func = getReactionSortFunction(sortDir.dir as "asc" | "desc");
+        setSortFunction(() => func);
+      } else if (sortDir.column.startsWith("reaction_")) {
+        // Handle specific reaction type sorting (e.g., 'reaction_❤️')
+        const reactionType = sortDir.column.replace("reaction_", "");
+        const func = getReactionSortFunction(
+          sortDir.dir as "asc" | "desc",
+          reactionType,
+        );
+        setSortFunction(() => func);
+      } else {
+        const func = getSortFunction<Fact>(sortDir);
+        setSortFunction(() => func);
+      }
     } else {
       setSortFunction(() => noSort);
     }
@@ -299,6 +340,93 @@ const FactsTable = ({
                 >
                   {/* Empty header - reaction icons are self-explanatory */}
                 </th>
+              )}
+
+              {/* Reaction Sorting Buttons */}
+              {enableReactionIcons && (
+                <>
+                  <th
+                    className="px-2 py-3 text-left text-xs font-semibold text-inverse uppercase tracking-wider cursor-pointer hover:bg-gray-700"
+                    style={{ width: "80px" }}
+                    onClick={(event) => {
+                      const targetElement = event.target as HTMLElement;
+                      if (
+                        targetElement.textContent?.slice(-1) !== "▼" &&
+                        targetElement.textContent?.slice(-1) !== "▲"
+                      ) {
+                        targetElement.textContent =
+                          targetElement.textContent + "▼";
+                        setSortDir({
+                          column: "reactions",
+                          dir: "desc",
+                        });
+                      } else if (targetElement.textContent.slice(-1) == "▼") {
+                        const columnText = targetElement.textContent.slice(
+                          0,
+                          -1,
+                        );
+                        targetElement.textContent = columnText + "▲";
+                        setSortDir({
+                          column: "reactions",
+                          dir: "asc",
+                        });
+                      } else if (targetElement.textContent.slice(-1) == "▲") {
+                        const columnText = targetElement.textContent.slice(
+                          0,
+                          -1,
+                        );
+                        targetElement.textContent = columnText;
+                        setSortDir(undefined);
+                      }
+                    }}
+                    title="Sort by total reactions"
+                  >
+                    Reactions
+                  </th>
+
+                  {/* Popular reaction type sorting buttons */}
+                  {["❤️", "😮", "🤔", "😟"].map((emoji) => (
+                    <th
+                      key={`reaction_${emoji}`}
+                      className="px-2 py-3 text-left text-xs font-semibold text-inverse uppercase tracking-wider cursor-pointer hover:bg-gray-700"
+                      style={{ width: "40px" }}
+                      onClick={(event) => {
+                        const targetElement = event.target as HTMLElement;
+                        if (
+                          targetElement.textContent?.slice(-1) !== "▼" &&
+                          targetElement.textContent?.slice(-1) !== "▲"
+                        ) {
+                          targetElement.textContent =
+                            targetElement.textContent + "▼";
+                          setSortDir({
+                            column: `reaction_${emoji}`,
+                            dir: "desc",
+                          });
+                        } else if (targetElement.textContent.slice(-1) == "▼") {
+                          const columnText = targetElement.textContent.slice(
+                            0,
+                            -1,
+                          );
+                          targetElement.textContent = columnText + "▲";
+                          setSortDir({
+                            column: `reaction_${emoji}`,
+                            dir: "asc",
+                          });
+                        } else if (targetElement.textContent.slice(-1) == "▲") {
+                          const columnText = targetElement.textContent.slice(
+                            0,
+                            -1,
+                          );
+                          targetElement.textContent = columnText;
+                          setSortDir(undefined);
+                        }
+                      }}
+                      title={`Sort by ${emoji} reactions`}
+                    >
+                      {emoji}
+                    </th>
+                  ))}
+                </>
               )}
             </tr>
           </thead>
