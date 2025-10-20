@@ -16,6 +16,7 @@ import {
   ServerFunction,
   User,
 } from "../../types";
+import { createLinkSlug } from "../../utils/slug";
 
 import FeedbackInputElement from "../../components/FeedbackInputElement";
 import { submitComment, submitReaction } from "../../functions";
@@ -1122,9 +1123,13 @@ const ClientSidePage = ({
                           }
 
                           if (titleToShow && uidToUse) {
+                            const linkSlug = createLinkSlug(
+                              titleToShow,
+                              uidToUse,
+                            );
                             return (
                               <Link
-                                href={`/links/${uidToUse}?from=insight&insight=${insight.uid}`}
+                                href={`/links/${linkSlug}?from=insight&insight=${insight.uid}`}
                                 className="text-sm text-primary font-medium hover:text-primary-600 transition-colors duration-200"
                               >
                                 {titleToShow || "Untitled"}

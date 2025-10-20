@@ -4,7 +4,7 @@ import React, { useMemo, useState } from "react";
 import moment from "moment";
 import Image from "next/image";
 import NextLink from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import cardStyles from "../../../styles/components/card.module.css";
 
 import {
@@ -22,19 +22,25 @@ import useUser from "../../hooks/useUser";
 import SourceLogo from "../../components/SourceLogo";
 import CurrentUserContext from "../../contexts/CurrentUserContext";
 import Comment from "../../components/Comment";
+import { createLinkSlug } from "../../utils/slug";
 
 const ClientSidePage = ({
   linkInput,
   currentUser,
+  requestedSlug,
+  uid,
 }: {
   linkInput: Link;
   currentUser?: User;
+  requestedSlug?: string;
+  uid?: string;
 }): React.JSX.Element => {
   const [link, setLink] = useState(linkInput);
   const [isEditingComment, setIsEditingComment] = useState(false);
 
   const { token } = useUser();
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   const createdOrUpdated = useMemo(() => {
     if (link.created_at == link.updated_at) {
@@ -71,6 +77,23 @@ const ClientSidePage = ({
     }
     return null;
   }, [link.evidence, searchParams]);
+
+  // Generate the canonical URL with the proper slug
+  const canonicalUrl = useMemo(() => {
+    const linkUid = uid || link.uid || "";
+    const slug = createLinkSlug(link.title || "Untitled", linkUid);
+    return `/links/${slug}`;
+  }, [link.title, link.uid, uid]);
+
+  // Redirect to canonical URL if the requested slug doesn't match
+  React.useEffect(() => {
+    if (
+      requestedSlug &&
+      requestedSlug !== canonicalUrl.replace("/links/", "")
+    ) {
+      router.replace(canonicalUrl + window.location.search);
+    }
+  }, [requestedSlug, canonicalUrl, router]);
 
   return (
     <div className={cardStyles.linkPagePaper}>

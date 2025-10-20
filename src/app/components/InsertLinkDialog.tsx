@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import FactsTable from "./FactsTable";
 import { Fact, Insight, Link } from "../types";
+import { createLinkSlug } from "../utils/slug";
 import { GetInsightsRouteResponse } from "../api/insights/route";
 import { GetLinksResponse } from "../api/links/route";
 import { getPageTitle } from "../hooks/functions";
@@ -108,7 +109,11 @@ const InsertLinkDialog = ({ html, setHtml }: Props) => {
       handleClose();
     } else if (chosenLinks.length > 0) {
       const newHtml = chosenLinks.reduce((html, link) => {
-        return `${html}Link: <a href="/links/${link.uid}" target="_blank">${link.title}</a>`;
+        const linkSlug = createLinkSlug(
+          link.title || "Untitled",
+          link.uid || "",
+        );
+        return `${html}Link: <a href="/links/${linkSlug}" target="_blank">${link.title}</a>`;
       }, "");
       setHtml(newHtml);
       handleClose();

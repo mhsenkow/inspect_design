@@ -1,8 +1,6 @@
 import { Model } from "objection";
 
 import { FactReaction } from "../../types";
-import { UserModel } from "./users";
-import { SummaryModel } from "./summaries";
 
 export class ReactionModel extends Model implements FactReaction {
   static tableName = "reactions";
@@ -28,33 +26,6 @@ export class ReactionModel extends Model implements FactReaction {
   summary_id?: number;
   comment_id?: number;
 
-  static get relationMappings() {
-    return {
-      user: {
-        relation: Model.HasOneRelation,
-        modelClass: UserModel,
-        join: {
-          from: "reactions.user_id",
-          to: "users.id",
-        },
-      },
-      insight: {
-        relation: Model.HasOneRelation,
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        modelClass: require("./insights").InsightModel,
-        join: {
-          from: "reactions.insight_id",
-          to: "insights.id",
-        },
-      },
-      summary: {
-        relation: Model.HasOneRelation,
-        modelClass: SummaryModel,
-        join: {
-          from: "reactions.summary_id",
-          to: "summaries.id",
-        },
-      },
-    };
-  }
+  // Relation mappings removed to prevent circular dependency issues
+  // static get relationMappings() { ... }
 }
