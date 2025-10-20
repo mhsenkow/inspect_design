@@ -211,15 +211,21 @@
   --color-link-active: #3b82f6;
 
   /* Enhanced Shadows for Dark Theme */
-  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.20);
-  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.25), 0 1px 2px -1px rgb(0 0 0 / 0.20);
-  --shadow-base: 0 2px 4px -1px rgb(0 0 0 / 0.25), 0 1px 2px -1px rgb(0 0 0 / 0.20);
-  --shadow-md: 0 4px 8px -2px rgb(0 0 0 / 0.30), 0 2px 4px -2px rgb(0 0 0 / 0.25);
-  --shadow-lg: 0 8px 16px -4px rgb(0 0 0 / 0.35), 0 4px 8px -4px rgb(0 0 0 / 0.30);
-  --shadow-xl: 0 12px 24px -6px rgb(0 0 0 / 0.40), 0 6px 12px -6px rgb(0 0 0 / 0.35);
-  --shadow-2xl: 0 16px 32px -8px rgb(0 0 0 / 0.45), 0 8px 16px -8px rgb(0 0 0 / 0.40);
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.2);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.25), 0 1px 2px -1px rgb(0 0 0 / 0.2);
+  --shadow-base:
+    0 2px 4px -1px rgb(0 0 0 / 0.25), 0 1px 2px -1px rgb(0 0 0 / 0.2);
+  --shadow-md:
+    0 4px 8px -2px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.25);
+  --shadow-lg:
+    0 8px 16px -4px rgb(0 0 0 / 0.35), 0 4px 8px -4px rgb(0 0 0 / 0.3);
+  --shadow-xl:
+    0 12px 24px -6px rgb(0 0 0 / 0.4), 0 6px 12px -6px rgb(0 0 0 / 0.35);
+  --shadow-2xl:
+    0 16px 32px -8px rgb(0 0 0 / 0.45), 0 8px 16px -8px rgb(0 0 0 / 0.4);
   --shadow-focus: 0 0 0 3px rgb(96 165 250 / 0.25);
-  --shadow-elevated: 0 20px 40px -12px rgb(0 0 0 / 0.50), 0 10px 20px -10px rgb(0 0 0 / 0.45);
+  --shadow-elevated:
+    0 20px 40px -12px rgb(0 0 0 / 0.5), 0 10px 20px -10px rgb(0 0 0 / 0.45);
 }
 
 /* ===================================

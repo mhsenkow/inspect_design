@@ -17,19 +17,44 @@ const FeedbackInputElement = ({
 }): React.JSX.Element => {
   const [html, setHtml] = useState<string>("");
 
-  const firstEmojiCode = "😀".codePointAt(0);
-  const reactOptions = Array.from({ length: 80 }, (_, i) => i)
-    .map((i) => (firstEmojiCode ?? 0) + i)
-    .map((i) => String.fromCodePoint(i))
-    .map((char) => (
-      <option value={char} key={`ReactOptions: ${char}`}>
-        {char}
-      </option>
-    ));
+  // Use the same emoji set as ReactionPicker for consistency
+  const commonEmojis = [
+    "❤️",
+    "😮",
+    "🙌",
+    "😟",
+    "😡",
+    "😕",
+    "🎯",
+    "😊",
+    "😎",
+    "🤔",
+    "🌱",
+    "👏",
+    "👍",
+    "😂",
+    "😢",
+    "😤",
+    "💕",
+    "🤕",
+    "😦",
+    "😍",
+    "🤓",
+    "😖",
+    "😱",
+    "😯",
+    "🤭",
+  ];
+
+  const reactOptions = commonEmojis.map((char) => (
+    <option value={char} key={`ReactOptions: ${char}`}>
+      {char}
+    </option>
+  ));
 
   useEffect(() => {
     if (!html && actionType == "reaction") {
-      setHtml("😀");
+      setHtml("❤️");
     }
   }, [actionType, reactOptions, html]);
 

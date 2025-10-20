@@ -27,22 +27,26 @@ src/styles/
 ## Key Features
 
 ### 1. Design Tokens
+
 - **Location**: `src/styles/tokens/design-tokens.css`
 - **Purpose**: Centralized CSS custom properties for colors, typography, spacing, etc.
 - **Usage**: All components reference these tokens for consistency
 
 ### 2. CSS Modules
+
 - **Naming Convention**: `*.module.css`
 - **Scoping**: Styles are automatically scoped to components
 - **Import**: `import styles from './component.module.css'`
 - **Usage**: `className={styles.className}`
 
 ### 3. Utility Classes
+
 - **Location**: `src/styles/utilities/utility-classes.css`
 - **Purpose**: Reusable utility classes (similar to Tailwind CSS)
 - **Usage**: Direct className usage in JSX
 
 ### 4. Theme System
+
 - **Location**: `src/styles/themes/theme-variations.css`
 - **Features**: Color themes, spacing scales, border radius, shadows, typography
 - **Usage**: Applied to `document.body` via ThemeSwitcher component
@@ -50,6 +54,7 @@ src/styles/
 ## Migration Status
 
 ### ✅ Completed
+
 - [x] Design tokens extraction
 - [x] CSS Modules structure creation
 - [x] ClientSidePage component migration
@@ -60,11 +65,13 @@ src/styles/
 - [x] Build verification
 
 ### 🔄 In Progress
+
 - [ ] FactsTable component migration
 - [ ] RichTextEditor component migration
 - [ ] Other component migrations
 
 ### 📋 Pending
+
 - [ ] Legacy styles cleanup
 - [ ] Component-specific CSS modules for remaining components
 - [ ] Performance optimization
@@ -73,8 +80,9 @@ src/styles/
 ## Usage Examples
 
 ### CSS Modules
+
 ```tsx
-import styles from './component.module.css';
+import styles from "./component.module.css";
 
 function MyComponent() {
   return (
@@ -86,6 +94,7 @@ function MyComponent() {
 ```
 
 ### Utility Classes
+
 ```tsx
 function MyComponent() {
   return (
@@ -98,9 +107,10 @@ function MyComponent() {
 ```
 
 ### Theme Switching
+
 ```tsx
 // Themes are applied to document.body
-document.body.classList.add('theme-blue', 'spacing-compact');
+document.body.classList.add("theme-blue", "spacing-compact");
 ```
 
 ## Benefits

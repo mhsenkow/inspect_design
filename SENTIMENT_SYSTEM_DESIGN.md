@@ -4,6 +4,7 @@
 ## Current System Analysis
 
 The current sentiment system uses:
+
 - Simple emoji strings (❤️, 👍, 🤔, etc.) stored in `reactions.reaction`
 - Basic aggregation by counting occurrences
 - No semantic categorization or intensity levels
@@ -91,7 +92,7 @@ RETURNS TABLE(
 BEGIN
     RETURN QUERY
     WITH sentiment_weights AS (
-        SELECT 
+        SELECT
             st.category,
             st.intensity,
             COUNT(r.id) as reaction_count,
@@ -102,14 +103,14 @@ BEGIN
         GROUP BY st.category, st.intensity
     ),
     category_totals AS (
-        SELECT 
+        SELECT
             category,
             SUM(reaction_count) as total_count,
             SUM(weighted_reactions) as weighted_score
         FROM sentiment_weights
         GROUP BY category
     )
-    SELECT 
+    SELECT
         ct.category,
         ct.total_count::INTEGER,
         ct.weighted_score,
@@ -123,6 +124,7 @@ $$ LANGUAGE plpgsql;
 ### 4. UI Display Components
 
 #### Sentiment Visualization Component
+
 ```typescript
 interface SentimentDisplayProps {
   insightId: number;
@@ -149,7 +151,7 @@ const SentimentDisplay: React.FC<SentimentDisplayProps> = ({
   compact = false
 }) => {
   const [sentimentData, setSentimentData] = useState<SentimentData[]>([]);
-  
+
   // Fetch sentiment data using the new aggregation function
   useEffect(() => {
     fetchSentimentData(insightId).then(setSentimentData);
@@ -159,7 +161,7 @@ const SentimentDisplay: React.FC<SentimentDisplayProps> = ({
     return (
       <div className="sentiment-compact">
         {sentimentData.slice(0, 3).map(sentiment => (
-          <span 
+          <span
             key={sentiment.category}
             className="sentiment-badge"
             style={{ backgroundColor: getCategoryColor(sentiment.category) }}
@@ -178,10 +180,10 @@ const SentimentDisplay: React.FC<SentimentDisplayProps> = ({
         <h4>Overall Sentiment: {sentimentData[0]?.dominantSentiment}</h4>
         <div className="sentiment-meter">
           {sentimentData.map(sentiment => (
-            <div 
+            <div
               key={sentiment.category}
               className="sentiment-bar"
-              style={{ 
+              style={{
                 width: `${(sentiment.weightedScore / getTotalScore()) * 100}%`,
                 backgroundColor: getCategoryColor(sentiment.category)
               }}
@@ -189,7 +191,7 @@ const SentimentDisplay: React.FC<SentimentDisplayProps> = ({
           ))}
         </div>
       </div>
-      
+
       {showDetails && (
         <div className="sentiment-breakdown">
           {sentimentData.map(sentiment => (
@@ -197,7 +199,7 @@ const SentimentDisplay: React.FC<SentimentDisplayProps> = ({
               <h5>{sentiment.category} ({sentiment.totalCount})</h5>
               <div className="intensity-breakdown">
                 {sentiment.breakdown.map(item => (
-                  <span 
+                  <span
                     key={item.intensity}
                     className="intensity-item"
                     style={{ color: item.color }}
@@ -216,6 +218,7 @@ const SentimentDisplay: React.FC<SentimentDisplayProps> = ({
 ```
 
 #### Enhanced Reaction Picker
+
 ```typescript
 const EnhancedReactionPicker: React.FC<ReactionPickerProps> = ({
   onReactionSelect,
@@ -225,7 +228,7 @@ const EnhancedReactionPicker: React.FC<ReactionPickerProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<string>('positive');
 
   const categories = ['positive', 'negative', 'neutral', 'concerned', 'excited'];
-  
+
   const filteredTokens = sentimentTokens.filter(
     token => token.category === selectedCategory
   );
@@ -244,14 +247,14 @@ const EnhancedReactionPicker: React.FC<ReactionPickerProps> = ({
           </button>
         ))}
       </div>
-      
+
       <div className="intensity-grid">
         {filteredTokens.map(token => (
           <button
             key={token.id}
             className="sentiment-token-button"
             onClick={() => onReactionSelect(token.id)}
-            style={{ 
+            style={{
               backgroundColor: token.color_hex,
               opacity: currentReactions.includes(token.id) ? 1 : 0.7
             }}
@@ -437,7 +440,7 @@ const EnhancedReactionPicker: React.FC<ReactionPickerProps> = ({
 
 -- Step 2: Migrate existing reactions
 INSERT INTO reactions (reaction, user_id, insight_id, summary_id, comment_id, created_at, sentiment_token_id, context)
-SELECT 
+SELECT
     r.reaction,
     r.user_id,
     r.insight_id,
@@ -445,7 +448,7 @@ SELECT
     r.comment_id,
     r.created_at,
     st.id as sentiment_token_id,
-    CASE 
+    CASE
         WHEN r.insight_id IS NOT NULL THEN 'insight'
         WHEN r.comment_id IS NOT NULL THEN 'comment'
         WHEN r.summary_id IS NOT NULL THEN 'evidence'
@@ -457,7 +460,7 @@ WHERE st.id IS NOT NULL;
 
 -- Step 3: Add fallback for unmapped reactions
 INSERT INTO sentiment_tokens (category, intensity, emoji, label, color_hex)
-SELECT DISTINCT 
+SELECT DISTINCT
     'neutral' as category,
     1 as intensity,
     r.reaction as emoji,
@@ -468,10 +471,10 @@ LEFT JOIN sentiment_tokens st ON st.emoji = r.reaction
 WHERE st.id IS NULL AND r.reaction IS NOT NULL;
 
 -- Step 4: Update remaining reactions
-UPDATE reactions 
+UPDATE reactions
 SET sentiment_token_id = st.id
 FROM sentiment_tokens st
-WHERE reactions.sentiment_token_id IS NULL 
+WHERE reactions.sentiment_token_id IS NULL
   AND reactions.reaction = st.emoji;
 ```
 

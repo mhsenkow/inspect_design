@@ -69,6 +69,7 @@ export async function GET(
     comments: {
       $modify: ["selectDisplayAndUserJoinColumn"],
       user: { $modify: ["selectUsername"] },
+      reactions: true,
     },
     evidence: {
       $modify: [

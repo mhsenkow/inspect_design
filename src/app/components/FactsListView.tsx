@@ -28,6 +28,7 @@ const FactsListView = ({
   enableFeedback,
   cellActions,
   enableReactionIcons = false,
+  reactionDisplayOnly = false,
   dataFilter,
   setDataFilter,
 }: {
@@ -60,6 +61,7 @@ const FactsListView = ({
     enabled?: (fact: Fact) => boolean;
   }[];
   enableReactionIcons?: boolean;
+  reactionDisplayOnly?: boolean;
   dataFilter?: string;
   setDataFilter?: React.Dispatch<React.SetStateAction<string>>;
 }): React.JSX.Element => {
@@ -249,6 +251,7 @@ const FactsListView = ({
               enableFeedback={enableFeedback}
               cellActions={cellActions}
               enableReactionIcons={enableReactionIcons}
+              reactionDisplayOnly={reactionDisplayOnly}
             />
           </div>
         )}

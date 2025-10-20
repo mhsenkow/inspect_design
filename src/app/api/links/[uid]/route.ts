@@ -17,7 +17,8 @@ export async function GET(
     .findOne("summaries.uid", uid)
     .withGraphJoined("source")
     .withGraphJoined("comments.user")
-    .withGraphJoined("reactions");
+    .withGraphJoined("reactions")
+    .withGraphJoined("evidence.insight");
 
   if (summary) {
     summary.imageUrl = await getPageHeaderImageUrl(summary.url);

@@ -39,13 +39,17 @@
 }
 
 .pageHeader::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, var(--color-base-500), var(--color-base-600));
+  background: linear-gradient(
+    90deg,
+    var(--color-base-500),
+    var(--color-base-600)
+  );
 }
 
 .pageHeaderContent {
@@ -135,16 +139,16 @@
     align-items: flex-start;
     gap: var(--spacing-4);
   }
-  
+
   .headerRight {
     align-self: flex-end;
   }
-  
+
   .sourceLogoContainer {
     width: 3rem;
     height: 3rem;
   }
-  
+
   .headerTitle {
     font-size: var(--font-size-xl);
   }

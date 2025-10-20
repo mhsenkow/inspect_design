@@ -356,7 +356,8 @@ const ClientSidePage = ({
                         >
                       }
                       selectedActions={[]}
-                      enableReactionIcons={false}
+                      enableReactionIcons={true}
+                      reactionDisplayOnly={true}
                       columns={[
                         {
                           name: "Updated",
@@ -491,7 +492,7 @@ const ClientSidePage = ({
                           </span>
                         </span>
                       )}
-                      {/* Aggregated reactions */}
+                      {/* Reactions on this insight, its comments, and evidence */}
                       {(() => {
                         const reactionCounts: { [key: string]: number } = {};
 
@@ -503,44 +504,11 @@ const ClientSidePage = ({
                           });
                         }
 
-                        // Add reactions from parent insights
-                        if (insight.parents) {
-                          insight.parents.forEach((parentLink) => {
-                            if (parentLink.parentInsight?.reactions) {
-                              parentLink.parentInsight.reactions.forEach(
-                                (reaction) => {
-                                  reactionCounts[reaction.reaction] =
-                                    (reactionCounts[reaction.reaction] || 0) +
-                                    1;
-                                },
-                              );
-                            }
-                          });
-                        }
-
-                        // Add reactions from child insights
-                        if (insight.children) {
-                          insight.children.forEach((childLink) => {
-                            if (childLink.childInsight?.reactions) {
-                              childLink.childInsight.reactions.forEach(
-                                (reaction) => {
-                                  reactionCounts[reaction.reaction] =
-                                    (reactionCounts[reaction.reaction] || 0) +
-                                    1;
-                                },
-                              );
-                            }
-                          });
-                        }
-
-                        // Add reactions from evidence
-                        if (insight.evidence) {
-                          insight.evidence.forEach((evidence) => {
-                            const evidenceSummary = (
-                              evidence as InsightEvidence
-                            ).summary;
-                            if (evidenceSummary?.reactions) {
-                              evidenceSummary.reactions.forEach((reaction) => {
+                        // Add reactions from comments
+                        if (insightComments) {
+                          insightComments.forEach((comment) => {
+                            if (comment.reactions) {
+                              comment.reactions.forEach((reaction) => {
                                 reactionCounts[reaction.reaction] =
                                   (reactionCounts[reaction.reaction] || 0) + 1;
                               });
@@ -548,21 +516,105 @@ const ClientSidePage = ({
                           });
                         }
 
-                        return Object.keys(reactionCounts).length > 0 ? (
+                        // Add reactions from evidence/summaries
+                        if (insight.evidence) {
+                          insight.evidence.forEach((evidence) => {
+                            const insightEvidence = evidence as InsightEvidence;
+                            if (insightEvidence.summary?.reactions) {
+                              insightEvidence.summary.reactions.forEach(
+                                (reaction) => {
+                                  reactionCounts[reaction.reaction] =
+                                    (reactionCounts[reaction.reaction] || 0) +
+                                    1;
+                                },
+                              );
+                            }
+                          });
+                        }
+
+                        const totalReactions = Object.values(
+                          reactionCounts,
+                        ).reduce((sum, count) => sum + count, 0);
+
+                        // Create detailed tooltip text for accessibility
+                        const tooltipText =
+                          totalReactions > 0
+                            ? Object.entries(reactionCounts)
+                                .map(
+                                  ([emoji, count]) =>
+                                    `${emoji}: ${count} reaction${count !== 1 ? "s" : ""}`,
+                                )
+                                .join(", ")
+                            : "No reactions";
+
+                        return totalReactions > 0 ? (
                           <span
                             className="icon-main"
-                            title="All reactions from parents, children, evidence, and this insight"
+                            title={tooltipText}
+                            aria-label={tooltipText}
                           >
                             {Object.entries(reactionCounts).map(
-                              ([reaction, count]) => (
-                                <span
-                                  key={reaction}
-                                  className="inline-block mr-1"
-                                >
-                                  {reaction}
-                                  {count > 1 ? count : ""}
-                                </span>
-                              ),
+                              ([reaction, count]) => {
+                                // Helper function to get size class based on count
+                                const getSizeClass = (
+                                  count: number,
+                                ): string => {
+                                  if (count <= 5) {
+                                    return `reaction-size-${count}`;
+                                  }
+                                  return "reaction-size-5";
+                                };
+
+                                // Helper function to get dot size class for counts above 5
+                                const getDotSizeClass = (
+                                  count: number,
+                                ): string => {
+                                  if (count <= 5) return "";
+                                  const dotLevel = Math.min(
+                                    Math.ceil((count - 5) / 5),
+                                    5,
+                                  );
+                                  return `reaction-dot-size-${dotLevel}`;
+                                };
+
+                                // Helper function to render dots for counts above 5
+                                const renderDots = (
+                                  count: number,
+                                ): React.JSX.Element[] => {
+                                  if (count <= 5) return [];
+
+                                  const dots = [];
+                                  const dotCount = Math.min(count - 5, 5); // Max 5 dots
+                                  const dotSizeClass = getDotSizeClass(count);
+
+                                  for (let i = 0; i < dotCount; i++) {
+                                    dots.push(
+                                      <span
+                                        key={i}
+                                        className={`reaction-dot ${dotSizeClass}`}
+                                      />,
+                                    );
+                                  }
+
+                                  return dots;
+                                };
+
+                                return (
+                                  <span
+                                    key={reaction}
+                                    className="inline-block mr-1"
+                                    title={`${reaction}: ${count} reaction${count !== 1 ? "s" : ""}`}
+                                    aria-label={`${reaction}: ${count} reaction${count !== 1 ? "s" : ""}`}
+                                  >
+                                    <span
+                                      className={`reaction-emoji ${getSizeClass(count)}`}
+                                    >
+                                      {reaction}
+                                    </span>
+                                    {renderDots(count)}
+                                  </span>
+                                );
+                              },
                             )}
                           </span>
                         ) : null;
@@ -787,7 +839,8 @@ const ClientSidePage = ({
                     }
                     activeServerFunction={activeServerFunctionForChildInsights}
                     selectedActions={[]}
-                    enableReactionIcons={false}
+                    enableReactionIcons={true}
+                    reactionDisplayOnly={true}
                     columns={[
                       {
                         name: "Updated",
@@ -1020,7 +1073,8 @@ const ClientSidePage = ({
                       >
                     }
                     selectedActions={[]}
-                    enableReactionIcons={false}
+                    enableReactionIcons={true}
+                    reactionDisplayOnly={true}
                     columns={[
                       {
                         name: "Updated",
@@ -1070,7 +1124,7 @@ const ClientSidePage = ({
                           if (titleToShow && uidToUse) {
                             return (
                               <Link
-                                href={`/links/${uidToUse}`}
+                                href={`/links/${uidToUse}?from=insight&insight=${insight.uid}`}
                                 className="text-sm text-primary font-medium hover:text-primary-600 transition-colors duration-200"
                               >
                                 {titleToShow || "Untitled"}
@@ -1153,7 +1207,7 @@ const ClientSidePage = ({
                         onReactionSubmit={async (reaction) => {
                           if (token) {
                             const result = await submitReaction(
-                              { reaction, insight_id: insight.id },
+                              { reaction, comment_id: comment.id },
                               token,
                             );
                             if (result) {

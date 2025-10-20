@@ -38,7 +38,7 @@ export async function GET(req: NextRequest): Promise<GetInsightsRouteResponse> {
       .withGraphJoined(
         `[
       reactions,
-      ${includeComments ? "comments," : ""}
+      ${includeComments ? "comments.reactions," : ""}
       ${includeParents ? "parents.parentInsight.reactions," : ""}
       ${includeChildren ? "children.childInsight.reactions," : ""}
       ${includeEvidence ? "evidence.summary.reactions" : ""}

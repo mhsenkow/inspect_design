@@ -78,11 +78,11 @@
     align-items: flex-start;
     gap: var(--spacing-4);
   }
-  
+
   .headerInfo {
     width: 100%;
   }
-  
+
   .actionButton {
     padding: var(--spacing-2) var(--spacing-4);
     font-size: var(--font-size-sm);

@@ -22,6 +22,7 @@ import useUser from "../hooks/useUser";
 import FeedbackInputElement from "./FeedbackInputElement";
 import Comment from "./Comment";
 import ReactionIcon from "./ReactionIcon";
+import ReactionDisplay from "./ReactionDisplay";
 
 export const REACTION_DIRECTIONS = "Select an emoji character";
 export const COMMENT_DIRECTIONS = "Enter a text comment";
@@ -48,6 +49,7 @@ const FactsTable = ({
   enableFeedback = false,
   cellActions,
   enableReactionIcons = false,
+  reactionDisplayOnly = false,
 }: {
   data?: Fact[];
   setData: React.Dispatch<React.SetStateAction<Fact[] | undefined>>;
@@ -76,6 +78,7 @@ const FactsTable = ({
     enabled?: (fact: Fact) => boolean;
   }[];
   enableReactionIcons?: boolean;
+  reactionDisplayOnly?: boolean;
 }): React.JSX.Element => {
   const { token, loggedIn, user_id } = useUser();
   const [returnPath, setReturnPath] = useState<string>();
@@ -506,67 +509,75 @@ const FactsTable = ({
                                 })}
                               </div>
                             )}
-                            {enableReactionIcons && loggedIn && (
-                              <ReactionIcon
-                                reactions={fact.reactions || []}
-                                currentUserId={getCurrentUserId()}
-                                onReactionSubmit={async (reaction) => {
-                                  if (token) {
-                                    // Handle different data structures
-                                    let insightId: number | undefined;
-                                    let summaryId: number | undefined;
+                            {enableReactionIcons &&
+                              loggedIn &&
+                              (reactionDisplayOnly ? (
+                                <ReactionDisplay
+                                  reactions={fact.reactions || []}
+                                  currentUserId={getCurrentUserId()}
+                                  className="reaction-display-table"
+                                />
+                              ) : (
+                                <ReactionIcon
+                                  reactions={fact.reactions || []}
+                                  currentUserId={getCurrentUserId()}
+                                  onReactionSubmit={async (reaction) => {
+                                    if (token) {
+                                      // Handle different data structures
+                                      let insightId: number | undefined;
+                                      let summaryId: number | undefined;
 
-                                    if (
-                                      factName === "childInsights" &&
-                                      (fact as Insight).childInsight
-                                    ) {
-                                      // For child insights, use the childInsight.id
-                                      insightId = (fact as Insight).childInsight
-                                        .id;
-                                      summaryId = undefined; // Child insights don't have summary_id
-                                    } else if (
-                                      factName === "parentInsights" &&
-                                      (fact as Insight).parentInsight
-                                    ) {
-                                      // For parent insights, use the parentInsight.id
-                                      insightId = (fact as Insight)
-                                        .parentInsight.id;
-                                      summaryId = undefined; // Parent insights don't have summary_id
-                                    } else if (factName === "insight") {
-                                      // For main page insights, use fact.id as insight_id
-                                      insightId = fact.id;
-                                      summaryId = undefined; // Main insights don't have summary_id
-                                    } else {
-                                      // For regular insights and evidence
-                                      insightId = fact.insight_id;
-                                      summaryId = fact.summary_id;
-                                    }
+                                      if (
+                                        factName === "childInsights" &&
+                                        (fact as Insight).childInsight
+                                      ) {
+                                        // For child insights, use the childInsight.id
+                                        insightId = (fact as Insight)
+                                          .childInsight.id;
+                                        summaryId = undefined; // Child insights don't have summary_id
+                                      } else if (
+                                        factName === "parentInsights" &&
+                                        (fact as Insight).parentInsight
+                                      ) {
+                                        // For parent insights, use the parentInsight.id
+                                        insightId = (fact as Insight)
+                                          .parentInsight.id;
+                                        summaryId = undefined; // Parent insights don't have summary_id
+                                      } else if (factName === "insight") {
+                                        // For main page insights, use fact.id as insight_id
+                                        insightId = fact.id;
+                                        summaryId = undefined; // Main insights don't have summary_id
+                                      } else {
+                                        // For regular insights and evidence
+                                        insightId = fact.insight_id;
+                                        summaryId = fact.summary_id;
+                                      }
 
-                                    const result = await submitReaction(
-                                      {
-                                        reaction,
-                                        summary_id: summaryId,
-                                        insight_id: insightId,
-                                      },
-                                      token,
-                                    );
-                                    if (result) {
-                                      // Remove any existing reaction from this user for this fact
-                                      const existingReactions =
-                                        fact.reactions?.filter(
-                                          (r) => r.user_id !== result.user_id,
-                                        ) || [];
-                                      fact.reactions = [
-                                        ...existingReactions,
-                                        result as FactReaction,
-                                      ];
-                                      setData([...data!]);
+                                      const result = await submitReaction(
+                                        {
+                                          reaction,
+                                          summary_id: summaryId,
+                                          insight_id: insightId,
+                                        },
+                                        token,
+                                      );
+                                      if (result) {
+                                        // Remove any existing reaction from this user for this fact
+                                        const existingReactions =
+                                          fact.reactions?.filter(
+                                            (r) => r.user_id !== result.user_id,
+                                          ) || [];
+                                        fact.reactions = [
+                                          ...existingReactions,
+                                          result as FactReaction,
+                                        ];
+                                        setData([...data!]);
+                                      }
                                     }
-                                  }
-                                }}
-                                className="reaction-icon-cell"
-                              />
-                            )}
+                                  }}
+                                  className="reaction-icon-cell"
+                                />
+                              ))}
                           </div>
                         </td>
                       </>
@@ -622,144 +633,157 @@ const FactsTable = ({
                           });
                           return null;
                         })()}
-                        <ReactionIcon
-                          reactions={fact.reactions || []}
-                          currentUserId={(() => {
-                            const userId = getCurrentUserId();
-                            console.log("getCurrentUserId result:", {
-                              userId,
-                              userIdType: typeof userId,
-                              token: token ? "present" : "missing",
-                              loggedIn,
-                            });
-                            return userId;
-                          })()}
-                          onReactionSubmit={async (reaction) => {
-                            if (token) {
-                              // Handle different data structures
-                              let insightId: number | undefined;
-                              let summaryId: number | undefined;
+                        {reactionDisplayOnly ? (
+                          <ReactionDisplay
+                            reactions={fact.reactions || []}
+                            currentUserId={getCurrentUserId()}
+                            className="reaction-display-table"
+                          />
+                        ) : (
+                          <ReactionIcon
+                            reactions={fact.reactions || []}
+                            currentUserId={(() => {
+                              const userId = getCurrentUserId();
+                              console.log("getCurrentUserId result:", {
+                                userId,
+                                userIdType: typeof userId,
+                                token: token ? "present" : "missing",
+                                loggedIn,
+                              });
+                              return userId;
+                            })()}
+                            onReactionSubmit={async (reaction) => {
+                              if (token) {
+                                // Handle different data structures
+                                let insightId: number | undefined;
+                                let summaryId: number | undefined;
 
-                              if (
-                                factName === "childInsights" &&
-                                (fact as Insight).childInsight
-                              ) {
-                                // For child insights, use the childInsight.id
-                                insightId = (fact as Insight).childInsight.id;
-                                summaryId = undefined; // Child insights don't have summary_id
-                              } else if (
-                                factName === "parentInsights" &&
-                                (fact as Insight).parentInsight
-                              ) {
-                                // For parent insights, use the parentInsight.id
-                                insightId = (fact as Insight).parentInsight.id;
-                                summaryId = undefined; // Parent insights don't have summary_id
-                              } else if (
-                                factName === "snippet" &&
-                                (fact as Fact).summary_id
-                              ) {
-                                // For snippets/evidence, use the summary_id
-                                insightId = undefined;
-                                summaryId = (fact as Fact).summary_id;
-                              } else {
-                                // For regular insights, use the fact.id
-                                insightId = fact.id;
-                                summaryId = undefined;
-                                console.log(
-                                  "Main page insight reaction submission:",
-                                  {
-                                    factName,
-                                    factId: fact.id,
-                                    insightId,
-                                    summaryId,
-                                    factTitle: fact.title,
-                                  },
-                                );
-                              }
-
-                              try {
-                                const response = await fetch("/api/reactions", {
-                                  method: "POST",
-                                  headers: {
-                                    "Content-Type": "application/json",
-                                    "x-access-token": token,
-                                  },
-                                  body: JSON.stringify({
-                                    insight_id: insightId,
-                                    summary_id: summaryId,
-                                    reaction: reaction,
-                                  }),
-                                });
-
-                                if (response.ok) {
-                                  // Refresh the data to show the new reaction
-                                  const currentUserId = getCurrentUserId();
-                                  if (!currentUserId) return; // Don't update if no user ID
-
+                                if (
+                                  factName === "childInsights" &&
+                                  (fact as Insight).childInsight
+                                ) {
+                                  // For child insights, use the childInsight.id
+                                  insightId = (fact as Insight).childInsight.id;
+                                  summaryId = undefined; // Child insights don't have summary_id
+                                } else if (
+                                  factName === "parentInsights" &&
+                                  (fact as Insight).parentInsight
+                                ) {
+                                  // For parent insights, use the parentInsight.id
+                                  insightId = (fact as Insight).parentInsight
+                                    .id;
+                                  summaryId = undefined; // Parent insights don't have summary_id
+                                } else if (
+                                  factName === "snippet" &&
+                                  (fact as Fact).summary_id
+                                ) {
+                                  // For snippets/evidence, use the summary_id
+                                  insightId = undefined;
+                                  summaryId = (fact as Fact).summary_id;
+                                } else {
+                                  // For regular insights, use the fact.id
+                                  insightId = fact.id;
+                                  summaryId = undefined;
                                   console.log(
-                                    "Reaction submitted successfully, updating data:",
+                                    "Main page insight reaction submission:",
                                     {
+                                      factName,
                                       factId: fact.id,
-                                      currentUserId,
-                                      reaction,
-                                      dataLength: data?.length,
+                                      insightId,
+                                      summaryId,
+                                      factTitle: fact.title,
+                                    },
+                                  );
+                                }
+
+                                try {
+                                  const response = await fetch(
+                                    "/api/reactions",
+                                    {
+                                      method: "POST",
+                                      headers: {
+                                        "Content-Type": "application/json",
+                                        "x-access-token": token,
+                                      },
+                                      body: JSON.stringify({
+                                        insight_id: insightId,
+                                        summary_id: summaryId,
+                                        reaction: reaction,
+                                      }),
                                     },
                                   );
 
-                                  const updatedData = data?.map((f) => {
-                                    console.log("Checking fact for update:", {
-                                      factId: f.id,
-                                      targetFactId: fact.id,
-                                      matches: f.id === fact.id,
-                                      factTitle: f.title,
-                                      targetFactTitle: fact.title,
-                                    });
+                                  if (response.ok) {
+                                    // Refresh the data to show the new reaction
+                                    const currentUserId = getCurrentUserId();
+                                    if (!currentUserId) return; // Don't update if no user ID
 
-                                    if (f.id === fact.id) {
-                                      // Remove any existing reaction from this user
-                                      const existingReactions = (
-                                        f.reactions || []
-                                      ).filter(
-                                        (r) => r.user_id !== currentUserId,
-                                      );
+                                    console.log(
+                                      "Reaction submitted successfully, updating data:",
+                                      {
+                                        factId: fact.id,
+                                        currentUserId,
+                                        reaction,
+                                        dataLength: data?.length,
+                                      },
+                                    );
 
-                                      const newFact = {
-                                        ...f,
-                                        reactions: [
-                                          ...existingReactions,
-                                          {
-                                            id: Date.now(), // Temporary ID
-                                            reaction: reaction,
-                                            user_id: currentUserId,
-                                          },
-                                        ],
-                                      };
-
-                                      console.log("Updated fact:", {
-                                        id: newFact.id,
-                                        title: newFact.title,
-                                        reactions: newFact.reactions,
+                                    const updatedData = data?.map((f) => {
+                                      console.log("Checking fact for update:", {
+                                        factId: f.id,
+                                        targetFactId: fact.id,
+                                        matches: f.id === fact.id,
+                                        factTitle: f.title,
+                                        targetFactTitle: fact.title,
                                       });
 
-                                      return newFact;
-                                    }
-                                    return f;
-                                  });
-                                  setData(updatedData);
-                                  console.log(
-                                    "Data updated, new length:",
-                                    updatedData?.length,
+                                      if (f.id === fact.id) {
+                                        // Remove any existing reaction from this user
+                                        const existingReactions = (
+                                          f.reactions || []
+                                        ).filter(
+                                          (r) => r.user_id !== currentUserId,
+                                        );
+
+                                        const newFact = {
+                                          ...f,
+                                          reactions: [
+                                            ...existingReactions,
+                                            {
+                                              id: Date.now(), // Temporary ID
+                                              reaction: reaction,
+                                              user_id: currentUserId,
+                                            },
+                                          ],
+                                        };
+
+                                        console.log("Updated fact:", {
+                                          id: newFact.id,
+                                          title: newFact.title,
+                                          reactions: newFact.reactions,
+                                        });
+
+                                        return newFact;
+                                      }
+                                      return f;
+                                    });
+                                    setData(updatedData);
+                                    console.log(
+                                      "Data updated, new length:",
+                                      updatedData?.length,
+                                    );
+                                  }
+                                } catch (error) {
+                                  console.error(
+                                    "Error submitting reaction:",
+                                    error,
                                   );
                                 }
-                              } catch (error) {
-                                console.error(
-                                  "Error submitting reaction:",
-                                  error,
-                                );
                               }
-                            }
-                          }}
-                        />
+                            }}
+                            className="reaction-icon-cell"
+                          />
+                        )}
                       </td>
                     )}
                   </tr>

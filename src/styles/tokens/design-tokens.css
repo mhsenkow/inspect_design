@@ -178,20 +178,26 @@
   /* Subtle shadows for minimal depth */
   --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.04);
   --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.06);
-  
+
   /* Standard shadows for cards and components */
-  --shadow-base: 0 2px 4px -1px rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.06);
-  --shadow-md: 0 4px 8px -2px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.06);
-  --shadow-lg: 0 8px 16px -4px rgb(0 0 0 / 0.10), 0 4px 8px -4px rgb(0 0 0 / 0.08);
-  
+  --shadow-base:
+    0 2px 4px -1px rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+  --shadow-md:
+    0 4px 8px -2px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.06);
+  --shadow-lg:
+    0 8px 16px -4px rgb(0 0 0 / 0.1), 0 4px 8px -4px rgb(0 0 0 / 0.08);
+
   /* Elevated shadows for modals and overlays */
-  --shadow-xl: 0 12px 24px -6px rgb(0 0 0 / 0.12), 0 6px 12px -6px rgb(0 0 0 / 0.10);
-  --shadow-2xl: 0 16px 32px -8px rgb(0 0 0 / 0.14), 0 8px 16px -8px rgb(0 0 0 / 0.12);
-  
+  --shadow-xl:
+    0 12px 24px -6px rgb(0 0 0 / 0.12), 0 6px 12px -6px rgb(0 0 0 / 0.1);
+  --shadow-2xl:
+    0 16px 32px -8px rgb(0 0 0 / 0.14), 0 8px 16px -8px rgb(0 0 0 / 0.12);
+
   /* Special shadows */
   --shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.06);
   --shadow-focus: 0 0 0 3px rgb(24 119 242 / 0.12);
-  --shadow-elevated: 0 20px 40px -12px rgb(0 0 0 / 0.16), 0 10px 20px -10px rgb(0 0 0 / 0.14);
+  --shadow-elevated:
+    0 20px 40px -12px rgb(0 0 0 / 0.16), 0 10px 20px -10px rgb(0 0 0 / 0.14);
 
   /* ===================================
      LAYOUT & SIZING

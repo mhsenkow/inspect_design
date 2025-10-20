@@ -72,7 +72,9 @@
   box-shadow: none !important;
   border-radius: 0 !important;
   background: transparent !important;
-  padding: var(--spacing-2) !important; /* Reduced padding for tighter spacing */
+  padding: var(
+    --spacing-2
+  ) !important; /* Reduced padding for tighter spacing */
   padding-top: var(--spacing-0) !important;
 }
 

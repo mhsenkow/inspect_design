@@ -143,8 +143,26 @@ export const getDisabledInsightIds = (
 };
 
 export const getAuthUser = async (headers: () => Promise<ReadonlyHeaders>) => {
-  const authUserString = (await headers()).get("x-authUser");
-  return authUserString ? (JSON.parse(authUserString) as AuthUser) : null;
+  const headersObj = await headers();
+
+  // First try to get x-authUser header (from middleware)
+  const authUserString = headersObj.get("x-authUser");
+  if (authUserString) {
+    return JSON.parse(authUserString) as AuthUser;
+  }
+
+  // If not found, try to decrypt x-access-token header
+  const token = headersObj.get("x-access-token");
+  if (token && token !== "undefined") {
+    const { decryptToken } = await import("../middleware/functions");
+    const userDetails = decryptToken(
+      token,
+      process.env.TOKEN_KEY || "your-secret-jwt-key-change-this-in-production",
+    );
+    return userDetails ? { user_id: userDetails.user_id } : null;
+  }
+
+  return null;
 };
 
 export const getColumnName = (

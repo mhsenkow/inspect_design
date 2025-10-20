@@ -3,6 +3,7 @@ export type FactReaction = {
   reaction: string;
   insight_id?: number;
   summary_id?: number;
+  comment_id?: number;
   user_id: number;
 };
 
@@ -51,6 +52,7 @@ export type Link = Fact & {
   logo_uri?: string;
   source_baseurl?: string;
   source: Source;
+  evidence?: InsightEvidence[];
 };
 
 export type EvidenceRecord = {

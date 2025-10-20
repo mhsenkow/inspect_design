@@ -19,12 +19,14 @@ export class ReactionModel extends Model implements FactReaction {
       user_id: { type: "integer" },
       insight_id: { type: "integer" },
       summary_id: { type: "integer" },
+      comment_id: { type: "integer" },
     },
   };
 
   user_id!: number;
   insight_id?: number;
   summary_id?: number;
+  comment_id?: number;
 
   static get relationMappings() {
     // eslint-disable-next-line @typescript-eslint/no-require-imports

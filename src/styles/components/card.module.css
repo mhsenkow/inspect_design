@@ -25,8 +25,6 @@
   position: relative;
 }
 
-
-
 .cardHeaderTitle {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
@@ -62,13 +60,17 @@
 }
 
 .feedbackInputContainer::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, var(--color-base-400), var(--color-base-600));
+  background: linear-gradient(
+    90deg,
+    var(--color-base-400),
+    var(--color-base-600)
+  );
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 }
 
@@ -218,7 +220,7 @@
 }
 
 .feedbackSectionHalfOff::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: calc(var(--spacing-8) * -1);
   left: 0;
@@ -285,7 +287,7 @@
 }
 
 .commentText {
-  font-family: 'Georgia', 'Times New Roman', serif;
+  font-family: "Georgia", "Times New Roman", serif;
   font-size: var(--font-size-base);
   line-height: var(--line-height-relaxed);
   color: var(--color-text-primary);
@@ -385,7 +387,11 @@
 }
 
 .loginCardHeader {
-  background: linear-gradient(135deg, var(--color-base-500), var(--color-base-600));
+  background: linear-gradient(
+    135deg,
+    var(--color-base-500),
+    var(--color-base-600)
+  );
   padding: var(--spacing-8) var(--spacing-6);
   text-align: center;
   color: var(--color-text-inverse);
@@ -492,6 +498,67 @@
   overflow: hidden;
 }
 
+/* Back Button Styles */
+.linkBackButtonContainer {
+  padding: var(--spacing-4);
+  border-bottom: 1px solid var(--color-border-primary);
+  background-color: var(--color-background-secondary);
+}
+
+.linkBackButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  background-color: var(--color-background-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  transition: all var(--transition-base);
+  cursor: pointer;
+}
+
+.linkBackButton:hover {
+  background-color: var(--color-background-hover);
+  border-color: var(--color-border-hover);
+  transform: translateX(-2px);
+}
+
+.linkBackButtonIcon {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+}
+
+.linkBackButtonText {
+  color: var(--color-text-primary);
+}
+
+.linkBackButtonDisabled {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  background-color: var(--color-background-disabled);
+  border: 1px solid var(--color-border-disabled);
+  border-radius: var(--radius-md);
+  color: var(--color-text-disabled);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: not-allowed;
+}
+
+.linkBackButtonDisabled .linkBackButtonIcon {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+}
+
+.linkBackButtonDisabled .linkBackButtonText {
+  color: var(--color-text-disabled);
+}
+
 /* Link Header Section - Matches Insight Page */
 .linkHeaderSection {
   background-color: var(--color-background-primary);
@@ -503,13 +570,17 @@
 }
 
 .linkHeaderSection::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, var(--color-base-400), var(--color-base-600));
+  background: linear-gradient(
+    90deg,
+    var(--color-base-400),
+    var(--color-base-600)
+  );
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
 }
 
@@ -698,13 +769,17 @@
 }
 
 .pageHeaderCard::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, var(--color-base-500), var(--color-base-600));
+  background: linear-gradient(
+    90deg,
+    var(--color-base-500),
+    var(--color-base-600)
+  );
 }
 
 .pageHeaderCardContent {
@@ -948,22 +1023,22 @@
     align-items: flex-start;
     gap: var(--spacing-3);
   }
-  
+
   .sectionActions {
     align-self: flex-end;
   }
-  
+
   .actionsSection {
     flex-wrap: wrap;
     justify-content: center;
   }
-  
+
   .cardHeader,
   .contentCardHeader,
   .pageHeaderCardContent {
     padding: var(--spacing-4);
   }
-  
+
   .cardBody,
   .contentCardBody {
     padding: var(--spacing-4);

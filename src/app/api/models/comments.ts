@@ -2,6 +2,7 @@ import { Model, QueryBuilder } from "objection";
 
 import { FactComment } from "../../types";
 import { UserModel } from "../models/users";
+import { ReactionModel } from "./reactions";
 
 export class CommentModel extends Model implements FactComment {
   static tableName = "comments";
@@ -46,6 +47,14 @@ export class CommentModel extends Model implements FactComment {
       join: {
         from: "comments.user_id",
         to: "users.id",
+      },
+    },
+    reactions: {
+      relation: Model.HasManyRelation,
+      modelClass: ReactionModel,
+      join: {
+        from: "comments.id",
+        to: "reactions.comment_id",
       },
     },
   };

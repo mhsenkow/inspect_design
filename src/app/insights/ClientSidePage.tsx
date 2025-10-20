@@ -10,7 +10,6 @@ import {
   FLVResponse,
   Insight,
   InsightEvidence,
-  InsightLink,
   ServerFunction,
   User,
 } from "../types";
@@ -478,95 +477,132 @@ const ClientSidePage = ({
                         name: "❤️",
                         dataColumn: "reactions",
                         display: (insight: Fact | Insight) => {
-                          // Aggregate all reactions from all sources
-                          const aggregateReactions = () => {
-                            const reactionCounts: { [key: string]: number } =
-                              {};
+                          // Show reactions from insight, comments, and evidence
+                          const reactionCounts: { [key: string]: number } = {};
 
-                            // Add reactions from the insight itself
-                            if (insight.reactions) {
-                              insight.reactions.forEach((reaction) => {
-                                reactionCounts[reaction.reaction] =
-                                  (reactionCounts[reaction.reaction] || 0) + 1;
-                              });
-                            }
+                          // Add reactions from the insight itself
+                          if (insight.reactions) {
+                            insight.reactions.forEach((reaction) => {
+                              reactionCounts[reaction.reaction] =
+                                (reactionCounts[reaction.reaction] || 0) + 1;
+                            });
+                          }
 
-                            // Add reactions from parent insights (nested structure)
-                            if (insight.parents) {
-                              insight.parents.forEach(
-                                (parentLink: InsightLink) => {
-                                  if (parentLink.parentInsight?.reactions) {
-                                    parentLink.parentInsight.reactions.forEach(
-                                      (reaction) => {
-                                        reactionCounts[reaction.reaction] =
-                                          (reactionCounts[reaction.reaction] ||
-                                            0) + 1;
-                                      },
-                                    );
-                                  }
-                                },
-                              );
-                            }
+                          // Add reactions from comments
+                          if (insight.comments) {
+                            insight.comments.forEach((comment) => {
+                              if (comment.reactions) {
+                                comment.reactions.forEach((reaction) => {
+                                  reactionCounts[reaction.reaction] =
+                                    (reactionCounts[reaction.reaction] || 0) +
+                                    1;
+                                });
+                              }
+                            });
+                          }
 
-                            // Add reactions from child insights (nested structure)
-                            if (insight.children) {
-                              insight.children.forEach(
-                                (childLink: InsightLink) => {
-                                  if (childLink.childInsight?.reactions) {
-                                    childLink.childInsight.reactions.forEach(
-                                      (reaction) => {
-                                        reactionCounts[reaction.reaction] =
-                                          (reactionCounts[reaction.reaction] ||
-                                            0) + 1;
-                                      },
-                                    );
-                                  }
-                                },
-                              );
-                            }
+                          // Add reactions from evidence/summaries
+                          if (insight.evidence) {
+                            insight.evidence.forEach((evidence) => {
+                              const insightEvidence =
+                                evidence as InsightEvidence;
+                              if (insightEvidence.summary?.reactions) {
+                                insightEvidence.summary.reactions.forEach(
+                                  (reaction) => {
+                                    reactionCounts[reaction.reaction] =
+                                      (reactionCounts[reaction.reaction] || 0) +
+                                      1;
+                                  },
+                                );
+                              }
+                            });
+                          }
 
-                            // Add reactions from evidence (nested structure)
-                            if (insight.evidence) {
-                              insight.evidence.forEach((evidence) => {
-                                const evidenceSummary = (
-                                  evidence as InsightEvidence
-                                ).summary;
-                                if (evidenceSummary?.reactions) {
-                                  evidenceSummary.reactions.forEach(
-                                    (reaction) => {
-                                      reactionCounts[reaction.reaction] =
-                                        (reactionCounts[reaction.reaction] ||
-                                          0) + 1;
-                                    },
-                                  );
-                                }
-                              });
-                            }
-
-                            return reactionCounts;
-                          };
-
-                          const aggregatedReactions = aggregateReactions();
                           const totalReactions = Object.values(
-                            aggregatedReactions,
+                            reactionCounts,
                           ).reduce((sum, count) => sum + count, 0);
+
+                          // Create detailed tooltip text for accessibility
+                          const tooltipText =
+                            totalReactions > 0
+                              ? Object.entries(reactionCounts)
+                                  .map(
+                                    ([emoji, count]) =>
+                                      `${emoji}: ${count} reaction${count !== 1 ? "s" : ""}`,
+                                  )
+                                  .join(", ")
+                              : "No reactions";
 
                           return (
                             <span
                               className="icon-main"
-                              title="All reactions from parents, children, evidence, and this insight"
+                              title={tooltipText}
+                              aria-label={tooltipText}
                             >
                               {totalReactions > 0 ? (
-                                Object.entries(aggregatedReactions).map(
-                                  ([reaction, count]) => (
-                                    <span
-                                      key={reaction}
-                                      className="inline-block mr-1"
-                                    >
-                                      {reaction}
-                                      {count > 1 ? count : ""}
-                                    </span>
-                                  ),
+                                Object.entries(reactionCounts).map(
+                                  ([reaction, count]) => {
+                                    // Helper function to get size class based on count
+                                    const getSizeClass = (
+                                      count: number,
+                                    ): string => {
+                                      if (count <= 5) {
+                                        return `reaction-size-${count}`;
+                                      }
+                                      return "reaction-size-5";
+                                    };
+
+                                    // Helper function to get dot size class for counts above 5
+                                    const getDotSizeClass = (
+                                      count: number,
+                                    ): string => {
+                                      if (count <= 5) return "";
+                                      const dotLevel = Math.min(
+                                        Math.ceil((count - 5) / 5),
+                                        5,
+                                      );
+                                      return `reaction-dot-size-${dotLevel}`;
+                                    };
+
+                                    // Helper function to render dots for counts above 5
+                                    const renderDots = (
+                                      count: number,
+                                    ): React.JSX.Element[] => {
+                                      if (count <= 5) return [];
+
+                                      const dots = [];
+                                      const dotCount = Math.min(count - 5, 5); // Max 5 dots
+                                      const dotSizeClass =
+                                        getDotSizeClass(count);
+
+                                      for (let i = 0; i < dotCount; i++) {
+                                        dots.push(
+                                          <span
+                                            key={i}
+                                            className={`reaction-dot ${dotSizeClass}`}
+                                          />,
+                                        );
+                                      }
+
+                                      return dots;
+                                    };
+
+                                    return (
+                                      <span
+                                        key={reaction}
+                                        className="inline-block mr-1"
+                                        title={`${reaction}: ${count} reaction${count !== 1 ? "s" : ""}`}
+                                        aria-label={`${reaction}: ${count} reaction${count !== 1 ? "s" : ""}`}
+                                      >
+                                        <span
+                                          className={`reaction-emoji ${getSizeClass(count)}`}
+                                        >
+                                          {reaction}
+                                        </span>
+                                        {renderDots(count)}
+                                      </span>
+                                    );
+                                  },
                                 )
                               ) : (
                                 <span className="text-muted">0</span>

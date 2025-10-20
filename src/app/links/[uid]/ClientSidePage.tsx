@@ -3,9 +3,17 @@
 import React, { useMemo, useState } from "react";
 import moment from "moment";
 import Image from "next/image";
+import NextLink from "next/link";
+import { useSearchParams } from "next/navigation";
 import cardStyles from "../../../styles/components/card.module.css";
 
-import { FactComment, FactReaction, Link, User } from "../../types";
+import {
+  FactComment,
+  FactReaction,
+  InsightEvidence,
+  Link,
+  User,
+} from "../../types";
 
 import FeedbackInputElement from "../../components/FeedbackInputElement";
 import { submitComment, submitReaction } from "../../functions";
@@ -26,6 +34,7 @@ const ClientSidePage = ({
   const [isEditingComment, setIsEditingComment] = useState(false);
 
   const { token } = useUser();
+  const searchParams = useSearchParams();
 
   const createdOrUpdated = useMemo(() => {
     if (link.created_at == link.updated_at) {
@@ -34,10 +43,62 @@ const ClientSidePage = ({
     return `Updated ${moment(link.updated_at).fromNow()}`;
   }, [link.created_at, link.updated_at]);
 
+  // Get the associated insight for the back button
+  const associatedInsight = useMemo(() => {
+    // First check if we have a specific insight from query params
+    const fromInsight = searchParams.get("from");
+    const insightUid = searchParams.get("insight");
+
+    if (fromInsight === "insight" && insightUid) {
+      // If we came from a specific insight, try to find it in the evidence
+      if (link.evidence && link.evidence.length > 0) {
+        const matchingEvidence = (link.evidence as InsightEvidence[]).find(
+          (e) => e.insight?.uid === insightUid,
+        );
+        if (matchingEvidence?.insight) {
+          return matchingEvidence.insight;
+        }
+      }
+    }
+
+    // Fallback to the original logic
+    if (link.evidence && link.evidence.length > 0) {
+      // Get the first insight from the evidence
+      const firstEvidence = (link.evidence as InsightEvidence[])[0];
+      if (firstEvidence.insight) {
+        return firstEvidence.insight;
+      }
+    }
+    return null;
+  }, [link.evidence, searchParams]);
+
   return (
     <div className={cardStyles.linkPagePaper}>
       <CurrentUserContext.Provider value={currentUser || null}>
         <div className={cardStyles.linkPageCard}>
+          {/* Back Button */}
+          <div className={cardStyles.linkBackButtonContainer}>
+            {associatedInsight ? (
+              <NextLink
+                href={`/insights/${associatedInsight.uid}`}
+                className={cardStyles.linkBackButton}
+                title={`Back to "${associatedInsight.title}"`}
+              >
+                <span className={cardStyles.linkBackButtonIcon}>←</span>
+                <span className={cardStyles.linkBackButtonText}>
+                  Back to Insight
+                </span>
+              </NextLink>
+            ) : (
+              <div className={cardStyles.linkBackButtonDisabled}>
+                <span className={cardStyles.linkBackButtonIcon}>⋯</span>
+                <span className={cardStyles.linkBackButtonText}>
+                  No associated insight
+                </span>
+              </div>
+            )}
+          </div>
+
           {/* Link Header Section */}
           <div className={cardStyles.linkHeaderSection}>
             <div className={cardStyles.linkHeaderContainer}>

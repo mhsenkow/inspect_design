@@ -21,14 +21,20 @@ const ReactionPicker: React.FC<ReactionPickerProps> = ({
   const [pickerStyle, setPickerStyle] = useState<React.CSSProperties>({});
   const pickerRef = useRef<HTMLDivElement>(null);
 
-  // Facebook-style reaction emojis
+  // Most commonly used emojis from the database
   const reactions = [
-    { emoji: "👍", label: "Like" },
     { emoji: "❤️", label: "Love" },
-    { emoji: "😂", label: "Haha" },
-    { emoji: "😮", label: "Wow" },
-    { emoji: "😢", label: "Sad" },
+    { emoji: "😮", label: "Surprised" },
+    { emoji: "🙌", label: "Celebrate" },
+    { emoji: "😟", label: "Concerned" },
     { emoji: "😡", label: "Angry" },
+    { emoji: "😕", label: "Disappointed" },
+    { emoji: "🎯", label: "Focused" },
+    { emoji: "😊", label: "Happy" },
+    { emoji: "😎", label: "Cool" },
+    { emoji: "🤔", label: "Thinking" },
+    { emoji: "🌱", label: "Hopeful" },
+    { emoji: "👏", label: "Applause" },
   ];
 
   // Calculate optimal position when picker becomes visible

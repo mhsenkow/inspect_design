@@ -4,12 +4,13 @@ import {
   Link,
   FactReaction,
   FactComment,
-  EvidenceRecord,
+  InsightEvidence,
   Source,
 } from "../../types";
 import { SourceModel } from "../models/sources";
 import { CommentModel } from "./comments";
 import { ReactionModel } from "./reactions";
+import { EvidenceModel } from "./evidence";
 
 export class SummaryModel extends Model implements Link {
   static tableName = "summaries";
@@ -21,7 +22,7 @@ export class SummaryModel extends Model implements Link {
   title!: string;
   reactions!: FactReaction[];
   comments!: FactComment[];
-  evidence!: EvidenceRecord[];
+  evidence!: InsightEvidence[];
   created_at!: string | undefined;
   url!: string;
   imageUrl?: string;
@@ -80,6 +81,14 @@ export class SummaryModel extends Model implements Link {
         join: {
           from: "summaries.id",
           to: "reactions.summary_id",
+        },
+      },
+      evidence: {
+        relation: Model.HasManyRelation,
+        modelClass: EvidenceModel,
+        join: {
+          from: "summaries.id",
+          to: "evidence.summary_id",
         },
       },
     };

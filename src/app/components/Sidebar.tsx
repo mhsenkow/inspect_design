@@ -11,9 +11,11 @@ import ThemeSwitcher from "./ThemeSwitcher";
 const Sidebar = ({ loggedIn }: { loggedIn: boolean }): React.JSX.Element => {
   const [origin, setOrigin] = useState<string>();
   const [returnPath, setReturnPath] = useState<string>();
+  const [isClient, setIsClient] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
+    setIsClient(true);
     setOrigin(window.location.origin);
     setReturnPath(window.location.pathname);
   }, []);
@@ -100,7 +102,9 @@ const Sidebar = ({ loggedIn }: { loggedIn: boolean }): React.JSX.Element => {
               <div className={sidebarStyles.userAvatar}>
                 {user_id ? (
                   <span className={sidebarStyles.avatarInitials}>
-                    {username?.charAt(0).toUpperCase() || "U"}
+                    {isClient && username
+                      ? username.charAt(0).toUpperCase()
+                      : "U"}
                   </span>
                 ) : (
                   <span className={sidebarStyles.avatarInitials}>U</span>
