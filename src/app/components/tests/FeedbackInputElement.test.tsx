@@ -74,12 +74,12 @@ describe("FeedbackInputElement", () => {
       />,
     );
 
-    fireEvent.change(getByRole("combobox"), { target: { value: "😀" } });
+    fireEvent.change(getByRole("combobox"), { target: { value: "😊" } });
 
     fireEvent.click(getByText("Submit"));
 
     await waitFor(() => {
-      expect(mockSubmitFunc).toHaveBeenCalledWith("😀");
+      expect(mockSubmitFunc).toHaveBeenCalledWith("😊");
       expect(mockSubmitFunc).toHaveBeenCalled();
       expect(mockAfterSubmit).toHaveBeenCalledWith("response");
     });
