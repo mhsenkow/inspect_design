@@ -211,19 +211,15 @@ describe("AddCitationsToOtherInsightsDialog", () => {
     );
 
     // Get rows by their citation counts
-    const rows = screen
-      .getAllByRole("row")
-      .filter((row) => row.querySelector("tbody") === null); // Filter out header rows
-    const tableRows = Array.from(
-      document.querySelectorAll("table tbody tr"),
-    );
+    const tableRows = Array.from(document.querySelectorAll("table tbody tr"));
 
     // Find row with citation count "1" (Insight 1) and "0" (Insight 2)
     const insight1Row = Array.from(tableRows).find((row) =>
       row.textContent?.includes("1"),
     ) as HTMLTableRowElement;
-    const insight2Row = Array.from(tableRows).find((row) =>
-      row.textContent?.includes("0") && !row.textContent?.includes("1"),
+    const insight2Row = Array.from(tableRows).find(
+      (row) =>
+        row.textContent?.includes("0") && !row.textContent?.includes("1"),
     ) as HTMLTableRowElement;
 
     expect(insight1Row).toBeDefined();
