@@ -154,7 +154,7 @@ describe("AddCitationsToOtherInsightsDialog", () => {
       },
     ];
     // Override fetch mock for this specific test - must be set before render
-    // Need to reset the mock from beforeEach  
+    // Need to reset the mock from beforeEach
     jest.clearAllMocks();
     const fetchMock = jest.fn().mockImplementation((url: string | Request) => {
       const urlString = typeof url === "string" ? url : url.toString();
