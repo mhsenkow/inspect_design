@@ -243,7 +243,7 @@ describe("InsertLinkDialog", () => {
     });
 
     expect(setHtmlMock).toHaveBeenCalledWith(
-      expect.stringMatching(/Link: <a href="\/links\/asdf2".+/i),
+      expect.stringMatching(/Link: <a href="\/links\/[^"]+-asdf2".+/i),
     );
   });
 });

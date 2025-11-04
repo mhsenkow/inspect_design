@@ -53,7 +53,6 @@ describe("FactsTable", () => {
         factName="insight"
         selectedFacts={[]}
         setSelectedFacts={jest.fn()}
-        columns={[]}
         dataFilter=""
         disabledIds={[]}
         selectRows={false}
@@ -132,7 +131,6 @@ describe("FactsTable", () => {
           factName="insight"
           selectedFacts={[]}
           setSelectedFacts={jest.fn()}
-          columns={[]}
           dataFilter="Fact 1"
           setDataFilter={jest.fn()}
           disabledIds={[]}
@@ -157,7 +155,6 @@ describe("FactsTable", () => {
         factName="insight"
         selectedFacts={[]}
         setSelectedFacts={jest.fn()}
-        columns={[]}
         dataFilter=""
         setDataFilter={jest.fn()}
         disabledIds={[]}
@@ -267,7 +264,9 @@ describe("FactsTable", () => {
     fireEvent.click(reactButton);
 
     await waitFor(() => {
-      expect(screen.getByText("Select an emoji character")).toBeInTheDocument();
+      expect(
+        screen.getByRole("combobox", { name: /Select Reaction/i }),
+      ).toBeInTheDocument();
     });
     screen.getByRole("button", { name: "Submit Reaction" }).click();
 
@@ -324,7 +323,9 @@ describe("FactsTable", () => {
     fireEvent.click(reactButton);
 
     await waitFor(() => {
-      expect(screen.getByText("Select an emoji character")).toBeInTheDocument();
+      expect(
+        screen.getByRole("combobox", { name: /Select Reaction/i }),
+      ).toBeInTheDocument();
     });
     screen.getByRole("button", { name: "Submit Reaction" }).click();
 

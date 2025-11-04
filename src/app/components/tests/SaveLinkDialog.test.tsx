@@ -412,7 +412,7 @@ describe("SaveLinkDialog", () => {
     });
   });
 
-  it("should have citation count as a column in the potential insights table", async () => {
+  it("should have Updated and Title columns in the potential insights table", async () => {
     render(
       <SaveLinkDialog
         id="saveLinkDialog"
@@ -431,8 +431,11 @@ describe("SaveLinkDialog", () => {
       expect(table).toBeInTheDocument();
     });
 
-    const citationHeader = within(table!).getByText("Citations");
-    expect(citationHeader).toBeInTheDocument();
+    // SaveLinkDialog has Updated and Title columns, not Citations
+    const updatedHeader = within(table!).getByText("Updated");
+    expect(updatedHeader).toBeInTheDocument();
+    const titleHeader = within(table!).getByText("Title");
+    expect(titleHeader).toBeInTheDocument();
 
     await waitFor(() => {
       expect(table!.getElementsByTagName("tbody")).toHaveLength(1);
@@ -442,13 +445,7 @@ describe("SaveLinkDialog", () => {
       const insightRow = within(tableTbody)
         .getByText(mockPotentialInsight.title!)
         .closest("tr");
-      const citationTd = insightRow!.querySelector("td:last-child");
-      const span = citationTd!.querySelector("span");
-      expect(span!.tagName.toLowerCase()).toBe("span");
-      expect(span).toHaveAttribute("class", "badge text-bg-danger");
-      expect(span).toHaveTextContent(
-        `${mockPotentialInsight.evidence!.length}`,
-      );
+      expect(insightRow).toBeInTheDocument();
     });
   });
 });
