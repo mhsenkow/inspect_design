@@ -23,7 +23,7 @@ jest.mock("../../hooks/useUser");
 describe("EditableTitle", () => {
   const token = "mock-token";
   beforeEach(() => {
-    (useUser as jest.Mock).mockReturnValue({ token });
+    (useUser as jest.Mock).mockReturnValue({ token, user_id: 1 });
     window.fetch = mockFetch({});
   });
   it("renders the title", () => {
@@ -35,63 +35,70 @@ describe("EditableTitle", () => {
 
   it("enters edit mode on click", async () => {
     const { getByText, getByDisplayValue } = render(
-      <EditableTitle insight={{ title: "Test Title" } as Insight} />,
+      <EditableTitle insight={{ title: "Test Title", user_id: 1 } as Insight} />,
     );
-    await userEvent.click(getByText("🖊"));
+    // Mock useUser to return user_id that matches
+    (useUser as jest.Mock).mockReturnValue({ token, user_id: 1 });
+    await userEvent.click(getByText("✏️"));
     expect(getByDisplayValue("Test Title")).toBeInTheDocument();
   });
 
   it("exits edit mode on submit", async () => {
     const { getByText, getByDisplayValue, queryByDisplayValue } = render(
-      <EditableTitle insight={{ title: "Test Title" } as Insight} />,
+      <EditableTitle insight={{ title: "Test Title", user_id: 1 } as Insight} />,
     );
-    await userEvent.click(getByText("🖊"));
+    (useUser as jest.Mock).mockReturnValue({ token, user_id: 1 });
+    await userEvent.click(getByText("✏️"));
     expect(getByDisplayValue("Test Title")).toBeInTheDocument();
     const textarea = getByDisplayValue("Test Title");
     await userEvent.type(textarea, "!");
 
-    const button = getByText("Submit");
+    const button = getByText("✓");
     await userEvent.click(button);
-    expect(queryByDisplayValue("Test Title")).not.toBeInTheDocument();
+    expect(queryByDisplayValue("Test Title!")).not.toBeInTheDocument();
   });
 
   it("exits edit mode on cancel", async () => {
     const { getByText, getByDisplayValue, queryByDisplayValue } = render(
-      <EditableTitle insight={{ title: "Test Title" } as Insight} />,
+      <EditableTitle insight={{ title: "Test Title", user_id: 1 } as Insight} />,
     );
-    await userEvent.click(getByText("🖊"));
+    (useUser as jest.Mock).mockReturnValue({ token, user_id: 1 });
+    await userEvent.click(getByText("✏️"));
     expect(getByDisplayValue("Test Title")).toBeInTheDocument();
 
-    const button = getByText("Cancel");
+    const button = getByText("✕");
     await userEvent.click(button);
     expect(queryByDisplayValue("Test Title!")).not.toBeInTheDocument();
   });
 
   it("disables the submit button if the title is the empty string", async () => {
     const { getByText, getByDisplayValue } = render(
-      <EditableTitle insight={{ title: "Test Title" } as Insight} />,
+      <EditableTitle insight={{ title: "Test Title", user_id: 1 } as Insight} />,
     );
-    await userEvent.click(getByText("🖊"));
+    (useUser as jest.Mock).mockReturnValue({ token, user_id: 1 });
+    await userEvent.click(getByText("✏️"));
     const textarea = getByDisplayValue("Test Title");
     fireEvent.change(textarea, { target: { value: "" } });
     expect(getByDisplayValue("")).toBeInTheDocument();
 
-    await expect(getByText("Submit")).toBeDisabled();
+    const submitButton = getByText("✓");
+    await expect(submitButton).toBeDisabled();
   });
 
   it("calls fetch on submit", async () => {
     const { getByText, findByText, getByDisplayValue } = render(
       <EditableTitle
         apiRoot="/api"
-        insight={{ title: "Test Title", uid: "asdf" } as Insight}
+        insight={{ title: "Test Title", uid: "asdf", user_id: 1 } as Insight}
       />,
     );
-    await userEvent.click(getByText("🖊"));
+    (useUser as jest.Mock).mockReturnValue({ token, user_id: 1 });
+    await userEvent.click(getByText("✏️"));
     const textarea = getByDisplayValue("Test Title");
     expect(textarea).toBeInTheDocument();
     await userEvent.type(textarea, "!");
 
-    const button = await findByText("Submit");
+    const button = await findByText("✓");
     await userEvent.click(button);
     expect(window.fetch).toHaveBeenCalledWith("/api/asdf", {
       method: "PATCH",
@@ -105,14 +112,15 @@ describe("EditableTitle", () => {
 
   it("does not call fetch and resets title on cancel", async () => {
     const { getByText, getByDisplayValue } = render(
-      <EditableTitle insight={{ title: "Test Title" } as Insight} />,
+      <EditableTitle insight={{ title: "Test Title", user_id: 1 } as Insight} />,
     );
-    await userEvent.click(getByText("🖊"));
+    (useUser as jest.Mock).mockReturnValue({ token, user_id: 1 });
+    await userEvent.click(getByText("✏️"));
     const textarea = getByDisplayValue("Test Title");
     await userEvent.type(textarea, "!");
     expect((textarea as HTMLTextAreaElement).value).toBe("Test Title!");
 
-    const button = getByText("Cancel");
+    const button = getByText("✕");
     await userEvent.click(button);
 
     expect(window.fetch).not.toHaveBeenCalled();
@@ -128,16 +136,17 @@ describe("EditableTitle", () => {
     const { getByText, getByDisplayValue } = render(
       <EditableTitle
         apiRoot="/api"
-        insight={{ title: "Test Title", uid: "asdf" } as Insight}
+        insight={{ title: "Test Title", uid: "asdf", user_id: 1 } as Insight}
       />,
     );
-    await userEvent.click(getByText("🖊"));
+    (useUser as jest.Mock).mockReturnValue({ token, user_id: 1 });
+    await userEvent.click(getByText("✏️"));
     const textarea = getByDisplayValue("Test Title");
     expect(textarea).toBeInTheDocument();
     await userEvent.type(textarea, "!");
     expect(textarea).toHaveValue("Test Title!");
 
-    const button = getByText("Submit");
+    const button = getByText("✓");
     await userEvent.click(button);
 
     expect(window.fetch).toHaveBeenCalled();
@@ -146,16 +155,17 @@ describe("EditableTitle", () => {
 
   it("resets title to original value on cancel after editing", async () => {
     const { getByText, getByDisplayValue } = render(
-      <EditableTitle insight={{ title: "Original Title" } as Insight} />,
+      <EditableTitle insight={{ title: "Original Title", user_id: 1 } as Insight} />,
     );
-    await userEvent.click(getByText("🖊"));
+    (useUser as jest.Mock).mockReturnValue({ token, user_id: 1 });
+    await userEvent.click(getByText("✏️"));
     const textarea = getByDisplayValue("Original Title");
     await userEvent.type(textarea, " Updated");
     expect((textarea as HTMLTextAreaElement).value).toBe(
       "Original Title Updated",
     );
 
-    const cancelButton = getByText("Cancel");
+    const cancelButton = getByText("✕");
     await userEvent.click(cancelButton);
 
     expect(getByText("Original Title")).toBeInTheDocument();
@@ -172,14 +182,15 @@ describe("EditableTitle", () => {
     const { getByText, getByDisplayValue } = render(
       <EditableTitle
         apiRoot="/api"
-        insight={{ title: "Unchanged Title", uid: "uid123" } as Insight}
+        insight={{ title: "Unchanged Title", uid: "uid123", user_id: 1 } as Insight}
       />,
     );
-    await userEvent.click(getByText("🖊"));
+    (useUser as jest.Mock).mockReturnValue({ token, user_id: 1 });
+    await userEvent.click(getByText("✏️"));
     const textarea = getByDisplayValue("Unchanged Title");
     expect(textarea).toBeInTheDocument();
 
-    const submitButton = getByText("Submit");
+    const submitButton = getByText("✓");
     await userEvent.click(submitButton);
 
     expect(window.fetch).not.toHaveBeenCalled();

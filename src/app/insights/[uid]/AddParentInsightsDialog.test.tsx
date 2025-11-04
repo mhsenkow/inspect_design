@@ -95,27 +95,33 @@ describe("AddParentInsightsDialog", () => {
   it("disables Submit button when nothing is selected or entered", () => {
     renderDialog();
     const submitBtn = screen.getByRole("button", {
-      name: /Submit/i,
+      name: /Add/i,
     });
     expect(submitBtn).toBeDisabled();
   });
 
   it("enables Submit button when new insight name is entered", () => {
     renderDialog();
+    // Switch to the "new" tab first
+    const newTab = screen.getByText("Create new");
+    fireEvent.click(newTab);
     const input = screen.getByPlaceholderText("New insight name");
     fireEvent.change(input, { target: { value: "My New Insight" } });
     const submitBtn = screen.getByRole("button", {
-      name: /Submit/i,
+      name: /Add/i,
     });
     expect(submitBtn).not.toBeDisabled();
   });
 
   it("calls setServerFunctionInput and closes dialog on submit", () => {
     renderDialog();
+    // Switch to the "new" tab first
+    const newTab = screen.getByText("Create new");
+    fireEvent.click(newTab);
     const input = screen.getByPlaceholderText("New insight name");
     fireEvent.change(input, { target: { value: "My New Insight" } });
     const submitBtn = screen.getByRole("button", {
-      name: /Submit/i,
+      name: /Add/i,
     });
     fireEvent.click(submitBtn);
     expect(setServerFunctionInput).toHaveBeenCalledWith({
