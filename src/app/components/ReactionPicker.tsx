@@ -7,14 +7,13 @@ interface ReactionPickerProps {
   onClose: () => void;
   isVisible: boolean;
   position?: "top" | "bottom" | "auto";
-  buttonRef?: React.RefObject<any>;
+  buttonRef?: React.RefObject<HTMLElement>;
 }
 
 const ReactionPicker: React.FC<ReactionPickerProps> = ({
   onReactionSelect,
   onClose,
   isVisible,
-  position: _position = "auto",
   buttonRef,
 }) => {
   const [hoveredEmoji, setHoveredEmoji] = useState<string | null>(null);

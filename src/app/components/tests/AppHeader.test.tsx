@@ -14,12 +14,12 @@ describe("AppHeader", () => {
     window.open = jest.fn();
 
     render(<AppHeader />);
-    
+
     // The component renders a span with emoji and text, not an image
     const inspectText = screen.getByText("INSPECT");
     expect(inspectText).toBeInTheDocument();
     expect(inspectText.tagName.toLowerCase()).toBe("strong");
-    
+
     // Check that the parent div contains the emoji and text
     const logoContainer = inspectText.closest("div");
     expect(logoContainer).toHaveTextContent("INSPECT");

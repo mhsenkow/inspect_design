@@ -41,6 +41,7 @@ const FactsTable = ({
   columns,
   queryFunction,
   dataFilter,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   setDataFilter: _setDataFilter,
   disabledIds,
   selectRows = false,
