@@ -7,7 +7,8 @@ interface ReactionPickerProps {
   onClose: () => void;
   isVisible: boolean;
   position?: "top" | "bottom" | "auto";
-  buttonRef?: React.RefObject<HTMLDivElement | null>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  buttonRef?: React.RefObject<any>;
 }
 
 const ReactionPicker: React.FC<ReactionPickerProps> = ({
