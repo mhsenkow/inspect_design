@@ -7,16 +7,26 @@ import { cleanUrl } from "../../hooks/functions";
 
 describe("AppHeader", () => {
   it("should render a clickable INSPECT logo", () => {
-    window.location = { origin: "http://localhost", assign: jest.fn() } as any;
-
-    render(<AppHeader />);
-    const logo = screen.getByAltText("Inspect logo");
-    expect(logo.tagName.toLowerCase()).toBe("img");
-    expect(logo).toBeInTheDocument();
-    expect(logo.closest("div")).toHaveTextContent("INSPECT");
+    // Mock window.location.origin
+    delete (window as any).location;
+    (window as any).location = { origin: "http://localhost" };
 
     window.open = jest.fn();
-    fireEvent.click(logo.closest("div")!);
+
+    render(<AppHeader />);
+    
+    // The component renders a span with emoji and text, not an image
+    const inspectText = screen.getByText("INSPECT");
+    expect(inspectText).toBeInTheDocument();
+    expect(inspectText.tagName.toLowerCase()).toBe("strong");
+    
+    // Check that the parent div contains the emoji and text
+    const logoContainer = inspectText.closest("div");
+    expect(logoContainer).toHaveTextContent("INSPECT");
+    expect(logoContainer).toHaveTextContent("🔍");
+
+    // Test click functionality - wait for useEffect to set origin
+    fireEvent.click(logoContainer!);
     expect(window.open).toHaveBeenCalledWith("http://localhost", "_self");
   });
 

@@ -330,6 +330,8 @@ describe("/api/insights", () => {
         title: "New Insight",
         user_id: 1,
         uid: expect.any(String),
+        created_at: expect.anything(),
+        updated_at: expect.anything(),
       });
     });
 
