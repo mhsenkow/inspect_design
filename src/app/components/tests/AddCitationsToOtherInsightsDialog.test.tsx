@@ -153,19 +153,29 @@ describe("AddCitationsToOtherInsightsDialog", () => {
         reactions: [],
       },
     ];
-    // Override fetch mock for this specific test
-    global.fetch = jest.fn().mockImplementation((url: string) => {
-      if (url.includes("/api/insights")) {
+    // Override fetch mock for this specific test - must be set before render
+    // Need to reset the mock from beforeEach  
+    jest.clearAllMocks();
+    const fetchMock = jest.fn().mockImplementation((url: string | Request) => {
+      const urlString = typeof url === "string" ? url : url.toString();
+      if (urlString.includes("/api/insights")) {
         return Promise.resolve({
           ok: true,
-          json: () => Promise.resolve(mockPotentialInsightsWithCitations),
-        });
+          json: async () => mockPotentialInsightsWithCitations,
+        } as Response);
+      }
+      if (urlString.includes("/api/links")) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => [],
+        } as Response);
       }
       return Promise.resolve({
         ok: true,
-        json: () => Promise.resolve([]),
-      });
+        json: async () => [],
+      } as Response);
     });
+    global.fetch = fetchMock;
 
     await act(async () => {
       render(
@@ -183,7 +193,12 @@ describe("AddCitationsToOtherInsightsDialog", () => {
       );
     });
 
-    // Wait for fetch to complete and data to render
+    // Wait for fetch to be called first
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalled();
+    });
+
+    // Then wait for data to render
     await waitFor(
       () => {
         expect(screen.queryByText("Insight 1")).toBeInTheDocument();
