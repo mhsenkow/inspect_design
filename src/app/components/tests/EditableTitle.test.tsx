@@ -35,7 +35,9 @@ describe("EditableTitle", () => {
 
   it("enters edit mode on click", async () => {
     const { getByText, getByDisplayValue } = render(
-      <EditableTitle insight={{ title: "Test Title", user_id: 1 } as Insight} />,
+      <EditableTitle
+        insight={{ title: "Test Title", user_id: 1 } as Insight}
+      />,
     );
     // Mock useUser to return user_id that matches
     (useUser as jest.Mock).mockReturnValue({ token, user_id: 1 });
@@ -45,7 +47,9 @@ describe("EditableTitle", () => {
 
   it("exits edit mode on submit", async () => {
     const { getByText, getByDisplayValue, queryByDisplayValue } = render(
-      <EditableTitle insight={{ title: "Test Title", user_id: 1 } as Insight} />,
+      <EditableTitle
+        insight={{ title: "Test Title", user_id: 1 } as Insight}
+      />,
     );
     (useUser as jest.Mock).mockReturnValue({ token, user_id: 1 });
     await userEvent.click(getByText("✏️"));
@@ -60,7 +64,9 @@ describe("EditableTitle", () => {
 
   it("exits edit mode on cancel", async () => {
     const { getByText, getByDisplayValue, queryByDisplayValue } = render(
-      <EditableTitle insight={{ title: "Test Title", user_id: 1 } as Insight} />,
+      <EditableTitle
+        insight={{ title: "Test Title", user_id: 1 } as Insight}
+      />,
     );
     (useUser as jest.Mock).mockReturnValue({ token, user_id: 1 });
     await userEvent.click(getByText("✏️"));
@@ -73,7 +79,9 @@ describe("EditableTitle", () => {
 
   it("disables the submit button if the title is the empty string", async () => {
     const { getByText, getByDisplayValue } = render(
-      <EditableTitle insight={{ title: "Test Title", user_id: 1 } as Insight} />,
+      <EditableTitle
+        insight={{ title: "Test Title", user_id: 1 } as Insight}
+      />,
     );
     (useUser as jest.Mock).mockReturnValue({ token, user_id: 1 });
     await userEvent.click(getByText("✏️"));
@@ -112,7 +120,9 @@ describe("EditableTitle", () => {
 
   it("does not call fetch and resets title on cancel", async () => {
     const { getByText, getByDisplayValue } = render(
-      <EditableTitle insight={{ title: "Test Title", user_id: 1 } as Insight} />,
+      <EditableTitle
+        insight={{ title: "Test Title", user_id: 1 } as Insight}
+      />,
     );
     (useUser as jest.Mock).mockReturnValue({ token, user_id: 1 });
     await userEvent.click(getByText("✏️"));
@@ -155,7 +165,9 @@ describe("EditableTitle", () => {
 
   it("resets title to original value on cancel after editing", async () => {
     const { getByText, getByDisplayValue } = render(
-      <EditableTitle insight={{ title: "Original Title", user_id: 1 } as Insight} />,
+      <EditableTitle
+        insight={{ title: "Original Title", user_id: 1 } as Insight}
+      />,
     );
     (useUser as jest.Mock).mockReturnValue({ token, user_id: 1 });
     await userEvent.click(getByText("✏️"));
@@ -182,7 +194,9 @@ describe("EditableTitle", () => {
     const { getByText, getByDisplayValue } = render(
       <EditableTitle
         apiRoot="/api"
-        insight={{ title: "Unchanged Title", uid: "uid123", user_id: 1 } as Insight}
+        insight={
+          { title: "Unchanged Title", uid: "uid123", user_id: 1 } as Insight
+        }
       />,
     );
     (useUser as jest.Mock).mockReturnValue({ token, user_id: 1 });
