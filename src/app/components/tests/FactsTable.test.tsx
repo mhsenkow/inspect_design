@@ -12,6 +12,7 @@ import FactsTable from "../FactsTable";
 import useUser from "../../hooks/useUser";
 import { submitComment, submitReaction } from "../../functions";
 import userEvent from "@testing-library/user-event";
+import { Fact } from "../../types";
 
 jest.mock("../../hooks/useUser");
 jest.mock("../../functions", () => ({
@@ -301,11 +302,15 @@ describe("FactsTable", () => {
     const selectElement = screen.getByRole("combobox", {
       name: /Select Reaction/i,
     }) as HTMLSelectElement;
-    fireEvent.change(selectElement, { target: { value: "😀" } });
+    await act(async () => {
+      fireEvent.change(selectElement, { target: { value: "😀" } });
+    });
     await waitFor(() => {
       expect(selectElement.value).toBe("😀");
     });
-    screen.getByRole("button", { name: "Submit Reaction" }).click();
+    await act(async () => {
+      screen.getByRole("button", { name: "Submit Reaction" }).click();
+    });
 
     await waitFor(() => {
       expect(submitReaction as jest.Mock).toHaveBeenCalledTimes(1);
@@ -368,11 +373,15 @@ describe("FactsTable", () => {
     const selectElement = screen.getByRole("combobox", {
       name: /Select Reaction/i,
     }) as HTMLSelectElement;
-    fireEvent.change(selectElement, { target: { value: "😀" } });
+    await act(async () => {
+      fireEvent.change(selectElement, { target: { value: "😀" } });
+    });
     await waitFor(() => {
       expect(selectElement.value).toBe("😀");
     });
-    screen.getByRole("button", { name: "Submit Reaction" }).click();
+    await act(async () => {
+      screen.getByRole("button", { name: "Submit Reaction" }).click();
+    });
 
     await waitFor(() => {
       expect(submitReaction as jest.Mock).toHaveBeenCalledTimes(1);
@@ -408,11 +417,15 @@ describe("FactsTable", () => {
     const selectElement2 = screen.getByRole("combobox", {
       name: /Select Reaction/i,
     }) as HTMLSelectElement;
-    fireEvent.change(selectElement2, { target: { value: "😈" } });
+    await act(async () => {
+      fireEvent.change(selectElement2, { target: { value: "😈" } });
+    });
     await waitFor(() => {
       expect(selectElement2.value).toBe("😈");
     });
-    screen.getByRole("button", { name: "Submit Reaction" }).click();
+    await act(async () => {
+      screen.getByRole("button", { name: "Submit Reaction" }).click();
+    });
 
     await waitFor(() => {
       expect(submitReaction as jest.Mock).toHaveBeenCalledTimes(2);
