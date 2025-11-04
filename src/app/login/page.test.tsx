@@ -16,7 +16,7 @@ describe("LoginPage", () => {
     render(<LoginPage />);
     expect(screen.getByLabelText(/Email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Password/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Login" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Sign In" })).toBeInTheDocument();
   });
 
   it("handles login successfully", async () => {
@@ -32,7 +32,7 @@ describe("LoginPage", () => {
     fireEvent.change(screen.getByLabelText(/Password/i), {
       target: { value: "password" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Login" }));
+    fireEvent.click(screen.getByRole("button", { name: "Sign In" }));
 
     expect(mockHandleLogin).toHaveBeenCalledTimes(1);
     expect(mockHandleLogin).toHaveBeenCalledWith(
