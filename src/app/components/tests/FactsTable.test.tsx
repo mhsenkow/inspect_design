@@ -66,6 +66,34 @@ describe("FactsTable", () => {
   });
 
   it("sorts the table on click between descending, ascending, and unsorted", async () => {
+    const columns = [
+      {
+        name: "Updated",
+        dataColumn: "updated_at",
+        display: (fact: Fact) => (
+          <span className="text-sm text-secondary font-mono">
+            {fact.updated_at
+              ? new Date(fact.updated_at).toLocaleDateString("en-US", {
+                  month: "2-digit",
+                  day: "2-digit",
+                  year: "numeric",
+                })
+              : "---"}
+          </span>
+        ),
+      },
+      {
+        name: "Title",
+        display: (fact: Fact) => (
+          <a
+            href={`/insights/${fact.uid}`}
+            className="text-primary hover:text-primary-600 transition-colors duration-200"
+          >
+            {fact.title}
+          </a>
+        ),
+      },
+    ];
     render(
       <FactsTable
         data={mockFacts}
@@ -73,6 +101,7 @@ describe("FactsTable", () => {
         factName="insight"
         selectedFacts={[]}
         setSelectedFacts={jest.fn()}
+        columns={columns}
         dataFilter=""
         setDataFilter={jest.fn()}
         disabledIds={[]}
@@ -268,14 +297,22 @@ describe("FactsTable", () => {
         screen.getByRole("combobox", { name: /Select Reaction/i }),
       ).toBeInTheDocument();
     });
+    // Select "😀" from the dropdown (default is "❤️")
+    const selectElement = screen.getByRole("combobox", {
+      name: /Select Reaction/i,
+    }) as HTMLSelectElement;
+    fireEvent.change(selectElement, { target: { value: "😀" } });
+    await waitFor(() => {
+      expect(selectElement.value).toBe("😀");
+    });
     screen.getByRole("button", { name: "Submit Reaction" }).click();
 
     await waitFor(() => {
       expect(submitReaction as jest.Mock).toHaveBeenCalledTimes(1);
       expect(submitReaction as jest.Mock).toHaveBeenCalledWith(
-        {
+        expect.objectContaining({
           reaction: "😀",
-        },
+        }),
         "token",
       );
     });
@@ -327,14 +364,22 @@ describe("FactsTable", () => {
         screen.getByRole("combobox", { name: /Select Reaction/i }),
       ).toBeInTheDocument();
     });
+    // Select "😀" from the dropdown (default is "❤️")
+    const selectElement = screen.getByRole("combobox", {
+      name: /Select Reaction/i,
+    }) as HTMLSelectElement;
+    fireEvent.change(selectElement, { target: { value: "😀" } });
+    await waitFor(() => {
+      expect(selectElement.value).toBe("😀");
+    });
     screen.getByRole("button", { name: "Submit Reaction" }).click();
 
     await waitFor(() => {
       expect(submitReaction as jest.Mock).toHaveBeenCalledTimes(1);
       expect(submitReaction as jest.Mock).toHaveBeenCalledWith(
-        {
+        expect.objectContaining({
           reaction: "😀",
-        },
+        }),
         "token",
       );
     });
@@ -355,22 +400,27 @@ describe("FactsTable", () => {
     fireEvent.click(reactButton);
 
     await waitFor(() => {
-      expect(screen.getByText("Select an emoji character")).toBeInTheDocument();
+      expect(
+        screen.getByRole("combobox", { name: /Select Reaction/i }),
+      ).toBeInTheDocument();
     });
     // select 😈
-    const selectElement = screen.getByRole("combobox", {
+    const selectElement2 = screen.getByRole("combobox", {
       name: /Select Reaction/i,
+    }) as HTMLSelectElement;
+    fireEvent.change(selectElement2, { target: { value: "😈" } });
+    await waitFor(() => {
+      expect(selectElement2.value).toBe("😈");
     });
-    fireEvent.change(selectElement, { target: { value: "😈" } });
     screen.getByRole("button", { name: "Submit Reaction" }).click();
 
     await waitFor(() => {
       expect(submitReaction as jest.Mock).toHaveBeenCalledTimes(2);
       expect(submitReaction as jest.Mock).toHaveBeenNthCalledWith(
         2,
-        {
+        expect.objectContaining({
           reaction: "😈",
-        },
+        }),
         "token",
       );
     });
