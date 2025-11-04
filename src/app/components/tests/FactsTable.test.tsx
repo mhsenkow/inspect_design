@@ -268,7 +268,7 @@ describe("FactsTable", () => {
 
   it("enables reacting to a fact, showing the resulting reaction to the right of the title", async () => {
     (submitReaction as jest.Mock).mockImplementationOnce(() => ({
-      reaction: "😀",
+      reaction: "😊",
     }));
 
     render(
@@ -298,15 +298,15 @@ describe("FactsTable", () => {
         screen.getByRole("combobox", { name: /Select Reaction/i }),
       ).toBeInTheDocument();
     });
-    // Select "😀" from the dropdown (default is "❤️")
+    // Select "😊" from the dropdown (default is "❤️")
     const selectElement = screen.getByRole("combobox", {
       name: /Select Reaction/i,
     }) as HTMLSelectElement;
     await act(async () => {
-      fireEvent.change(selectElement, { target: { value: "😀" } });
+      fireEvent.change(selectElement, { target: { value: "😊" } });
     });
     await waitFor(() => {
-      expect(selectElement.value).toBe("😀");
+      expect(selectElement.value).toBe("😊");
     });
     await act(async () => {
       screen.getByRole("button", { name: "Submit Reaction" }).click();
@@ -316,7 +316,7 @@ describe("FactsTable", () => {
       expect(submitReaction as jest.Mock).toHaveBeenCalledTimes(1);
       expect(submitReaction as jest.Mock).toHaveBeenCalledWith(
         expect.objectContaining({
-          reaction: "😀",
+          reaction: "😊",
         }),
         "token",
       );
@@ -330,16 +330,16 @@ describe("FactsTable", () => {
     expect((emojiElement as HTMLElement).tagName.toLowerCase()).toBe("span");
 
     await waitFor(() => {
-      expect(emojiElement?.textContent).toContain("😀");
+      expect(emojiElement?.textContent).toContain("😊");
     });
   });
 
   it("enables reacting a 2nd time to a fact, showing the resulting reaction to the right of the title in place of the 1st one", async () => {
     (submitReaction as jest.Mock).mockImplementationOnce(() => ({
-      reaction: "😀",
+      reaction: "😊",
     }));
     (submitReaction as jest.Mock).mockImplementationOnce(() => ({
-      reaction: "😈",
+      reaction: "😮",
     }));
 
     render(
@@ -369,15 +369,15 @@ describe("FactsTable", () => {
         screen.getByRole("combobox", { name: /Select Reaction/i }),
       ).toBeInTheDocument();
     });
-    // Select "😀" from the dropdown (default is "❤️")
+    // Select "😊" from the dropdown (default is "❤️")
     const selectElement = screen.getByRole("combobox", {
       name: /Select Reaction/i,
     }) as HTMLSelectElement;
     await act(async () => {
-      fireEvent.change(selectElement, { target: { value: "😀" } });
+      fireEvent.change(selectElement, { target: { value: "😊" } });
     });
     await waitFor(() => {
-      expect(selectElement.value).toBe("😀");
+      expect(selectElement.value).toBe("😊");
     });
     await act(async () => {
       screen.getByRole("button", { name: "Submit Reaction" }).click();
@@ -387,7 +387,7 @@ describe("FactsTable", () => {
       expect(submitReaction as jest.Mock).toHaveBeenCalledTimes(1);
       expect(submitReaction as jest.Mock).toHaveBeenCalledWith(
         expect.objectContaining({
-          reaction: "😀",
+          reaction: "😊",
         }),
         "token",
       );
@@ -401,7 +401,7 @@ describe("FactsTable", () => {
     expect((emojiElement as HTMLElement).tagName.toLowerCase()).toBe("span");
 
     await waitFor(() => {
-      expect(emojiElement?.textContent).toContain("😀");
+      expect(emojiElement?.textContent).toContain("😊");
     });
 
     // Simulate a second reaction
@@ -413,15 +413,15 @@ describe("FactsTable", () => {
         screen.getByRole("combobox", { name: /Select Reaction/i }),
       ).toBeInTheDocument();
     });
-    // select 😈
+    // select 😮
     const selectElement2 = screen.getByRole("combobox", {
       name: /Select Reaction/i,
     }) as HTMLSelectElement;
     await act(async () => {
-      fireEvent.change(selectElement2, { target: { value: "😈" } });
+      fireEvent.change(selectElement2, { target: { value: "😮" } });
     });
     await waitFor(() => {
-      expect(selectElement2.value).toBe("😈");
+      expect(selectElement2.value).toBe("😮");
     });
     await act(async () => {
       screen.getByRole("button", { name: "Submit Reaction" }).click();
@@ -432,15 +432,15 @@ describe("FactsTable", () => {
       expect(submitReaction as jest.Mock).toHaveBeenNthCalledWith(
         2,
         expect.objectContaining({
-          reaction: "😈",
+          reaction: "😮",
         }),
         "token",
       );
     });
 
     await waitFor(() => {
-      expect(emojiElement?.textContent).toContain("😈");
-      expect(emojiElement?.textContent).not.toContain("😀");
+      expect(emojiElement?.textContent).toContain("😮");
+      expect(emojiElement?.textContent).not.toContain("😊");
     });
   });
 
