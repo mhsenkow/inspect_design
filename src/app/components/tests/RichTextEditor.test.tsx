@@ -38,9 +38,7 @@ describe("RichTextEditor", () => {
   });
 
   it("opens the insert link dialog", async () => {
-    render(
-      <RichTextEditor html="Some text" setHtml={setHtmlMock} />,
-    );
+    render(<RichTextEditor html="Some text" setHtml={setHtmlMock} />);
 
     // Open the dialog programmatically
     const dialog = document.getElementById(
