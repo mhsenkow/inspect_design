@@ -198,21 +198,45 @@ describe("AddCitationsToOtherInsightsDialog", () => {
       expect(fetchMock).toHaveBeenCalled();
     });
 
-    // Then wait for data to render
+    // Wait for data to render - FactsTable renders rows with citation counts
+    // When selectRows=true and custom columns are provided, titles aren't rendered
+    // So we check for the citation counts instead
     await waitFor(
       () => {
-        expect(screen.queryByText("Insight 1")).toBeInTheDocument();
-        expect(screen.queryByText("Insight 2")).toBeInTheDocument();
+        // Insight 1 has 1 citation, Insight 2 has 0 citations
+        expect(screen.queryByText("1")).toBeInTheDocument();
+        expect(screen.queryByText("0")).toBeInTheDocument();
       },
       { timeout: 5000 },
     );
 
-    const insight1Row = screen.getByText("Insight 1").closest("tr")!;
-    const disabledInsight = insight1Row.querySelector("input[type='checkbox']");
+    // Get rows by their citation counts
+    const rows = screen
+      .getAllByRole("row")
+      .filter((row) => row.querySelector("tbody") === null); // Filter out header rows
+    const tableRows = Array.from(
+      document.querySelectorAll("table tbody tr"),
+    );
+
+    // Find row with citation count "1" (Insight 1) and "0" (Insight 2)
+    const insight1Row = Array.from(tableRows).find((row) =>
+      row.textContent?.includes("1"),
+    ) as HTMLTableRowElement;
+    const insight2Row = Array.from(tableRows).find((row) =>
+      row.textContent?.includes("0") && !row.textContent?.includes("1"),
+    ) as HTMLTableRowElement;
+
+    expect(insight1Row).toBeDefined();
+    expect(insight2Row).toBeDefined();
+
+    const disabledInsight = insight1Row.querySelector(
+      "input[type='checkbox']",
+    ) as HTMLInputElement;
     expect(disabledInsight).toBeDisabled();
 
-    const insight2Row = screen.getByText("Insight 2").closest("tr")!;
-    const enabledInsight = insight2Row.querySelector("input[type='checkbox']");
+    const enabledInsight = insight2Row.querySelector(
+      "input[type='checkbox']",
+    ) as HTMLInputElement;
     expect(enabledInsight).toBeEnabled();
   });
 
