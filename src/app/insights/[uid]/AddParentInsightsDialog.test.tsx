@@ -81,7 +81,7 @@ describe("AddParentInsightsDialog", () => {
   it("renders tabs for existing and new insights", () => {
     renderDialog();
     expect(screen.getByText("Existing insights")).toBeInTheDocument();
-    expect(screen.getByText("New insight")).toBeInTheDocument();
+    expect(screen.getByText("Create new")).toBeInTheDocument();
   });
 
   it("calls cancelDialog when Cancel button is clicked", () => {
