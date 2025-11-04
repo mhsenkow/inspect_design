@@ -120,7 +120,6 @@ describe("AddLinksAsEvidenceDialog", () => {
   });
 
   it("searches the server for links based on query", async () => {
-    const setDataFilterMock = jest.fn();
     render(
       <AddLinksAsEvidenceDialog
         id="test-dialog"
