@@ -33,16 +33,18 @@ describe("Linkpage", () => {
     };
     mockGetUserFromServer.mockResolvedValue(mockUser);
 
-    const props = { params: Promise.resolve({ uid: "test-uid" }) };
+    const props = { params: Promise.resolve({ uid: "testuid" }) };
     const response = await Linkpage(props);
 
     expect(response.props).toEqual({
       linkInput: mockLink,
       currentUser: mockUser,
+      requestedSlug: "testuid",
+      uid: "testuid",
     });
     expect(mockGetLinkFromServer).toHaveBeenCalledWith(
       "http://localhost",
-      "test-uid",
+      "testuid",
     );
     expect(mockGetUserFromServer).toHaveBeenCalledWith(
       "http://localhost",
@@ -56,7 +58,7 @@ describe("Linkpage", () => {
   it("renders no summary message when link is not found", async () => {
     (getLinkFromServer as jest.Mock).mockResolvedValue(null);
 
-    const props = { params: Promise.resolve({ uid: "test-uid" }) };
+    const props = { params: Promise.resolve({ uid: "testuid" }) };
     const response = await Linkpage(props);
 
     expect(response.props.children).toEqual("No link with this UID");
@@ -69,7 +71,7 @@ describe("generateMetadata", () => {
     const mockGetLinkFromServer = getLinkFromServer as jest.Mock;
     mockGetLinkFromServer.mockResolvedValue(link);
 
-    const params = { uid: "test-uid" };
+    const params = { uid: "testuid" };
     const metadata = await generateMetadata({
       params: Promise.resolve(params),
     });
@@ -89,7 +91,7 @@ describe("generateMetadata", () => {
     });
     expect(mockGetLinkFromServer).toHaveBeenCalledWith(
       "http://localhost",
-      "test-uid",
+      "testuid",
     );
   });
 
@@ -97,7 +99,7 @@ describe("generateMetadata", () => {
     const mockGetLinkFromServer = getLinkFromServer as jest.Mock;
     mockGetLinkFromServer.mockResolvedValue(null);
 
-    const params = { uid: "test-uid" };
+    const params = { uid: "testuid" };
     const metadata = await generateMetadata({
       params: Promise.resolve(params),
     });
@@ -105,7 +107,7 @@ describe("generateMetadata", () => {
     expect(metadata).toBeUndefined();
     expect(mockGetLinkFromServer).toHaveBeenCalledWith(
       "http://localhost",
-      "test-uid",
+      "testuid",
     );
   });
 });
