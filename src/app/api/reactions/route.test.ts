@@ -52,7 +52,9 @@ describe("POST /api/reactions", () => {
     const mockDeleteBuilder = {
       where: jest.fn().mockResolvedValue(undefined),
     };
-    (ReactionModel.query().delete as jest.Mock).mockReturnValue(mockDeleteBuilder);
+    (ReactionModel.query().delete as jest.Mock).mockReturnValue(
+      mockDeleteBuilder,
+    );
     (ReactionModel.query().insert as jest.Mock).mockReturnThis();
     (ReactionModel.query().onConflict as jest.Mock).mockReturnThis();
     (ReactionModel.query().merge as jest.Mock).mockReturnThis();
@@ -71,7 +73,9 @@ describe("POST /api/reactions", () => {
     const mockDeleteBuilder = {
       where: jest.fn().mockResolvedValue(undefined),
     };
-    (ReactionModel.query().delete as jest.Mock).mockReturnValue(mockDeleteBuilder);
+    (ReactionModel.query().delete as jest.Mock).mockReturnValue(
+      mockDeleteBuilder,
+    );
     (ReactionModel.query().then as jest.Mock).mockImplementationOnce(
       (callback) => Promise.resolve(callback(localMockReaction)),
     );
@@ -98,7 +102,9 @@ describe("POST /api/reactions", () => {
     const mockDeleteBuilder = {
       where: jest.fn().mockResolvedValue(undefined),
     };
-    (ReactionModel.query().delete as jest.Mock).mockReturnValue(mockDeleteBuilder);
+    (ReactionModel.query().delete as jest.Mock).mockReturnValue(
+      mockDeleteBuilder,
+    );
     (ReactionModel.query().then as jest.Mock).mockImplementationOnce(
       (callback) => Promise.resolve(callback(localMockReaction)),
     );
@@ -164,7 +170,9 @@ describe("POST /api/reactions", () => {
     const mockDeleteBuilder = {
       where: jest.fn().mockResolvedValue(undefined),
     };
-    (ReactionModel.query().delete as jest.Mock).mockReturnValue(mockDeleteBuilder);
+    (ReactionModel.query().delete as jest.Mock).mockReturnValue(
+      mockDeleteBuilder,
+    );
     (ReactionModel.query().insert as jest.Mock).mockImplementationOnce(() => {
       throw error;
     });
@@ -192,7 +200,9 @@ describe("POST /api/reactions", () => {
     const mockDeleteBuilder = {
       where: jest.fn().mockResolvedValue(undefined),
     };
-    (ReactionModel.query().delete as jest.Mock).mockReturnValue(mockDeleteBuilder);
+    (ReactionModel.query().delete as jest.Mock).mockReturnValue(
+      mockDeleteBuilder,
+    );
     (ReactionModel.query().insert as jest.Mock).mockImplementationOnce(() => {
       throw error;
     });
@@ -221,7 +231,9 @@ describe("POST /api/reactions", () => {
     const mockDeleteBuilder = {
       where: jest.fn().mockResolvedValue(undefined),
     };
-    (ReactionModel.query().delete as jest.Mock).mockReturnValue(mockDeleteBuilder);
+    (ReactionModel.query().delete as jest.Mock).mockReturnValue(
+      mockDeleteBuilder,
+    );
     (ReactionModel.query().insert as jest.Mock).mockImplementationOnce(() => {
       throw error;
     });
