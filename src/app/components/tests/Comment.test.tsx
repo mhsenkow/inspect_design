@@ -131,5 +131,6 @@ describe("Comment component", () => {
       screen.queryByAltText("Comment user avatar"),
     ).not.toBeInTheDocument();
     expect(screen.getByText("Test User")).toBeInTheDocument();
+    expect(screen.getByText("TU")).toBeInTheDocument();
   });
 });

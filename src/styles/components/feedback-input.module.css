@@ -1,0 +1,132 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+  background: color-mix(in oklab, var(--color-bg-elev) 70%, var(--color-bg));
+}
+
+.lead {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--color-muted);
+  line-height: 1.4;
+}
+
+.emojiGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(2.4rem, 1fr));
+  gap: 0.35rem;
+}
+
+.emojiOption {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 2.4rem;
+  margin: 0;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.emojiOption:hover {
+  background: color-mix(in oklab, var(--color-ink) 4%, transparent);
+}
+
+.emojiOptionSelected {
+  border-color: color-mix(in oklab, var(--color-accent) 45%, var(--color-border));
+  background: color-mix(in oklab, var(--color-accent) 10%, transparent);
+}
+
+.selectedPreview {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.8125rem;
+  color: var(--color-muted);
+}
+
+.selectedPreviewEmoji {
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.error {
+  margin: 0;
+  padding: 0.55rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid color-mix(in oklab, var(--color-accent-2) 35%, transparent);
+  background: color-mix(in oklab, var(--color-accent-2) 10%, transparent);
+  color: var(--color-text);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.editorWrap {
+  border: 1px solid color-mix(in oklab, var(--color-ink) 10%, transparent);
+  border-radius: 10px;
+  background: var(--color-bg-elev);
+  overflow: hidden;
+  min-height: 5.5rem;
+}
+
+.editorWrap :global([contenteditable="true"]),
+.editorWrap :global([role="textbox"]) {
+  min-height: 4.5rem;
+  padding: 0.7rem 0.85rem;
+  outline: none;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.cancelButton,
+.submitButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.15rem;
+  margin: 0;
+  padding: 0.35rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 560;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.cancelButton {
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-muted);
+}
+
+.cancelButton:hover {
+  color: var(--color-text);
+  background: color-mix(in oklab, var(--color-ink) 4%, transparent);
+}
+
+.submitButton {
+  border: 1px solid var(--color-accent);
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.submitButton:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
+.submitButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

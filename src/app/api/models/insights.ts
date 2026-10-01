@@ -25,7 +25,11 @@ export class InsightModel extends PostgresBaseModel implements Insight {
       id: { type: "integer" },
       uid: { type: "string" },
       title: { type: "string" },
+      description: { type: ["string", "null"] },
       is_public: { type: "boolean" },
+      created_at: { type: ["string", "null"] },
+      updated_at: { type: ["string", "null"] },
+      user_id: { type: "integer" },
     },
   };
 

@@ -1,7 +1,29 @@
 "use client";
+
 import React, { useCallback, useState } from "react";
+
 import RichTextEditor from "./RichTextEditor";
 import { FactComment, FactReaction } from "../types";
+import styles from "../../styles/components/feedback-input.module.css";
+
+const REACTION_OPTIONS = [
+  "👍",
+  "👎",
+  "❤️",
+  "😂",
+  "😮",
+  "😢",
+  "🔥",
+  "👏",
+  "🤔",
+  "✨",
+  "💯",
+  "🙌",
+  "😀",
+  "🥳",
+  "💡",
+  "📌",
+] as const;
 
 const FeedbackInputElement = ({
   actionType,
@@ -17,68 +39,115 @@ const FeedbackInputElement = ({
   afterSubmit: (response?: FactComment | FactReaction | void) => void;
 }): React.JSX.Element => {
   const [html, setHtml] = useState<string>(
-    actionType === "reaction" ? "😀" : "",
+    actionType === "reaction" ? "👍" : "",
   );
-
-  const firstEmojiCode = "😀".codePointAt(0);
-  const reactOptions = Array.from({ length: 80 }, (_, i) => i)
-    .map((i) => (firstEmojiCode ?? 0) + i)
-    .map((i) => String.fromCodePoint(i))
-    .map((char) => (
-      <option value={char} key={`ReactOptions: ${char}`}>
-        {char}
-      </option>
-    ));
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   const closeFeedbackInputElement = useCallback(() => {
-    setHtml("");
+    setHtml(actionType === "reaction" ? "👍" : "");
+    setError("");
     closeFunc();
-  }, [closeFunc]);
+  }, [closeFunc, actionType]);
+
+  const canSubmit =
+    !isSubmitting &&
+    (actionType === "reaction"
+      ? Boolean(html)
+      : Boolean(html.replace(/<[^>]*>/g, "").trim()));
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        textAlign: "center",
-        width: "100%",
-      }}
-    >
-      <p>{directions}</p>
-      <div>
-        {actionType == "reaction" && (
-          <select
-            style={{ fontSize: 50 }}
-            value={html}
-            onChange={(event) => setHtml(event.target.value)}
+    <div className={styles.panel}>
+      <p className={styles.lead}>{directions}</p>
+
+      {actionType === "reaction" && (
+        <>
+          <div
+            className={styles.emojiGrid}
+            role="listbox"
             aria-label="Select Reaction"
           >
-            {reactOptions}
-          </select>
-        )}
-        {actionType == "comment" && (
+            {REACTION_OPTIONS.map((emoji) => (
+              <button
+                key={emoji}
+                type="button"
+                role="option"
+                aria-selected={html === emoji}
+                className={`${styles.emojiOption} ${
+                  html === emoji ? styles.emojiOptionSelected : ""
+                }`}
+                onClick={() => {
+                  setHtml(emoji);
+                  if (error) setError("");
+                }}
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
+          <p className={styles.selectedPreview}>
+            Selected{" "}
+            <span className={styles.selectedPreviewEmoji} aria-hidden>
+              {html}
+            </span>
+          </p>
+        </>
+      )}
+
+      {actionType === "comment" && (
+        <div className={styles.editorWrap}>
           <RichTextEditor html={html} setHtml={setHtml} />
-        )}
-      </div>
-      <div>
-        <button type="button" onClick={closeFeedbackInputElement}>
+        </div>
+      )}
+
+      {error && (
+        <div className={styles.error} role="alert">
+          {error}
+        </div>
+      )}
+
+      <div className={styles.actions}>
+        <button
+          type="button"
+          className={styles.cancelButton}
+          onClick={closeFeedbackInputElement}
+          disabled={isSubmitting}
+        >
           Cancel
         </button>
         <button
-          type="submit"
+          type="button"
+          className={styles.submitButton}
           aria-label={`Submit ${actionType.charAt(0).toUpperCase() + actionType.slice(1)}`}
+          disabled={!canSubmit}
           onClick={async () => {
-            if (submitFunc) {
+            if (!submitFunc || !canSubmit) return;
+            setIsSubmitting(true);
+            setError("");
+            try {
               const response = await submitFunc(html);
               if (response) {
                 afterSubmit(response);
                 closeFeedbackInputElement();
+              } else {
+                setError("Nothing was saved. Please try again.");
               }
+            } catch (err) {
+              setError(
+                err instanceof Error
+                  ? err.message
+                  : "Something went wrong. Please try again.",
+              );
+            } finally {
+              setIsSubmitting(false);
             }
           }}
         >
-          Submit
+          {isSubmitting
+            ? "Submitting…"
+            : actionType === "reaction"
+              ? "Add reaction"
+              : "Post comment"}
         </button>
       </div>
     </div>

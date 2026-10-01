@@ -9,8 +9,8 @@ const ResetPasswordPage = (): React.JSX.Element => {
     <Suspense
       fallback={
         <div className="auth-shell">
-          <div className="auth-card">
-            <p className="text-center">Loading…</p>
+          <div className="auth-card auth-card--quiet">
+            <p className="auth-lead">Loading…</p>
           </div>
         </div>
       }

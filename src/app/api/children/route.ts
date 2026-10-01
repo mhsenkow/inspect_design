@@ -34,11 +34,20 @@ export async function POST(
         }));
       if (childrenToInsert.length > 0) {
         try {
-          const insertedLinks = await InsightLinkModel.query()
-            .insert(childrenToInsert)
-            .withGraphFetched("childInsight.evidence")
-            .withGraphFetched("parentInsight");
-          return NextResponse.json(insertedLinks);
+          const insertedLinks = await InsightLinkModel.query().insert(
+            childrenToInsert,
+          );
+          const insertedIds = (
+            Array.isArray(insertedLinks) ? insertedLinks : [insertedLinks]
+          )
+            .map((link) => link.id)
+            .filter((id): id is number => typeof id === "number");
+
+          const hydratedLinks = await InsightLinkModel.query()
+            .findByIds(insertedIds)
+            .withGraphFetched("[childInsight.evidence, parentInsight]");
+
+          return NextResponse.json(hydratedLinks);
         } catch (err) {
           if (err instanceof ForeignKeyViolationError) {
             console.error("Foreign key violation:", err.message);
@@ -46,10 +55,24 @@ export async function POST(
               { statusText: "Either a child_id or parent_id is invalid" },
               { status: 409 },
             );
-          } else {
-            console.error("Other database error:", err);
-            throw err;
           }
+          console.error("Other database error:", err);
+          const message =
+            err instanceof Error ? err.message : "Unable to create insight link";
+          // Unique parent/child pairs (u_cp) and other DB failures
+          const isUnique =
+            typeof message === "string" &&
+            (message.includes("u_cp") ||
+              message.includes("duplicate key") ||
+              message.includes("unique"));
+          return NextResponse.json(
+            {
+              statusText: isUnique
+                ? "That parent/child link already exists"
+                : message,
+            },
+            { status: isUnique ? 409 : 500 },
+          );
         }
       }
       return NextResponse.json(

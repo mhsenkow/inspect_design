@@ -18,7 +18,7 @@ interface PostCommentRequest extends NextRequest {
 }
 
 export type PostCommentResponse = NextResponse<
-  FactComment | { statusText: string }
+  FactComment | { message: string; statusText?: string }
 >;
 
 export async function POST(
@@ -35,30 +35,54 @@ export async function POST(
         user_id: authUser.id,
       };
       try {
+        const inserted = await CommentModel.query().insertAndFetch(
+          commentToInsert,
+        );
         const newComment = await CommentModel.query()
-          .insert(commentToInsert)
+          .findById(inserted.id!)
           .withGraphFetched("user");
-        return NextResponse.json(newComment);
+        if (newComment?.user) {
+          const safeUser = { ...newComment.user } as Record<string, unknown>;
+          delete safeUser.password;
+          delete safeUser.token;
+          delete safeUser.passwordResetKey;
+          delete safeUser.verificationKey;
+          newComment.user = safeUser as unknown as typeof newComment.user;
+        }
+        return NextResponse.json(newComment ?? inserted);
       } catch (err) {
         if (err instanceof ForeignKeyViolationError) {
           console.error("Foreign key violation:", err.message);
           return NextResponse.json(
-            { statusText: "Either the summary_id or insight_id is invalid" },
+            {
+              message: "Either the summary_id or insight_id is invalid",
+              statusText: "Either the summary_id or insight_id is invalid",
+            },
             { status: 409 },
           );
-        } else {
-          console.error("Other database error:", err);
-          throw err;
         }
+        console.error("Other database error:", err);
+        return NextResponse.json(
+          {
+            message: "Unable to save comment.",
+            statusText: "Unable to save comment.",
+          },
+          { status: 500 },
+        );
       }
     }
     return NextResponse.json(
       {
+        message:
+          "Request must include a valid comment and either insight_id or summary_id",
         statusText:
           "Request must include a valid comment and either insight_id or summary_id",
       },
       { status: 400 },
     );
   }
-  return NextResponse.json({ statusText: "Unauthorized" }, { status: 401 });
+  return NextResponse.json(
+    { message: "Unauthorized", statusText: "Unauthorized" },
+    { status: 401 },
+  );
 }

@@ -32,6 +32,25 @@ export const getUnreadSummariesForCurrentUser = (
     },
   }).then((response) => response.json());
 
+async function readResponseJson<T = unknown>(
+  response: Response,
+): Promise<T | null> {
+  const text = await response.text();
+  if (!text) return null;
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    return null;
+  }
+}
+
+function errorMessageFromBody(
+  body: { message?: string; statusText?: string } | null,
+  fallback: string,
+): string {
+  return body?.message || body?.statusText || fallback;
+}
+
 export const submitComment = async (
   requestBody: Awaited<PostCommentRequestBody>,
   token: string,
@@ -44,12 +63,21 @@ export const submitComment = async (
       "x-access-token": token,
     },
   })) as PostCommentResponse;
-  if (response.status == 200) {
-    return await response.json();
-  } else {
-    const textObject = await response.json();
-    alert(textObject.message || response.statusText);
+
+  const body = await readResponseJson<
+    FactComment | { message?: string; statusText?: string }
+  >(response);
+
+  if (response.ok && body && "comment" in body) {
+    return body as FactComment;
   }
+
+  throw new Error(
+    errorMessageFromBody(
+      body as { message?: string; statusText?: string } | null,
+      response.statusText || "Unable to save comment.",
+    ),
+  );
 };
 
 export const deleteComment = async (
@@ -63,43 +91,45 @@ export const deleteComment = async (
       "x-access-token": token,
     },
   })) as DeleteCommentRouteResponse;
-  if (response.status == 200) {
+  if (response.ok) {
     return true;
-  } else {
-    throw await response.json();
   }
+  const body = await readResponseJson<{ message?: string; statusText?: string }>(
+    response,
+  );
+  throw new Error(
+    errorMessageFromBody(body, response.statusText || "Unable to delete comment."),
+  );
 };
 
-// const percentageToHsl = (
-//   percentage: number,
-//   hue0: number = 120,
-//   hue1: number = 0,
-// ): string => {
-//   const hue = percentage * (hue0 - hue1) + hue1;
-//   return "hsl(" + hue + ", 100%, 50%)";
-// };
-
-export const submitReaction = (
+export const submitReaction = async (
   requestBody: Awaited<PostRequestRouteRequestBody>,
   token: string,
-): Promise<FactReaction | void> =>
-  fetch("/api/reactions", {
+): Promise<FactReaction | void> => {
+  const response = await fetch("/api/reactions", {
     method: "POST",
     body: JSON.stringify(requestBody),
     headers: {
       "Content-Type": "application/json",
       "x-access-token": token,
     },
-  }).then(async (response) => {
-    // TODO: add PostReactionRouteResponse type to response if I can debug its ts error
-    if (response.status == 200) {
-      return await response.json();
-    } else {
-      const textObject = await response.json();
-      alert(textObject.message || response.statusText);
-    }
   });
 
+  const body = await readResponseJson<
+    FactReaction | { message?: string; statusText?: string }
+  >(response);
+
+  if (response.ok && body && "reaction" in body) {
+    return body as FactReaction;
+  }
+
+  throw new Error(
+    errorMessageFromBody(
+      body as { message?: string; statusText?: string } | null,
+      response.statusText || "Unable to save reaction.",
+    ),
+  );
+};
 const timeouts: Record<string, ReturnType<typeof setTimeout>> = {};
 
 export function debounce({

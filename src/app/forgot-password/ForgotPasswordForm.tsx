@@ -10,7 +10,7 @@ const ForgotPasswordForm = (): React.JSX.Element => {
   const [resetUrl, setResetUrl] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const canSubmit = Boolean(email) && !isSubmitting;
+  const canSubmit = Boolean(email.trim()) && !isSubmitting;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,7 +23,7 @@ const ForgotPasswordForm = (): React.JSX.Element => {
       const response = await fetch("/api/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: email.trim() }),
       });
       const data = (await response.json()) as {
         message?: string;
@@ -49,59 +49,68 @@ const ForgotPasswordForm = (): React.JSX.Element => {
   return (
     <div className="auth-shell">
       <div className="auth-card">
-        <h2>Forgot password</h2>
-        <p style={{ color: "var(--color-muted)", marginBottom: "1.5rem" }}>
-          Enter your account email and we&apos;ll create a reset link.
-        </p>
-        <form name="forgotPassword" onSubmit={handleSubmit}>
-          <div className="mb-6">
+        <header className="auth-card__header">
+          <p className="auth-eyebrow">Inspect</p>
+          <h1 className="auth-title">Forgot password</h1>
+          <p className="auth-lead">
+            Enter your account email and we&apos;ll send a reset link.
+          </p>
+        </header>
+
+        <form name="forgotPassword" onSubmit={handleSubmit} noValidate>
+          <div className="auth-field">
             <label htmlFor="forgot-email" className="form-label">
-              Email:
+              Email
             </label>
             <input
               id="forgot-email"
               type="email"
               name="email"
               autoComplete="email"
+              autoFocus
+              inputMode="email"
+              spellCheck={false}
               value={email}
-              onChange={(event) => setEmail(event.target.value)}
+              onChange={(event) => {
+                setEmail(event.target.value);
+                if (error) setError("");
+              }}
               className="form-input"
+              placeholder="you@example.com"
               required
             />
           </div>
-          <button
-            type="submit"
-            disabled={!canSubmit}
-            className="btn btn-primary w-full"
-          >
-            {isSubmitting ? "Sending…" : "Send reset link"}
-          </button>
+
           {error && (
-            <div className="alert alert-error">
-              <div className="alert-content">
-                <div className="alert-message">{error}</div>
-              </div>
+            <div className="alert alert-error" role="alert" aria-live="assertive">
+              <div className="alert-message">{error}</div>
             </div>
           )}
           {message && (
-            <div className="alert alert-success" style={{ marginTop: "1rem" }}>
-              <div className="alert-content">
-                <div className="alert-message">{message}</div>
-              </div>
+            <div className="alert alert-success" role="status" aria-live="polite">
+              <div className="alert-message">{message}</div>
             </div>
           )}
           {resetUrl && (
-            <p className="mt-4" style={{ wordBreak: "break-all" }}>
-              Local reset link:{" "}
-              <Link href={resetUrl}>{resetUrl}</Link>
+            <p className="auth-reset-link">
+              Local reset link: <Link href={resetUrl}>{resetUrl}</Link>
             </p>
           )}
+
+          <button
+            type="submit"
+            disabled={!canSubmit}
+            className="btn btn-primary w-full auth-submit"
+          >
+            {isSubmitting ? "Sending…" : "Send reset link"}
+          </button>
         </form>
-        <p
-          className="text-center mt-6"
-          style={{ color: "var(--color-muted)" }}
-        >
-          Remembered it? <Link href="/login">Back to login</Link>
+
+        <p className="auth-footer">
+          Remembered it?{" "}
+          <Link href="/login" className="auth-footer__link">
+            Sign in
+          </Link>
         </p>
       </div>
     </div>

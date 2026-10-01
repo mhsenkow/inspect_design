@@ -1,0 +1,111 @@
+.display {
+  margin: 0;
+  min-width: 0;
+  width: 100%;
+}
+
+.textButton {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: text;
+  border-radius: 2px;
+}
+
+.textButton:hover,
+.textButton:focus-visible {
+  outline: none;
+  box-shadow: 0 1px 0 0 var(--color-border);
+}
+
+.placeholder {
+  color: var(--color-muted);
+  font-weight: 400;
+}
+
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  width: 100%;
+  max-width: 40rem;
+}
+
+.input,
+.textarea {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid color-mix(in oklab, var(--color-ink) 12%, transparent);
+  border-radius: 10px;
+  background: var(--color-bg-elev);
+  color: var(--color-text);
+  font: inherit;
+  line-height: 1.4;
+}
+
+.textarea {
+  min-height: 4.75rem;
+  resize: vertical;
+}
+
+.input:focus,
+.textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-accent) 16%, transparent);
+}
+
+.editorActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.saveButton,
+.cancelButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0.3rem 0.75rem;
+  min-height: 2rem;
+  border-radius: 7px;
+  font-size: 0.75rem;
+  font-weight: 560;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.saveButton {
+  border: 1px solid var(--color-accent);
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.saveButton:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
+.cancelButton {
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-muted);
+}
+
+.cancelButton:hover:not(:disabled) {
+  color: var(--color-text);
+  background: color-mix(in oklab, var(--color-ink) 4%, transparent);
+}
+
+.saveButton:disabled,
+.cancelButton:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

@@ -4,6 +4,7 @@ import parse from "html-react-parser";
 
 import InsertLinkDialog from "./InsertLinkDialog";
 import { INSERT_LINK_DIALOG_ID } from "../constants";
+import styles from "../../styles/components/rich-text-editor.module.css";
 
 interface Props {
   html: string;
@@ -15,21 +16,6 @@ const RichTextEditor = ({ html, setHtml }: Props) => {
   const cursor = useRef<{ node?: Node; offset: number }>({
     offset: 0,
   });
-
-  // const nodeIsIncluded = useCallback((nodes: Node[], node: Node): boolean => {
-  //   for (let i = 0; i < nodes.length; i++) {
-  //     if (nodes[i] == node) {
-  //       return true;
-  //     }
-  //     if (nodes[i].nodeType == Node.ELEMENT_NODE) {
-  //       const childNodes = (nodes[i] as Element).childNodes;
-  //       if (nodeIsIncluded(Array.from(childNodes), node)) {
-  //         return true;
-  //       }
-  //     }
-  //   }
-  //   return false;
-  // }, []);
 
   const insertLink = () => {
     const dialog = document.getElementById(
@@ -70,28 +56,21 @@ const RichTextEditor = ({ html, setHtml }: Props) => {
   }, [html]);
 
   return (
-    <div>
-      <div
-        style={{
-          marginBottom: "10px",
-          display: "flex",
-          justifyContent: "center",
-        }}
-        className="rich-text-editor-toolbar"
-      >
+    <div className={styles.root}>
+      <div className={styles.toolbar}>
         <button
+          type="button"
           onClick={() => insertLink()}
-          style={{ width: "30px", height: "30px", position: "relative" }}
+          className={styles.toolbarButton}
+          aria-label="Insert link"
+          title="Insert link"
         >
           <Image
             src="/images/link-icon.png"
-            alt="Insert Link"
-            width={20}
-            height={20}
-            // TODO: get a better image that doesn't need to be resized
-            style={{
-              margin: "-3px 0 0 -3px",
-            }}
+            alt=""
+            width={14}
+            height={14}
+            className={styles.toolbarButtonImage}
           />
         </button>
       </div>
@@ -102,14 +81,7 @@ const RichTextEditor = ({ html, setHtml }: Props) => {
         role="textbox"
         aria-label="Comment Text Div"
         suppressContentEditableWarning={true}
-        style={{
-          border: "1px solid black",
-          height: "200px",
-          width: "80%",
-          margin: "0 auto 10px",
-          padding: "5px",
-          textAlign: "left",
-        }}
+        className={styles.editor}
         onInput={(event) => {
           cursor.current = getCaretPosition();
           const newHtml = (event.target as HTMLDivElement).innerHTML.replace(

@@ -68,11 +68,26 @@ export const modifyInsight = (
       "x-access-token": token,
     },
   })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(response.statusText);
+    .then(async (response) => {
+      const text = await response.text();
+      let body: Partial<Insight> & { statusText?: string; message?: string } =
+        {};
+      if (text) {
+        try {
+          body = JSON.parse(text);
+        } catch {
+          /* ignore */
+        }
       }
-      return response.json();
+      if (!response.ok) {
+        throw new Error(
+          body.message ||
+            body.statusText ||
+            response.statusText ||
+            "Unable to update insight",
+        );
+      }
+      return body as Partial<Insight>;
     })
     .then((updatedPartialInsight: Partial<Insight>) => ({
       action: 0,

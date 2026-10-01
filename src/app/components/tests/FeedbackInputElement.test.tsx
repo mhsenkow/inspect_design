@@ -1,5 +1,5 @@
 import React from "react";
-import { render, fireEvent, waitFor } from "@testing-library/react";
+import { render, fireEvent, waitFor, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
 import FeedbackInputElement from "../FeedbackInputElement";
@@ -14,7 +14,7 @@ describe("FeedbackInputElement", () => {
   });
 
   it("renders directions", () => {
-    const { getByText } = render(
+    render(
       <FeedbackInputElement
         actionType="reaction"
         submitFunc={mockSubmitFunc}
@@ -23,11 +23,11 @@ describe("FeedbackInputElement", () => {
         afterSubmit={mockAfterSubmit}
       />,
     );
-    expect(getByText("Please provide your feedback")).toBeInTheDocument();
+    expect(screen.getByText("Please provide your feedback")).toBeInTheDocument();
   });
 
   it("renders reaction options when actionType is 'reaction'", () => {
-    const { getByRole } = render(
+    render(
       <FeedbackInputElement
         actionType="reaction"
         submitFunc={mockSubmitFunc}
@@ -36,11 +36,12 @@ describe("FeedbackInputElement", () => {
         afterSubmit={mockAfterSubmit}
       />,
     );
-    expect(getByRole("combobox")).toBeInTheDocument();
+    expect(screen.getByRole("listbox")).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "👍" })).toBeInTheDocument();
   });
 
-  it("renders a conteneditable div when actionType is 'comment'", () => {
-    const { getByRole } = render(
+  it("renders a contenteditable div when actionType is 'comment'", () => {
+    render(
       <FeedbackInputElement
         actionType="comment"
         submitFunc={mockSubmitFunc}
@@ -49,11 +50,11 @@ describe("FeedbackInputElement", () => {
         afterSubmit={mockAfterSubmit}
       />,
     );
-    expect(getByRole("textbox")).toBeInTheDocument();
+    expect(screen.getByRole("textbox")).toBeInTheDocument();
   });
 
   it("calls closeFunc when Cancel button is clicked", () => {
-    const { getByText } = render(
+    render(
       <FeedbackInputElement
         actionType="reaction"
         submitFunc={mockSubmitFunc}
@@ -62,13 +63,13 @@ describe("FeedbackInputElement", () => {
         afterSubmit={mockAfterSubmit}
       />,
     );
-    fireEvent.click(getByText("Cancel"));
+    fireEvent.click(screen.getByText("Cancel"));
     expect(mockCloseFunc).toHaveBeenCalled();
   });
 
   it("calls submitFunc and afterSubmit when Submit button is clicked", async () => {
     mockSubmitFunc.mockResolvedValueOnce("response");
-    const { getByText, getByRole } = render(
+    render(
       <FeedbackInputElement
         actionType="reaction"
         submitFunc={mockSubmitFunc}
@@ -78,13 +79,11 @@ describe("FeedbackInputElement", () => {
       />,
     );
 
-    fireEvent.change(getByRole("combobox"), { target: { value: "😀" } });
-
-    fireEvent.click(getByText("Submit"));
+    fireEvent.click(screen.getByRole("option", { name: "😀" }));
+    fireEvent.click(screen.getByRole("button", { name: "Submit Reaction" }));
 
     await waitFor(() => {
       expect(mockSubmitFunc).toHaveBeenCalledWith("😀");
-      expect(mockSubmitFunc).toHaveBeenCalled();
       expect(mockAfterSubmit).toHaveBeenCalledWith("response");
     });
   });

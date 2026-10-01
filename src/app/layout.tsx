@@ -47,35 +47,27 @@ const Dashboard = async ({ children }: Props): Promise<React.JSX.Element> => {
         <BootstrapClient />
         <header className="inspect-header">
           <div className="inspect-header__inner">
-            <Link href={loggedIn ? "/insights" : "/"} className="inspect-brand">
-              <span className="inspect-brand__mark">
-                <Image
-                  src="/images/icon.png"
-                  width={16}
-                  height={16}
-                  alt=""
-                />
-              </span>
-              <span className="inspect-brand__text">Inspect</span>
-            </Link>
+            <div className="inspect-header__left">
+              <Link href={loggedIn ? "/insights" : "/"} className="inspect-brand">
+                <span className="inspect-brand__mark">
+                  <Image
+                    src="/images/icon.png"
+                    width={14}
+                    height={14}
+                    alt=""
+                  />
+                </span>
+                <span className="inspect-brand__text">Inspect</span>
+              </Link>
 
-            <nav className="inspect-nav" aria-label="Primary">
               {loggedIn && (
-                <Link href="/insights" className="inspect-nav__link">
-                  Insights
-                </Link>
-              )}
-              {!loggedIn && (
-                <>
-                  <Link href="/login" className="inspect-nav__link inspect-nav__link--desktop">
-                    Login
+                <nav className="inspect-nav" aria-label="Primary">
+                  <Link href="/insights" className="inspect-nav__link">
+                    Insights
                   </Link>
-                  <Link href="/register" className="inspect-nav__link inspect-nav__link--desktop">
-                    Register
-                  </Link>
-                </>
+                </nav>
               )}
-            </nav>
+            </div>
 
             <div className="inspect-header__actions">
               <ThemeToggle />
@@ -88,8 +80,8 @@ const Dashboard = async ({ children }: Props): Promise<React.JSX.Element> => {
               >
                 <Image
                   src="/images/Color1.png"
-                  width={16}
-                  height={16}
+                  width={14}
+                  height={14}
                   alt="Datagotchi"
                 />
               </Link>

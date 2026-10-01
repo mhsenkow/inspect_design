@@ -77,15 +77,21 @@ const AddChildInsightsDialog = ({
 
   const handleSubmit = useCallback(() => {
     if (serverActionContext) {
-      serverActionContext.executeAction(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        addChildrenToInsight as ServerFunction<any>,
-        {
-          parentInsight: insight,
-          children: selectedChildInsights,
-          newChildInsightName: newInsightName,
-        },
-      );
+      void serverActionContext
+        .executeAction(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          addChildrenToInsight as ServerFunction<any>,
+          {
+            parentInsight: insight,
+            children: selectedChildInsights,
+            newChildInsightName: newInsightName,
+          },
+        )
+        .then(() => {
+          resetStateValues();
+          onClose();
+        });
+      return;
     }
     resetStateValues();
     onClose();
@@ -169,7 +175,7 @@ const AddChildInsightsDialog = ({
   return (
     <Modal
       id={id}
-      title={`Add Child Insights to Insight: ${insight.title}`}
+      title="Add child insights"
       isOpen={isOpen}
       onClose={handleClose}
       size="large"

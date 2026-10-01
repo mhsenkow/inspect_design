@@ -122,13 +122,27 @@ export const addChildrenToInsight = async (
       "x-access-token": token,
     },
   }).then(async (response: Response) => {
-    if (!response.ok) {
-      throw response;
+    const text = await response.text();
+    let body: InsightLink[] | { statusText?: string; message?: string } = [];
+    if (text) {
+      try {
+        body = JSON.parse(text);
+      } catch {
+        /* ignore */
+      }
     }
-    const newChildrenLinks = await response.json();
+    if (!response.ok) {
+      const errBody = body as { statusText?: string; message?: string };
+      throw new Error(
+        errBody.message ||
+          errBody.statusText ||
+          response.statusText ||
+          "Failed to add child insights",
+      );
+    }
     return {
       action: 1,
-      facts: newChildrenLinks as InsightLink[],
+      facts: body as InsightLink[],
     };
   });
 };

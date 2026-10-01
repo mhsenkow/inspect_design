@@ -12,36 +12,32 @@ test("click on login link", async ({ page }) => {
   await expect(page.getByRole("link", { name: "Login" })).toBeVisible();
   await page.getByRole("link", { name: "Login" }).click();
 
-  await expect(page).toHaveURL("http://localhost:3000/login?return=/insights");
+  await expect(page).toHaveURL(/\/login\?return=/);
 });
 
 test("do login", async ({ page }) => {
   await page.goto("http://localhost:3000/login?return=/insights");
 
-  await expect(
-    page.getByRole("heading", { name: "Login to Inspect" }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
 
-  const loginButton = page.getByRole("button", { name: "Login" });
+  const loginButton = page.getByRole("button", { name: "Sign in" });
   await expect(loginButton).toBeVisible();
   await expect(loginButton).toBeDisabled();
 
-  await expect(page.getByRole("textbox", { name: "Email:" })).toBeVisible();
-  await page.getByRole("textbox", { name: "Email:" }).fill(email);
+  await expect(page.getByLabel("Email")).toBeVisible();
+  await page.getByLabel("Email").fill(email);
 
   await expect(loginButton).toBeDisabled();
 
-  await expect(page.getByRole("textbox", { name: "Password:" })).toBeVisible();
-  await page
-    .getByRole("textbox", { name: "Password:" })
-    .fill(`${password}-wrong`);
+  await expect(page.getByLabel("Password")).toBeVisible();
+  await page.getByLabel("Password").fill(`${password}-wrong`);
 
   await expect(loginButton).toBeEnabled();
   await loginButton.click();
 
-  await expect(page.getByText("Invalid credentials")).toBeVisible();
+  await expect(page.getByText("Invalid email or password.")).toBeVisible();
 
-  await page.getByRole("textbox", { name: "Password:" }).fill(password);
+  await page.getByLabel("Password").fill(password);
 
   await loginButton.click();
 

@@ -8,10 +8,11 @@ import useUser from "../hooks/useUser";
 
 const ChangePasswordForm = (): React.JSX.Element => {
   const router = useRouter();
-  const { loggedIn, setLoggedIn, setToken } = useUser();
+  const { loggedIn, logout } = useUser();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,10 +49,9 @@ const ChangePasswordForm = (): React.JSX.Element => {
         return;
       }
 
-      setMessage(data.message || "Password changed.");
-      setToken("");
-      setLoggedIn(false);
-      setTimeout(() => router.push("/login"), 1000);
+      setMessage(data.message || "Password changed. Please sign in again.");
+      logout();
+      setTimeout(() => router.replace("/login"), 1000);
     } catch {
       setError("Unable to change password.");
     } finally {
@@ -63,12 +63,21 @@ const ChangePasswordForm = (): React.JSX.Element => {
     return (
       <div className="auth-shell">
         <div className="auth-card">
-          <h2>Change password</h2>
-          <p style={{ color: "var(--color-muted)" }}>
-            You need to be logged in.{" "}
-            <Link href="/login">Login</Link> or{" "}
-            <Link href="/forgot-password">reset your password</Link>.
-          </p>
+          <header className="auth-card__header">
+            <p className="auth-eyebrow">Inspect</p>
+            <h1 className="auth-title">Change password</h1>
+            <p className="auth-lead">
+              You need to be signed in.{" "}
+              <Link href="/login" className="auth-footer__link">
+                Sign in
+              </Link>{" "}
+              or{" "}
+              <Link href="/forgot-password" className="auth-footer__link">
+                reset your password
+              </Link>
+              .
+            </p>
+          </header>
         </div>
       </div>
     );
@@ -77,74 +86,109 @@ const ChangePasswordForm = (): React.JSX.Element => {
   return (
     <div className="auth-shell">
       <div className="auth-card">
-        <h2>Change password</h2>
-        <form name="changePassword" onSubmit={handleSubmit}>
-          <div className="mb-4">
+        <header className="auth-card__header">
+          <p className="auth-eyebrow">Account</p>
+          <h1 className="auth-title">Change password</h1>
+          <p className="auth-lead">
+            After updating, you&apos;ll sign in again with the new password.
+          </p>
+        </header>
+
+        <form name="changePassword" onSubmit={handleSubmit} noValidate>
+          <div className="auth-field">
             <label htmlFor="current-password" className="form-label">
-              Current password:
+              Current password
             </label>
             <input
               id="current-password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               autoComplete="current-password"
+              autoFocus
               value={currentPassword}
-              onChange={(event) => setCurrentPassword(event.target.value)}
+              onChange={(event) => {
+                setCurrentPassword(event.target.value);
+                if (error) setError("");
+              }}
               className="form-input"
               required
             />
           </div>
-          <div className="mb-4">
-            <label htmlFor="change-new-password" className="form-label">
-              New password:
-            </label>
+
+          <div className="auth-field">
+            <div className="auth-label-row">
+              <label htmlFor="change-new-password" className="form-label">
+                New password
+              </label>
+              <button
+                type="button"
+                className="auth-inline-link"
+                onClick={() => setShowPassword((v) => !v)}
+                aria-pressed={showPassword}
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
             <input
               id="change-new-password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               autoComplete="new-password"
               value={newPassword}
-              onChange={(event) => setNewPassword(event.target.value)}
+              onChange={(event) => {
+                setNewPassword(event.target.value);
+                if (error) setError("");
+              }}
               className="form-input"
+              placeholder="At least 6 characters"
               minLength={6}
               required
             />
           </div>
-          <div className="mb-6">
+
+          <div className="auth-field">
             <label htmlFor="change-confirm-password" className="form-label">
-              Confirm new password:
+              Confirm new password
             </label>
             <input
               id="change-confirm-password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               autoComplete="new-password"
               value={confirmPassword}
-              onChange={(event) => setConfirmPassword(event.target.value)}
+              onChange={(event) => {
+                setConfirmPassword(event.target.value);
+                if (error) setError("");
+              }}
               className="form-input"
+              placeholder="Re-enter new password"
               minLength={6}
               required
             />
           </div>
-          <button
-            type="submit"
-            disabled={!canSubmit}
-            className="btn btn-primary w-full"
-          >
-            {isSubmitting ? "Updating…" : "Update password"}
-          </button>
+
           {error && (
-            <div className="alert alert-error">
-              <div className="alert-content">
-                <div className="alert-message">{error}</div>
-              </div>
+            <div className="alert alert-error" role="alert" aria-live="assertive">
+              <div className="alert-message">{error}</div>
             </div>
           )}
           {message && (
-            <div className="alert alert-success" style={{ marginTop: "1rem" }}>
-              <div className="alert-content">
-                <div className="alert-message">{message}</div>
-              </div>
+            <div className="alert alert-success" role="status" aria-live="polite">
+              <div className="alert-message">{message}</div>
             </div>
           )}
+
+          <button
+            type="submit"
+            disabled={!canSubmit}
+            className="btn btn-primary w-full auth-submit"
+          >
+            {isSubmitting ? "Updating…" : "Update password"}
+          </button>
         </form>
+
+        <p className="auth-footer">
+          <Link href="/insights" className="auth-footer__link">
+            Back to insights
+          </Link>
+        </p>
       </div>
     </div>
   );

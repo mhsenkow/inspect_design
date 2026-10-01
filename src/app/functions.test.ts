@@ -59,8 +59,10 @@ describe("functions", () => {
 
     beforeEach(() => {
       mockFetch.mockResolvedValueOnce({
+        ok: true,
         status: 200,
-        json: jest.fn().mockResolvedValueOnce(mockResponse),
+        statusText: "OK",
+        text: jest.fn().mockResolvedValueOnce(JSON.stringify(mockResponse)),
       });
     });
 
@@ -117,7 +119,11 @@ describe("functions", () => {
 
   describe("deleteComment", () => {
     it("should delete a comment", async () => {
-      mockFetch.mockResolvedValueOnce({ status: 200, rowCount: 1 });
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        text: jest.fn().mockResolvedValueOnce(""),
+      });
 
       const result = await deleteComment({ id: "1" }, "token");
       expect(mockFetch).toHaveBeenCalledWith("/api/comments/1", {
@@ -135,15 +141,17 @@ describe("functions", () => {
     it("should submit a reaction", async () => {
       const mockResponse = { reaction: "😬" };
       mockFetch.mockResolvedValueOnce({
+        ok: true,
         status: 200,
-        json: jest.fn().mockResolvedValueOnce(mockResponse),
+        statusText: "OK",
+        text: jest.fn().mockResolvedValueOnce(JSON.stringify(mockResponse)),
       });
 
       const result = await submitReaction(
         { reaction: "😬", insight_id: 1, summary_id: 2 },
         "token",
       );
-      expect(result).toEqual({ summary_id: undefined, reaction: "😬" });
+      expect(result).toEqual({ reaction: "😬" });
       expect(mockFetch).toHaveBeenCalledWith("/api/reactions", {
         method: "POST",
         body: JSON.stringify({ reaction: "😬", insight_id: 1, summary_id: 2 }),

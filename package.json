@@ -20,7 +20,8 @@
     "db:reload": "PGPASSWORD=${DATABASE_PASSWORD} psql -h ${DATABASE_HOST} -p ${DATABASE_PORT} -U ${DATABASE_USER} -c 'DROP DATABASE IF EXISTS inspect' && PGPASSWORD=${DATABASE_PASSWORD} psql -h ${DATABASE_HOST} -p ${DATABASE_PORT} -U ${DATABASE_USER} -c 'CREATE DATABASE inspect' && PGPASSWORD=${DATABASE_PASSWORD} psql -h ${DATABASE_HOST} -p ${DATABASE_PORT} -U ${DATABASE_USER} -d inspect < inspect-dump.sql",
     "db:schema": "PGPASSWORD=${DATABASE_PASSWORD} psql -h ${DATABASE_HOST} -p ${DATABASE_PORT} -U ${DATABASE_USER} -d inspect < schema.sql",
     "export": "next export",
-    "sqlite": "node src/scripts/sqlite-cli.js"
+    "sqlite": "node src/scripts/sqlite-cli.js",
+    "db:seed-sample": "node scripts/seed-sample-insights.mjs"
   },
   "dependencies": {
     "@libsql/client": "^0.17.0",

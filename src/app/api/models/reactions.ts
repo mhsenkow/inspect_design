@@ -62,10 +62,9 @@ export class ReactionModel extends PostgresBaseModel implements FactReaction {
 
   $beforeInsert() {
     this.created_at = new Date().toISOString();
-    this.updated_at = new Date().toISOString();
   }
 
   $beforeUpdate() {
-    this.updated_at = new Date().toISOString();
+    // reactions table has no updated_at column
   }
 }

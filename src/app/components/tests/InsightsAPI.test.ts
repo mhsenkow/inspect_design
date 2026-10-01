@@ -16,6 +16,7 @@ describe("InsightsAPI", () => {
     (window.fetch as jest.Mock).mockResolvedValue({
       ok: true,
       json: mockFetchResponseJson,
+      text: async () => JSON.stringify(await mockFetchResponseJson()),
     });
   });
 

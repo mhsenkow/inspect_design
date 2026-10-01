@@ -55,10 +55,9 @@ export class CommentModel extends PostgresBaseModel implements FactComment {
 
   $beforeInsert() {
     this.created_at = new Date().toISOString();
-    this.updated_at = new Date().toISOString();
   }
 
   $beforeUpdate() {
-    this.updated_at = new Date().toISOString();
+    // comments table has no updated_at column
   }
 }

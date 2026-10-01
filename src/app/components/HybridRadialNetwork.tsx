@@ -3,7 +3,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import * as d3 from "d3";
-import { HierarchyPointNode } from "d3-hierarchy";
 import { Insight, InsightLink } from "../types";
 import styles from "../../styles/components/network.module.css";
 
@@ -19,6 +18,20 @@ interface HybridNetworkProps {
   onNodeClick?: (insight: Insight) => void;
 }
 
+type SimNode = d3.SimulationNodeDatum & {
+  id: string;
+  insight: Insight;
+  depth: number;
+  hasChildren: boolean;
+};
+
+type SimLink = d3.SimulationLinkDatum<SimNode> & {
+  kind: "hierarchy" | "cross";
+};
+
+const clamp = (value: number, min: number, max: number) =>
+  Math.max(min, Math.min(max, value));
+
 const HybridRadialNetwork: React.FC<HybridNetworkProps> = ({
   data,
   crossLinks,
@@ -27,8 +40,21 @@ const HybridRadialNetwork: React.FC<HybridNetworkProps> = ({
   const router = useRouter();
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const zoomApiRef = useRef<{
+    zoomBy: (factor: number) => void;
+    fit: () => void;
+  } | null>(null);
   const [totalNodeCount, setTotalNodeCount] = useState(0);
   const [size, setSize] = useState({ width: 640, height: 360 });
+  const [canZoom, setCanZoom] = useState(false);
+  const [preview, setPreview] = useState<{
+    insight: Insight;
+    depth: number;
+    hasChildren: boolean;
+    left: number;
+    top: number;
+  } | null>(null);
+  const hidePreviewTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleNodeNavigate = useMemo(
     () => (insight: Insight) => {
@@ -49,9 +75,13 @@ const HybridRadialNetwork: React.FC<HybridNetworkProps> = ({
 
     const update = () => {
       const rect = el.getBoundingClientRect();
-      const width = Math.max(200, Math.floor(rect.width));
-      const height = Math.max(160, Math.floor(rect.height));
-      setSize({ width, height });
+      const width = Math.max(240, Math.floor(rect.width));
+      const height = Math.max(220, Math.floor(rect.height));
+      setSize((prev) =>
+        prev.width === width && prev.height === height
+          ? prev
+          : { width, height },
+      );
     };
 
     update();
@@ -61,11 +91,18 @@ const HybridRadialNetwork: React.FC<HybridNetworkProps> = ({
   }, []);
 
   useEffect(() => {
-    if (!data || data.length === 0 || !svgRef.current) {
+    if (!svgRef.current) return;
+
+    const svgEl = svgRef.current;
+    const width = size.width;
+    const height = size.height;
+
+    if (!data || data.length === 0) {
       setTotalNodeCount(0);
-      if (svgRef.current) {
-        d3.select(svgRef.current).selectAll("*").remove();
-      }
+      setCanZoom(false);
+      setPreview(null);
+      zoomApiRef.current = null;
+      d3.select(svgEl).selectAll("*").remove();
       return;
     }
 
@@ -91,47 +128,165 @@ const HybridRadialNetwork: React.FC<HybridNetworkProps> = ({
 
     populateMap(data);
 
-    const rootData: Partial<Insight> & { uid: string; title: string } = {
-      uid: "synthetic-root",
-      title: "All My Insights",
-      children: data
-        .filter(
-          (i) =>
-            !i.parents ||
-            i.parents.length === 0 ||
-            !i.parents.some(
-              (p) => p.parentInsight && insightMap.has(p.parentInsight.uid!),
-            ),
-        )
-        .map((i) => ({
-          childInsight: i,
-          child_id: i.id!,
-          parent_id: 0,
-        })),
+    const resolveChild = (link: InsightLink): Insight | undefined => {
+      const fallbackUid = (link as unknown as Partial<Insight>).uid;
+      const childObj = link.childInsight
+        ? insightMap.get(link.childInsight.uid!) || link.childInsight
+        : fallbackUid
+          ? insightMap.get(fallbackUid) || (link as unknown as Insight)
+          : undefined;
+      return childObj && childObj.title ? childObj : undefined;
     };
 
-    const getChildren = (d: Partial<Insight>) => {
-      if (!d.children || d.children.length === 0) return null;
-      return d.children
-        .map((link: InsightLink) => {
-          const fallbackUid = (link as unknown as Partial<Insight>).uid;
-          const childObj = link.childInsight
-            ? insightMap.get(link.childInsight.uid!) || link.childInsight
-            : fallbackUid
-              ? insightMap.get(fallbackUid) || (link as unknown as Insight)
-              : undefined;
-          return childObj;
-        })
-        .filter((i): i is Insight => !!i && !!i.title);
+    const roots = data.filter(
+      (i) =>
+        !!i.uid &&
+        (!i.parents ||
+          i.parents.length === 0 ||
+          !i.parents.some(
+            (p) => p.parentInsight && insightMap.has(p.parentInsight.uid!),
+          )),
+    );
+
+    const nodes: SimNode[] = [];
+    const nodeById = new Map<string, SimNode>();
+    const links: SimLink[] = [];
+    const linkKeys = new Set<string>();
+
+    const addNode = (insight: Insight, depth: number) => {
+      if (!insight.uid || nodeById.has(insight.uid)) {
+        return nodeById.get(insight.uid!);
+      }
+      const hasChildren = !!(
+        insight.children &&
+        insight.children.some((link) => !!resolveChild(link))
+      );
+      const node: SimNode = {
+        id: insight.uid,
+        insight,
+        depth,
+        hasChildren,
+      };
+      nodes.push(node);
+      nodeById.set(insight.uid, node);
+      return node;
     };
 
-    const width = size.width;
-    const height = size.height;
-    const radius = Math.min(width, height) / 2;
+    const addLink = (
+      sourceId: string,
+      targetId: string,
+      kind: SimLink["kind"],
+    ) => {
+      const key = `${kind}:${sourceId}->${targetId}`;
+      if (linkKeys.has(key) || sourceId === targetId) return;
+      if (!nodeById.has(sourceId) || !nodeById.has(targetId)) return;
+      linkKeys.add(key);
+      links.push({ source: sourceId, target: targetId, kind });
+    };
+
+    const walk = (insight: Insight, depth: number) => {
+      addNode(insight, depth);
+      if (!insight.children?.length || !insight.uid) return;
+      for (const link of insight.children) {
+        const child = resolveChild(link);
+        if (!child?.uid) continue;
+        const existed = nodeById.has(child.uid);
+        addNode(child, existed ? nodeById.get(child.uid)!.depth : depth + 1);
+        addLink(insight.uid, child.uid, "hierarchy");
+        if (!existed) walk(child, depth + 1);
+      }
+    };
+
+    for (const root of roots) {
+      walk(root, 0);
+    }
+
+    // Include any filtered insights that weren't reachable as children
+    for (const insight of data) {
+      if (insight.uid && !nodeById.has(insight.uid)) {
+        walk(insight, 0);
+      }
+    }
+
+    for (const cross of crossLinks) {
+      addLink(cross.sourceId, cross.targetId, "cross");
+    }
+
+    setTotalNodeCount(nodes.length);
+
+    if (nodes.length === 0) {
+      d3.select(svgEl).selectAll("*").remove();
+      return;
+    }
+
+    const area = width * height;
+    const density = Math.sqrt(area / Math.max(nodes.length, 1));
+    const isCompact = width < 520 || nodes.length > 18;
+    const cardWidth = clamp(
+      density * (isCompact ? 0.58 : 0.7),
+      isCompact ? 152 : 176,
+      isCompact ? 196 : 240,
+    );
+    const cardHeight = clamp(
+      cardWidth * 0.46,
+      isCompact ? 70 : 78,
+      isCompact ? 92 : 104,
+    );
+    // Circle must clear the full rectangle, plus breathing room between cards
+    const collideRadius = Math.hypot(cardWidth, cardHeight) / 2 + 28;
+    const linkDistance = Math.max(collideRadius * 2.15, clamp(density * 0.9, 140, 280));
+    const chargeStrength = -clamp(area / (nodes.length * 4.2), 220, 900);
+
+    const titleType = (raw: string | undefined) => {
+      const text = (raw || "Untitled").trim() || "Untitled";
+      const len = text.length;
+      const availW = cardWidth - 28;
+      const availH = cardHeight - 22;
+      const targetLines = len <= 22 ? 1 : len <= 48 ? 2 : 3;
+      const charsPerLine = Math.max(10, Math.ceil(len / targetLines));
+      const fromWidth = availW / (charsPerLine * 0.52);
+      const fromHeight = availH / (targetLines * 1.28);
+      const fontSize = clamp(Math.min(fromWidth, fromHeight), 12.5, 16);
+      const lengthClass =
+        len <= 22
+          ? styles.nodeTitleShort
+          : len <= 48
+            ? styles.nodeTitleMedium
+            : styles.nodeTitleLong;
+      return { text, fontSize, lengthClass, targetLines };
+    };
+
+    // Seed on a viewport-filling grid so spacing starts even
+    const aspect = width / Math.max(height, 1);
+    const cols = Math.max(
+      1,
+      Math.ceil(Math.sqrt(nodes.length * aspect)),
+    );
+    const rows = Math.max(1, Math.ceil(nodes.length / cols));
+    const marginX = cardWidth * 0.55 + 24;
+    const marginY = cardHeight * 0.55 + 24;
+    const usableW = Math.max(width - marginX * 2, cardWidth);
+    const usableH = Math.max(height - marginY * 2, cardHeight);
+    const stepX = cols === 1 ? 0 : usableW / (cols - 1 || 1);
+    const stepY = rows === 1 ? 0 : usableH / (rows - 1 || 1);
+    nodes.forEach((node, index) => {
+      const col = index % cols;
+      const row = Math.floor(index / cols);
+      const jitterX = ((index * 37) % 11) - 5;
+      const jitterY = ((index * 53) % 11) - 5;
+      node.x =
+        cols === 1
+          ? width / 2
+          : marginX + stepX * col + jitterX;
+      node.y =
+        rows === 1
+          ? height / 2
+          : marginY + stepY * row + jitterY;
+    });
 
     const svg = d3
-      .select(svgRef.current)
-      .attr("viewBox", `${-width / 2} ${-height / 2} ${width} ${height}`)
+      .select(svgEl)
+      .attr("viewBox", `0 0 ${width} ${height}`)
       .attr("preserveAspectRatio", "xMidYMid meet");
 
     svg.selectAll("*").remove();
@@ -140,147 +295,410 @@ const HybridRadialNetwork: React.FC<HybridNetworkProps> = ({
 
     const zoomBehavior = d3
       .zoom<SVGSVGElement, unknown>()
-      .scaleExtent([0.25, 3])
+      .scaleExtent([0.2, 3.5])
+      .filter((event) => {
+        // Allow wheel/pinch/drag; ignore right-click
+        if (event.type === "wheel") return true;
+        return !event.ctrlKey && event.button === 0;
+      })
+      .on("start", () => {
+        setPreview(null);
+      })
       .on("zoom", (event) => {
         zoomGroup.attr("transform", event.transform);
       });
 
     svg.call(zoomBehavior);
+    // Disable double-click zoom — we use dblclick to fit instead
+    svg.on("dblclick.zoom", null);
 
-    const treeLayout = d3
-      .tree<Partial<Insight>>()
-      .size([2 * Math.PI, Math.max(80, radius - 90)])
-      .separation((a, b) => (a.parent === b.parent ? 1 : 2) / a.depth);
+    const hierarchyLinks = links.filter((l) => l.kind === "hierarchy");
+    const crossLinkData = links.filter((l) => l.kind === "cross");
 
-    const root = treeLayout(d3.hierarchy(rootData, getChildren));
-
-    const realNodesCount = root.descendants().filter((d) => d.parent).length;
-    setTotalNodeCount(realNodesCount);
-
-    const levelRadiusStep = Math.max(110, Math.min(180, radius * 0.42));
-    root.each((d) => {
-      d.y = d.depth * levelRadiusStep;
-    });
-
-    zoomGroup
+    const linkLayer = zoomGroup
       .append("g")
+      .attr("class", "hierarchy-links")
       .attr("fill", "none")
       .attr("stroke", "currentColor")
-      .attr("stroke-opacity", 0.28)
+      .attr("stroke-opacity", 0.3)
       .attr("stroke-width", 1.5)
-      .selectAll("path")
-      .data(root.links())
-      .join("path")
-      .attr(
-        "d",
-        d3
-          .linkRadial<
-            d3.HierarchyLink<Partial<Insight>>,
-            HierarchyPointNode<Partial<Insight>>
-          >()
-          .angle((d) => d.x)
-          .radius((d) => d.y),
-      );
+      .selectAll("line")
+      .data(hierarchyLinks)
+      .join("line");
 
-    const isCompact = width < 520;
-    const cardWidth = isCompact ? 112 : 148;
-    const cardHeight = isCompact ? 52 : 64;
-
-    const node = zoomGroup
+    const crossLayer = zoomGroup
       .append("g")
-      .selectAll("g")
-      .data(root.descendants())
-      .join("g")
-      .attr("class", "network-node")
-      .style("cursor", (d) => (d.parent && d.data.uid ? "pointer" : "default"))
-      .attr("transform", (d) => {
-        if (!d.parent) return "translate(0,0)";
-        const isRightHalf = d.x < Math.PI;
-        const angle = (d.x * 180) / Math.PI - 90;
-        return `rotate(${angle}) translate(${d.y},0) ${
-          isRightHalf ? "" : "rotate(180)"
-        }`;
-      })
-      .on("click", (event, d) => {
-        event.stopPropagation();
-        if (!d.parent || !d.data.uid) return;
-        handleNodeNavigate(d.data as Insight);
-      });
-
-    node
-      .append("foreignObject")
-      .attr("width", cardWidth)
-      .attr("height", cardHeight)
-      .attr("x", (d) => {
-        if (!d.parent) return -cardWidth / 2;
-        return d.x < Math.PI ? 10 : -cardWidth - 10;
-      })
-      .attr("y", -cardHeight / 2)
-      .append("xhtml:div")
-      .attr("xmlns", "http://www.w3.org/1999/xhtml")
-      .style("width", "100%")
-      .style("height", "100%")
-      .style("box-sizing", "border-box")
-      .style("background-color", (d) =>
-        !d.parent
-          ? "var(--color-accent, #c45c26)"
-          : d.children
-            ? "color-mix(in oklab, var(--color-accent, #c45c26) 78%, #1a1a1a)"
-            : "var(--color-bg-elev, #fff)",
-      )
-      .style("color", (d) =>
-        !d.parent || d.children
-          ? "#fff"
-          : "var(--color-text, #1a1a1a)",
-      )
-      .style("border", (d) =>
-        !d.parent || d.children
-          ? "0"
-          : "1px solid var(--color-border, #ddd)",
-      )
-      .style("border-radius", "10px")
-      .style("padding", isCompact ? "8px 10px" : "10px 12px")
-      .style("font-size", isCompact ? "10px" : "11px")
-      .style("font-weight", "600")
-      .style("line-height", "1.3")
-      .style("display", "flex")
-      .style("align-items", "center")
-      .style("justify-content", "center")
-      .style("text-align", "center")
-      .style("word-break", "break-word")
-      .style("overflow", "hidden")
-      .style("box-shadow", "0 2px 8px rgba(0,0,0,0.12)")
-      .html((d) => d.data.title!);
-
-    const nodeMap = new Map(
-      root
-        .descendants()
-        .filter((d) => d.data.uid)
-        .map((d) => [d.data.uid!, d]),
-    );
-
-    zoomGroup
-      .append("g")
+      .attr("class", "cross-links")
+      .attr("fill", "none")
       .attr("stroke", "var(--color-accent-2, #c62828)")
       .attr("stroke-width", 1.5)
       .attr("stroke-dasharray", "4,4")
-      .attr("fill", "none")
-      .selectAll("path")
-      .data(crossLinks)
-      .join("path")
-      .attr("d", (d) => {
-        const source = nodeMap.get(d.sourceId);
-        const target = nodeMap.get(d.targetId);
-        if (!source || !target) return "";
+      .attr("stroke-opacity", 0.75)
+      .selectAll("line")
+      .data(crossLinkData)
+      .join("line");
 
-        const x1 = source.y * Math.cos(source.x - Math.PI / 2);
-        const y1 = source.y * Math.sin(source.x - Math.PI / 2);
-        const x2 = target.y * Math.cos(target.x - Math.PI / 2);
-        const y2 = target.y * Math.sin(target.x - Math.PI / 2);
-
-        return `M${x1},${y1} Q 0,0 ${x2},${y2}`;
+    const nodeLayer = zoomGroup
+      .append("g")
+      .attr("class", "nodes")
+      .selectAll("g")
+      .data(nodes)
+      .join("g")
+      .attr("class", styles.networkNode)
+      .style("cursor", "pointer")
+      .on("click", (event, d) => {
+        event.stopPropagation();
+        handleNodeNavigate(d.insight);
       });
+
+    const adjacency = new Map<string, Set<string>>();
+    for (const link of links) {
+      const sourceId =
+        typeof link.source === "object"
+          ? (link.source as SimNode).id
+          : String(link.source);
+      const targetId =
+        typeof link.target === "object"
+          ? (link.target as SimNode).id
+          : String(link.target);
+      if (!adjacency.has(sourceId)) adjacency.set(sourceId, new Set());
+      if (!adjacency.has(targetId)) adjacency.set(targetId, new Set());
+      adjacency.get(sourceId)!.add(targetId);
+      adjacency.get(targetId)!.add(sourceId);
+    }
+
+    const clearFocus = () => {
+      nodeLayer.classed(styles.nodeDimmed, false);
+      nodeLayer.classed(styles.nodeFocused, false);
+      linkLayer.classed(styles.linkDimmed, false);
+      linkLayer.classed(styles.linkFocused, false);
+      crossLayer.classed(styles.linkDimmed, false);
+      crossLayer.classed(styles.linkFocused, false);
+    };
+
+    const focusNode = (id: string) => {
+      const connected = adjacency.get(id) ?? new Set<string>();
+      nodeLayer.classed(
+        styles.nodeDimmed,
+        (n) => n.id !== id && !connected.has(n.id),
+      );
+      nodeLayer.classed(styles.nodeFocused, (n) => n.id === id);
+      const isTouching = (l: SimLink) => {
+        const s =
+          typeof l.source === "object" ? (l.source as SimNode).id : String(l.source);
+        const t =
+          typeof l.target === "object" ? (l.target as SimNode).id : String(l.target);
+        return s === id || t === id;
+      };
+      linkLayer.classed(styles.linkDimmed, (l) => !isTouching(l));
+      linkLayer.classed(styles.linkFocused, (l) => isTouching(l));
+      crossLayer.classed(styles.linkDimmed, (l) => !isTouching(l));
+      crossLayer.classed(styles.linkFocused, (l) => isTouching(l));
+    };
+
+    let isDragging = false;
+
+    const cancelHidePreview = () => {
+      if (hidePreviewTimer.current) {
+        clearTimeout(hidePreviewTimer.current);
+        hidePreviewTimer.current = null;
+      }
+    };
+
+    const hidePreview = () => {
+      cancelHidePreview();
+      hidePreviewTimer.current = setTimeout(() => setPreview(null), 60);
+    };
+
+    const showPreviewFor = (d: SimNode) => {
+      if (isDragging || d.x == null || d.y == null) return;
+      cancelHidePreview();
+      const transform = d3.zoomTransform(svgEl);
+      const scale = transform.k;
+      const px = transform.applyX(d.x);
+      const py = transform.applyY(d.y);
+      const halfW = (cardWidth / 2) * scale;
+      const halfH = (cardHeight / 2) * scale;
+      const previewW = Math.min(288, width - 20);
+      const previewH = 148;
+      const gap = 12;
+
+      let left = px + halfW + gap;
+      if (left + previewW > width - 10) {
+        left = px - halfW - gap - previewW;
+      }
+      left = clamp(left, 10, Math.max(10, width - previewW - 10));
+
+      let top = py - previewH * 0.35;
+      if (top + previewH > height - 10) top = height - previewH - 10;
+      if (top < 10) top = 10;
+      // If still covering the node heavily, nudge below/above
+      if (Math.abs(top + previewH / 2 - py) < halfH) {
+        top = py + halfH + gap;
+        if (top + previewH > height - 10) top = py - halfH - gap - previewH;
+        top = clamp(top, 10, Math.max(10, height - previewH - 10));
+      }
+
+      setPreview({
+        insight: d.insight,
+        depth: d.depth,
+        hasChildren: d.hasChildren,
+        left,
+        top,
+      });
+    };
+
+    nodeLayer
+      .on("mouseenter", (_event, d) => {
+        focusNode(d.id);
+        showPreviewFor(d);
+      })
+      .on("mouseleave", () => {
+        clearFocus();
+        hidePreview();
+      });
+
+    nodeLayer
+      .append("foreignObject")
+      .attr("class", styles.nodeForeign)
+      .attr("width", cardWidth)
+      .attr("height", cardHeight)
+      .attr("x", -cardWidth / 2)
+      .attr("y", -cardHeight / 2)
+      .style("overflow", "visible")
+      .append("xhtml:div")
+      .attr("xmlns", "http://www.w3.org/1999/xhtml")
+      .attr(
+        "class",
+        (d) =>
+          `${styles.nodeCard}${d.depth === 0 ? ` ${styles.nodeCardRoot}` : ""}${
+            d.hasChildren && d.depth > 0 ? ` ${styles.nodeCardBranch}` : ""
+          }`,
+      )
+      .each(function (d) {
+        const { text, fontSize, lengthClass, targetLines } = titleType(
+          d.insight.title,
+        );
+        const card = d3.select(this);
+        card
+          .style("font-size", `${fontSize}px`)
+          .style("font-weight", "600")
+          .style("text-align", "left")
+          .style("justify-content", "flex-start")
+          .style("align-items", "center");
+        card
+          .append("xhtml:span")
+          .attr("class", `${styles.nodeTitle} ${lengthClass}`)
+          .style("display", "-webkit-box")
+          .style("-webkit-box-orient", "vertical")
+          .style("-webkit-line-clamp", String(targetLines))
+          .style("overflow", "hidden")
+          .style("text-align", "left")
+          .style("font-weight", "600")
+          .style("width", "100%")
+          .text(text);
+      });
+
+    const simulation = d3
+      .forceSimulation<SimNode>(nodes)
+      .force(
+        "link",
+        d3
+          .forceLink<SimNode, SimLink>(links)
+          .id((d) => d.id)
+          .distance((d) =>
+            d.kind === "cross" ? linkDistance * 1.1 : linkDistance,
+          )
+          .strength((d) => (d.kind === "cross" ? 0.12 : 0.28)),
+      )
+      .force(
+        "charge",
+        d3
+          .forceManyBody<SimNode>()
+          .strength(chargeStrength)
+          .distanceMin(collideRadius)
+          .distanceMax(Math.max(width, height) * 0.9),
+      )
+      .force(
+        "collide",
+        d3
+          .forceCollide<SimNode>()
+          .radius(collideRadius)
+          .strength(1)
+          .iterations(4),
+      )
+      .force("x", d3.forceX<SimNode>(width / 2).strength(0.018))
+      .force("y", d3.forceY<SimNode>(height / 2).strength(0.022))
+      .force("bounds", (alpha) => {
+        const padX = cardWidth / 2 + 20;
+        const padY = cardHeight / 2 + 20;
+        const strength = 0.35 * alpha;
+        for (const node of nodes) {
+          if (node.x == null || node.y == null) continue;
+          if (node.x < padX) node.vx = (node.vx ?? 0) + (padX - node.x) * strength;
+          if (node.x > width - padX) {
+            node.vx = (node.vx ?? 0) + (width - padX - node.x) * strength;
+          }
+          if (node.y < padY) node.vy = (node.vy ?? 0) + (padY - node.y) * strength;
+          if (node.y > height - padY) {
+            node.vy = (node.vy ?? 0) + (height - padY - node.y) * strength;
+          }
+        }
+      })
+      .alpha(1)
+      .alphaDecay(0.016)
+      .velocityDecay(0.32);
+
+    const linkSource = (d: SimLink) => d.source as SimNode;
+    const linkTarget = (d: SimLink) => d.target as SimNode;
+
+    const fitToViewport = (animate: boolean) => {
+      if (nodes.length === 0) return;
+
+      let minX = Infinity;
+      let minY = Infinity;
+      let maxX = -Infinity;
+      let maxY = -Infinity;
+
+      for (const node of nodes) {
+        if (node.x == null || node.y == null) continue;
+        minX = Math.min(minX, node.x - cardWidth / 2);
+        minY = Math.min(minY, node.y - cardHeight / 2);
+        maxX = Math.max(maxX, node.x + cardWidth / 2);
+        maxY = Math.max(maxY, node.y + cardHeight / 2);
+      }
+
+      if (!Number.isFinite(minX) || !Number.isFinite(minY)) return;
+
+      const boundsWidth = Math.max(maxX - minX, 1);
+      const boundsHeight = Math.max(maxY - minY, 1);
+      const pad = Math.max(24, Math.min(width, height) * 0.05);
+      // Never zoom in past 1 — keep the spread that fills the canvas
+      const scale = clamp(
+        Math.min(
+          (width - pad * 2) / boundsWidth,
+          (height - pad * 2) / boundsHeight,
+        ),
+        0.45,
+        1,
+      );
+      const tx = width / 2 - scale * (minX + boundsWidth / 2);
+      const ty = height / 2 - scale * (minY + boundsHeight / 2);
+      const transform = d3.zoomIdentity.translate(tx, ty).scale(scale);
+
+      if (animate) {
+        svg
+          .transition()
+          .duration(450)
+          .ease(d3.easeCubicOut)
+          .call(zoomBehavior.transform, transform);
+      } else {
+        svg.call(zoomBehavior.transform, transform);
+      }
+    };
+
+    const zoomBy = (factor: number) => {
+      svg
+        .transition()
+        .duration(180)
+        .ease(d3.easeCubicOut)
+        .call(zoomBehavior.scaleBy, factor);
+    };
+
+    zoomApiRef.current = { zoomBy, fit: () => fitToViewport(true) };
+    setCanZoom(true);
+
+    svg.on("dblclick.fit", (event) => {
+      event.preventDefault();
+      fitToViewport(true);
+    });
+
+    let fitted = false;
+
+    simulation.on("tick", () => {
+      linkLayer
+        .attr("x1", (d) => linkSource(d).x ?? 0)
+        .attr("y1", (d) => linkSource(d).y ?? 0)
+        .attr("x2", (d) => linkTarget(d).x ?? 0)
+        .attr("y2", (d) => linkTarget(d).y ?? 0);
+
+      crossLayer
+        .attr("x1", (d) => linkSource(d).x ?? 0)
+        .attr("y1", (d) => linkSource(d).y ?? 0)
+        .attr("x2", (d) => linkTarget(d).x ?? 0)
+        .attr("y2", (d) => linkTarget(d).y ?? 0);
+
+      nodeLayer.attr(
+        "transform",
+        (d) => `translate(${d.x ?? 0},${d.y ?? 0})`,
+      );
+
+      if (!fitted && simulation.alpha() < 0.12) {
+        fitted = true;
+        fitToViewport(true);
+      }
+    });
+
+    simulation.on("end", () => {
+      if (!fitted) fitToViewport(true);
+    });
+
+    const drag = d3
+      .drag<SVGGElement, SimNode>()
+      .on("start", (event, d) => {
+        isDragging = true;
+        setPreview(null);
+        clearFocus();
+        if (!event.active) simulation.alphaTarget(0.25).restart();
+        d.fx = d.x;
+        d.fy = d.y;
+      })
+      .on("drag", (event, d) => {
+        d.fx = event.x;
+        d.fy = event.y;
+      })
+      .on("end", (event, d) => {
+        isDragging = false;
+        if (!event.active) simulation.alphaTarget(0);
+        d.fx = null;
+        d.fy = null;
+      });
+
+    (
+      nodeLayer as unknown as d3.Selection<SVGGElement, SimNode, SVGGElement, unknown>
+    ).call(drag);
+
+    return () => {
+      simulation.stop();
+      clearFocus();
+      cancelHidePreview();
+      setPreview(null);
+      zoomApiRef.current = null;
+      setCanZoom(false);
+      svg.on(".zoom", null);
+      svg.on("dblclick.fit", null);
+    };
   }, [data, crossLinks, size, handleNodeNavigate]);
+
+  const handleZoomIn = () => zoomApiRef.current?.zoomBy(1.28);
+  const handleZoomOut = () => zoomApiRef.current?.zoomBy(1 / 1.28);
+  const handleFit = () => zoomApiRef.current?.fit();
+
+  const handleCanvasKeyDown = (
+    event: React.KeyboardEvent<HTMLDivElement>,
+  ) => {
+    if (!canZoom) return;
+    if (event.key === "+" || event.key === "=") {
+      event.preventDefault();
+      handleZoomIn();
+    } else if (event.key === "-" || event.key === "_") {
+      event.preventDefault();
+      handleZoomOut();
+    } else if (event.key === "0") {
+      event.preventDefault();
+      handleFit();
+    }
+  };
 
   return (
     <div className={styles.networkRoot}>
@@ -292,11 +710,115 @@ const HybridRadialNetwork: React.FC<HybridNetworkProps> = ({
                 (totalNodeCount || data.length) === 1 ? "" : "s"
               } in network`}
         </span>
-        <span className={styles.networkHint}>Pinch or drag to explore</span>
+        <span className={styles.networkHint}>
+          Hover for details · click to open
+        </span>
       </div>
 
-      <div ref={containerRef} className={styles.networkCanvas}>
-        <svg ref={svgRef} className={styles.networkSvg} role="img" aria-label="Insights network" />
+      <div
+        ref={containerRef}
+        className={styles.networkCanvas}
+        tabIndex={canZoom ? 0 : -1}
+        onKeyDown={handleCanvasKeyDown}
+        aria-label="Insights network canvas"
+      >
+        <svg
+          ref={svgRef}
+          className={styles.networkSvg}
+          role="img"
+          aria-label="Insights network"
+        />
+
+        {canZoom && (
+          <div className={styles.zoomControls} role="group" aria-label="Zoom">
+            <button
+              type="button"
+              className={styles.zoomBtn}
+              onClick={handleZoomIn}
+              aria-label="Zoom in"
+              title="Zoom in"
+            >
+              <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                <path
+                  d="M8 3.25v9.5M3.25 8h9.5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </button>
+            <button
+              type="button"
+              className={styles.zoomBtn}
+              onClick={handleZoomOut}
+              aria-label="Zoom out"
+              title="Zoom out"
+            >
+              <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                <path
+                  d="M3.25 8h9.5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </button>
+            <button
+              type="button"
+              className={`${styles.zoomBtn} ${styles.zoomBtnFit}`}
+              onClick={handleFit}
+              aria-label="Fit network to view"
+              title="Fit to view"
+            >
+              <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                <path
+                  d="M3 6V3h3M10 3h3v3M13 10v3h-3M6 13H3v-3"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
+        )}
+
+        {preview && (
+          <aside
+            className={`${styles.nodePreview}${
+              preview.depth === 0 ? ` ${styles.nodePreviewRoot}` : ""
+            }`}
+            style={{ left: preview.left, top: preview.top }}
+            aria-hidden
+          >
+            <p className={styles.nodePreviewTitle}>
+              {preview.insight.title || "Untitled insight"}
+            </p>
+            {preview.insight.description ? (
+              <p className={styles.nodePreviewBody}>
+                {preview.insight.description}
+              </p>
+            ) : (
+              <p className={styles.nodePreviewBodyMuted}>No description yet</p>
+            )}
+            <div className={styles.nodePreviewMeta}>
+              <span>
+                {`${preview.insight.evidence?.length ?? 0} citation${
+                  (preview.insight.evidence?.length ?? 0) === 1 ? "" : "s"
+                }`}
+              </span>
+              <span>
+                {`${preview.insight.children?.length ?? 0} child${
+                  (preview.insight.children?.length ?? 0) === 1 ? "" : "ren"
+                }`}
+              </span>
+              <span className={styles.nodePreviewHint}>Click to open</span>
+            </div>
+          </aside>
+        )}
       </div>
     </div>
   );

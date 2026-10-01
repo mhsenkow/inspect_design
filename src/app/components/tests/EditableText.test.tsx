@@ -1,5 +1,5 @@
 import React from "react";
-import { render, fireEvent } from "@testing-library/react";
+import { render, fireEvent, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
@@ -13,6 +13,7 @@ const mockFetch = (data: any, rejectMessage: any = null): (() => any) =>
       return Promise.resolve({
         ok: true,
         json: () => data,
+        text: async () => JSON.stringify(data ?? {}),
         status: 200,
       });
     }
@@ -44,7 +45,7 @@ describe("EditableText", () => {
           fieldName={"title"}
         />,
       );
-      await userEvent.click(getByText("🖊"));
+      await userEvent.click(screen.getByRole("button", { name: /Edit /i }));
       expect(getByDisplayValue("Test Title")).toBeInTheDocument();
     });
 
@@ -55,12 +56,12 @@ describe("EditableText", () => {
           fieldName={"title"}
         />,
       );
-      await userEvent.click(getByText("🖊"));
+      await userEvent.click(screen.getByRole("button", { name: /Edit /i }));
       expect(getByDisplayValue("Test Title")).toBeInTheDocument();
       const textarea = getByDisplayValue("Test Title");
       await userEvent.type(textarea, "!");
 
-      const button = getByText("Submit");
+      const button = screen.getByRole("button", { name: /Save/i });
       await userEvent.click(button);
       expect(queryByDisplayValue("Test Title")).not.toBeInTheDocument();
     });
@@ -72,7 +73,7 @@ describe("EditableText", () => {
           fieldName={"title"}
         />,
       );
-      await userEvent.click(getByText("🖊"));
+      await userEvent.click(screen.getByRole("button", { name: /Edit /i }));
       expect(getByDisplayValue("Test Title")).toBeInTheDocument();
 
       const button = getByText("Cancel");
@@ -87,12 +88,12 @@ describe("EditableText", () => {
           fieldName={"title"}
         />,
       );
-      await userEvent.click(getByText("🖊"));
+      await userEvent.click(screen.getByRole("button", { name: /Edit /i }));
       const textarea = getByDisplayValue("Test Title");
       fireEvent.change(textarea, { target: { value: "" } });
       expect(getByDisplayValue("")).toBeInTheDocument();
 
-      await expect(getByText("Submit")).toBeDisabled();
+      await expect(screen.getByRole("button", { name: /Save/i })).toBeDisabled();
     });
 
     it("calls fetch on submit", async () => {
@@ -103,12 +104,12 @@ describe("EditableText", () => {
           fieldName={"title"}
         />,
       );
-      await userEvent.click(getByText("🖊"));
+      await userEvent.click(screen.getByRole("button", { name: /Edit /i }));
       const textarea = getByDisplayValue("Test Title");
       expect(textarea).toBeInTheDocument();
       await userEvent.type(textarea, "!");
 
-      const button = await findByText("Submit");
+      const button = await screen.findByRole("button", { name: /Save/i });
       await userEvent.click(button);
       expect(window.fetch).toHaveBeenCalledWith("/api/asdf", {
         method: "PATCH",
@@ -127,7 +128,7 @@ describe("EditableText", () => {
           fieldName={"title"}
         />,
       );
-      await userEvent.click(getByText("🖊"));
+      await userEvent.click(screen.getByRole("button", { name: /Edit /i }));
       const textarea = getByDisplayValue("Test Title");
       await userEvent.type(textarea, "!");
       expect((textarea as HTMLTextAreaElement).value).toBe("Test Title!");
@@ -143,26 +144,37 @@ describe("EditableText", () => {
       const consoleErrorMock = jest
         .spyOn(console, "error")
         .mockImplementation(() => {});
-      consoleErrorMock.mockRestore();
+      const alertMock = jest.spyOn(window, "alert").mockImplementation(() => {});
+      window.fetch = jest.fn().mockResolvedValue({
+        ok: false,
+        status: 400,
+        statusText: "Bad Request",
+        text: async () =>
+          JSON.stringify({ statusText: "title, description, or is_public is required" }),
+      });
 
-      const { getByText, getByDisplayValue } = render(
+      const { getByDisplayValue } = render(
         <EditableText
           apiRoot="/api"
           insight={{ title: "Test Title", uid: "asdf" } as Insight}
           fieldName={"title"}
         />,
       );
-      await userEvent.click(getByText("🖊"));
+      await userEvent.click(screen.getByRole("button", { name: /Edit /i }));
       const textarea = getByDisplayValue("Test Title");
       expect(textarea).toBeInTheDocument();
       await userEvent.type(textarea, "!");
       expect(textarea).toHaveValue("Test Title!");
 
-      const button = getByText("Submit");
+      const button = screen.getByRole("button", { name: /Save/i });
       await userEvent.click(button);
 
       expect(window.fetch).toHaveBeenCalled();
-      expect(getByText("Test Title!")).toBeInTheDocument(); // Title remains unchanged
+      expect(alertMock).toHaveBeenCalled();
+      // Stays in edit mode with the typed value
+      expect(getByDisplayValue("Test Title!")).toBeInTheDocument();
+      consoleErrorMock.mockRestore();
+      alertMock.mockRestore();
     });
 
     it("resets title to original value on cancel after editing", async () => {
@@ -172,7 +184,7 @@ describe("EditableText", () => {
           fieldName={"title"}
         />,
       );
-      await userEvent.click(getByText("🖊"));
+      await userEvent.click(screen.getByRole("button", { name: /Edit /i }));
       const textarea = getByDisplayValue("Original Title");
       await userEvent.type(textarea, " Updated");
       expect((textarea as HTMLTextAreaElement).value).toBe(
@@ -203,11 +215,11 @@ describe("EditableText", () => {
           fieldName={"title"}
         />,
       );
-      await userEvent.click(getByText("🖊"));
+      await userEvent.click(screen.getByRole("button", { name: /Edit /i }));
       const textarea = getByDisplayValue("Unchanged Title");
       expect(textarea).toBeInTheDocument();
 
-      const submitButton = getByText("Submit");
+      const submitButton = screen.getByRole("button", { name: /Save/i });
       await userEvent.click(submitButton);
 
       expect(window.fetch).not.toHaveBeenCalled();
@@ -233,7 +245,7 @@ describe("EditableText", () => {
           isTextarea={true}
         />,
       );
-      await userEvent.click(getByText("🖊"));
+      await userEvent.click(screen.getByRole("button", { name: /Edit /i }));
       expect(getByDisplayValue("Test Description")).toBeInTheDocument();
     });
 
@@ -245,12 +257,12 @@ describe("EditableText", () => {
           isTextarea={true}
         />,
       );
-      await userEvent.click(getByText("🖊"));
+      await userEvent.click(screen.getByRole("button", { name: /Edit /i }));
       expect(getByDisplayValue("Test Description")).toBeInTheDocument();
       const textarea = getByDisplayValue("Test Description");
       await userEvent.type(textarea, "!");
 
-      const button = getByText("Submit");
+      const button = screen.getByRole("button", { name: /Save/i });
       await userEvent.click(button);
       expect(queryByDisplayValue("Test Description")).not.toBeInTheDocument();
     });
@@ -263,7 +275,7 @@ describe("EditableText", () => {
           isTextarea={true}
         />,
       );
-      await userEvent.click(getByText("🖊"));
+      await userEvent.click(screen.getByRole("button", { name: /Edit /i }));
       expect(getByDisplayValue("Test Description")).toBeInTheDocument();
 
       const button = getByText("Cancel");
@@ -280,12 +292,12 @@ describe("EditableText", () => {
           isTextarea={true}
         />,
       );
-      await userEvent.click(getByText("🖊"));
+      await userEvent.click(screen.getByRole("button", { name: /Edit /i }));
       const textarea = getByDisplayValue("Test Description");
       expect(textarea).toBeInTheDocument();
       await userEvent.type(textarea, "!");
 
-      const button = await findByText("Submit");
+      const button = await screen.findByRole("button", { name: /Save/i });
       await userEvent.click(button);
       expect(window.fetch).toHaveBeenCalledWith("/api/asdf", {
         method: "PATCH",
@@ -305,7 +317,7 @@ describe("EditableText", () => {
           isTextarea={true}
         />,
       );
-      await userEvent.click(getByText("🖊"));
+      await userEvent.click(screen.getByRole("button", { name: /Edit /i }));
       const textarea = getByDisplayValue("Test Description");
       await userEvent.type(textarea, "!");
       expect((textarea as HTMLTextAreaElement).value).toBe("Test Description!");

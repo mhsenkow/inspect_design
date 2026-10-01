@@ -41,12 +41,22 @@ const LoginRegisterLinks = ({
 
   return (
     <div className={`${styles.loginRegisterContainer} ${styles.mobileAuth}`}>
-      <Link href={`/login?return=${path}`} className={styles.loginButton}>
-        Login
-      </Link>
-      <Link href={`/register?return=${path}`} className={styles.registerButton}>
-        Register
-      </Link>
+      {path !== "/login" && (
+        <Link
+          href={`/login?return=${encodeURIComponent(path || "/")}`}
+          className={styles.loginButton}
+        >
+          Login
+        </Link>
+      )}
+      {path !== "/register" && (
+        <Link
+          href={`/register?return=${encodeURIComponent(path || "/")}`}
+          className={styles.registerButton}
+        >
+          Register
+        </Link>
+      )}
     </div>
   );
 };

@@ -1,16 +1,19 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
 import LoginForm from "./LoginForm";
 import { handleLogin } from "./LoginPageFunctions";
 
+const replace = jest.fn();
+
 jest.mock("./LoginPageFunctions");
 jest.mock("next/navigation", () => ({
-  useRouter: () => ({ push: jest.fn() }),
-  useSearchParams: () => new URLSearchParams(),
+  useRouter: () => ({ push: jest.fn(), replace }),
+  useSearchParams: () => new URLSearchParams("return=/insights"),
 }));
 jest.mock("../hooks/useUser", () => () => ({
+  loggedIn: false,
   setLoggedIn: jest.fn(),
   setToken: jest.fn(),
 }));
@@ -22,9 +25,9 @@ describe("LoginForm", () => {
 
   it("renders login form", () => {
     render(<LoginForm />);
-    expect(screen.getByLabelText(/Email/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Password/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Login" })).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Email$/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Password$/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Sign in" })).toBeInTheDocument();
   });
 
   it("handles login successfully", async () => {
@@ -34,18 +37,23 @@ describe("LoginForm", () => {
 
     render(<LoginForm />);
 
-    fireEvent.change(screen.getByLabelText(/Email/i), {
+    fireEvent.change(screen.getByLabelText(/^Email$/i), {
       target: { value: "test@example.com" },
     });
-    fireEvent.change(screen.getByLabelText(/Password/i), {
+    fireEvent.change(screen.getByLabelText(/^Password$/i), {
       target: { value: "password" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Login" }));
+    fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
 
-    expect(mockHandleLogin).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(mockHandleLogin).toHaveBeenCalledTimes(1);
+    });
     expect(mockHandleLogin).toHaveBeenCalledWith(
       "test@example.com",
       "password",
     );
+    await waitFor(() => {
+      expect(replace).toHaveBeenCalledWith("/insights");
+    });
   });
 });

@@ -1,7 +1,6 @@
 "use client";
 
 import styles from "../../../styles/components/client-side-page.module.css";
-import cardStyles from "../../../styles/components/card.module.css";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import moment from "moment";
 
@@ -19,8 +18,6 @@ import {
 
 import FeedbackInputElement from "../../components/FeedbackInputElement";
 import { submitComment, submitReaction } from "../../functions";
-import FeedbackLink from "../../components/FeedbackLink";
-import SourceLogo from "../../components/SourceLogo";
 import useUser from "../../hooks/useUser";
 import EditableText from "../../components/EditableText";
 import AddLinksAsEvidenceDialog from "./AddLinksAsEvidenceDialog";
@@ -32,6 +29,7 @@ import AddChildInsightsDialog from "./AddChildInsightsDialog";
 import FactsDataContext from "../../contexts/FactsDataContext";
 import AddParentInsightsDialog from "./AddParentInsightsDialog";
 import ServerActionContext from "../../contexts/ServerActionContext";
+import { prop } from "../../lib/prop";
 import {
   // doAddCitationsToOtherInsightsSchema,
   // doAddParentInsights,
@@ -47,6 +45,12 @@ import {} from // addChildrenToInsight,
 "../../components/SelectedCitationsAPI";
 import Comment from "../../components/Comment";
 import { deleteInsights, publishInsights } from "../../components/InsightsAPI";
+import {
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalButton,
+} from "../../components/Modal";
 
 export const ADD_LINKS_AS_EVIDENCE_DIALOG_ID = "addLinksAsEvidenceDialog";
 export const ADD_CHILD_INSIGHTS_DIALOG_ID = "addChildInsightsDialog";
@@ -69,13 +73,17 @@ const ClientSidePage = ({
   useEffect(() => setReturnPath(window.location.pathname), []);
 
   const [insight, setInsight] = useState(insightInput);
+  const insightOwnerId = prop<number>(insight, "user_id", "userId");
+  const isOwner = Boolean(currentUser && insightOwnerId == currentUser.id);
   const [insightComments, setInsightComments] = useState<FactComment[]>();
   useEffect(() => {
     if (insight.comments) {
       setInsightComments(
-        insight.comments.filter(
-          (c) => c.insight_id == insight.id && !c.summary_id,
-        ),
+        insight.comments.filter((c) => {
+          const insightId = prop<number>(c, "insight_id", "insightId");
+          const summaryId = prop<number>(c, "summary_id", "summaryId");
+          return insightId == insight.id && !summaryId;
+        }),
       );
     }
   }, [insight]);
@@ -83,9 +91,11 @@ const ClientSidePage = ({
   useEffect(() => {
     if (insight.reactions) {
       setInsightReactions(
-        insight.reactions.filter(
-          (r) => r.insight_id == insight.id && !r.summary_id,
-        ),
+        insight.reactions.filter((r) => {
+          const insightId = prop<number>(r, "insight_id", "insightId");
+          const summaryId = prop<number>(r, "summary_id", "summaryId");
+          return insightId == insight.id && !summaryId;
+        }),
       );
     }
   }, [insight, setInsightReactions]);
@@ -130,6 +140,11 @@ const ClientSidePage = ({
   ] = useState(false);
   const [isAddParentInsightsDialogOpen, setIsAddParentInsightsDialogOpen] =
     useState(false);
+  const [isAddChildInsightsDialogOpen, setIsAddChildInsightsDialogOpen] =
+    useState(false);
+  const [isDeleteInsightDialogOpen, setIsDeleteInsightDialogOpen] =
+    useState(false);
+  const [isDeletingInsight, setIsDeletingInsight] = useState(false);
 
   const createdOrUpdated = useMemo(() => {
     if (insight) {
@@ -150,6 +165,18 @@ const ClientSidePage = ({
     }
   }, [returnPath]);
 
+  const handleConfirmDeleteInsight = useCallback(async () => {
+    if (!token || isDeletingInsight) return;
+    setIsDeletingInsight(true);
+    try {
+      await deleteInsights({ insights: [insight] }, token);
+      window.location.href = "/insights";
+    } catch (error) {
+      console.error("Failed to delete insight", error);
+      setIsDeletingInsight(false);
+    }
+  }, [token, isDeletingInsight, insight]);
+
   const executeAction = useCallback(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async (func: ServerFunction<any>, input: any) => {
@@ -159,163 +186,268 @@ const ClientSidePage = ({
       }
       try {
         const response = await func(input, token);
-        if (response) {
-          const responses = Array.isArray(response) ? response : [response];
-          responses.forEach((res: FLVResponse) => {
+        if (!response) return;
+
+        const responses = Array.isArray(response) ? response : [response];
+        const currentInsightId = insight.id;
+
+        const linkId = (link: InsightLink | Fact) =>
+          prop<number>(link, "id", "id");
+        const linkChildId = (link: InsightLink | Fact) =>
+          prop<number>(link, "child_id", "childId");
+        const linkParentId = (link: InsightLink | Fact) =>
+          prop<number>(link, "parent_id", "parentId");
+        const evidenceId = (item: InsightEvidence | Fact) =>
+          prop<number>(item, "id", "id") ??
+          prop<number>(item, "summary_id", "summaryId");
+
+        setInsight((prev) => {
+          let nextParents: InsightLink[] = prev.parents ?? [];
+          let nextChildren: InsightLink[] = prev.children ?? [];
+          let nextEvidence: InsightEvidence[] =
+            (prev.evidence as InsightEvidence[] | undefined) ?? [];
+
+          for (const res of responses) {
             if (res.action === -1) {
-              // Delete
-              const idsToDelete = new Set(res.facts.map((f) => f.id));
-              setInsight(
-                (prev: Insight) =>
-                  ({
-                    ...prev,
-                    parents: prev.parents.filter((p) => !idsToDelete.has(p.id)),
-                    children: prev.children.filter(
-                      (c) => !idsToDelete.has(c.id),
-                    ),
-                    evidence: prev.evidence?.filter(
-                      (e) => !idsToDelete.has(e.id),
-                    ),
-                  }) as unknown as Insight,
+              const idsToDelete = new Set(
+                res.facts
+                  .map((f) => linkId(f) ?? evidenceId(f as InsightEvidence))
+                  .filter((id): id is number => typeof id === "number"),
               );
-            } else if (res.action === 1) {
-              // Create
-              // This is complex and depends on what is being created.
-              // For now, we can assume a page reload might be simplest,
-              // or more specific logic can be added here.
-              // For example, adding a new child insight:
-              if (res.facts[0]?.child_id) {
-                setInsight((prev) => ({
-                  ...prev,
-                  children: [...prev.children, ...(res.facts as InsightLink[])],
-                }));
+              nextParents = nextParents.filter(
+                (p) => !idsToDelete.has(linkId(p) as number),
+              );
+              nextChildren = nextChildren.filter(
+                (c) => !idsToDelete.has(linkId(c) as number),
+              );
+              nextEvidence = nextEvidence.filter(
+                (e) => !idsToDelete.has(evidenceId(e) as number),
+              );
+              continue;
+            }
+
+            if (res.action !== 1 || !res.facts?.length) continue;
+
+            const childLinks: InsightLink[] = [];
+            const parentLinks: InsightLink[] = [];
+            const evidenceItems: InsightEvidence[] = [];
+
+            for (const fact of res.facts) {
+              const childId = linkChildId(fact);
+              const parentId = linkParentId(fact);
+              const summaryId = prop<number>(fact, "summary_id", "summaryId");
+
+              if (
+                typeof parentId === "number" &&
+                typeof childId === "number" &&
+                parentId === currentInsightId
+              ) {
+                childLinks.push(fact as InsightLink);
+              } else if (
+                typeof parentId === "number" &&
+                typeof childId === "number" &&
+                childId === currentInsightId
+              ) {
+                parentLinks.push(fact as InsightLink);
+              } else if (typeof summaryId === "number") {
+                evidenceItems.push(fact as InsightEvidence);
+              } else if (
+                typeof parentId === "number" &&
+                typeof childId === "number"
+              ) {
+                // Fallback: treat as child link if shape matches
+                childLinks.push(fact as InsightLink);
               }
             }
-          });
+
+            if (childLinks.length) {
+              const existing = new Set(
+                nextChildren
+                  .map((c) => linkId(c) ?? `${linkParentId(c)}-${linkChildId(c)}`)
+                  .filter(Boolean),
+              );
+              nextChildren = [
+                ...nextChildren,
+                ...childLinks.filter((link) => {
+                  const key =
+                    linkId(link) ?? `${linkParentId(link)}-${linkChildId(link)}`;
+                  return key != null && !existing.has(key);
+                }),
+              ];
+            }
+
+            if (parentLinks.length) {
+              const existing = new Set(
+                nextParents
+                  .map((p) => linkId(p) ?? `${linkParentId(p)}-${linkChildId(p)}`)
+                  .filter(Boolean),
+              );
+              nextParents = [
+                ...nextParents,
+                ...parentLinks.filter((link) => {
+                  const key =
+                    linkId(link) ?? `${linkParentId(link)}-${linkChildId(link)}`;
+                  return key != null && !existing.has(key);
+                }),
+              ];
+            }
+
+            if (evidenceItems.length) {
+              const existing = new Set(
+                nextEvidence
+                  .map((e) => evidenceId(e))
+                  .filter((id): id is number => typeof id === "number"),
+              );
+              nextEvidence = [
+                ...evidenceItems.filter((item) => {
+                  const id = evidenceId(item);
+                  return typeof id === "number" && !existing.has(id);
+                }),
+                ...nextEvidence,
+              ];
+            }
+          }
+
+          return {
+            ...prev,
+            parents: nextParents,
+            children: nextChildren,
+            evidence: nextEvidence,
+          };
+        });
+      } catch (error: unknown) {
+        let message = "Action failed";
+        if (error instanceof Error && error.message) {
+          message = error.message;
+        } else if (typeof Response !== "undefined" && error instanceof Response) {
+          message = `Request failed (${error.status})`;
+        } else if (typeof error === "string" && error) {
+          message = error;
         }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (error: any) {
-        console.error("Error executing server action:", error);
-        alert(`Action failed: ${error.message}`);
+        console.error("Error executing server action:", message, error);
+        alert(message);
       }
     },
-    [token],
+    [token, insight.id],
   );
 
   return (
-    <div className={styles.pageContainer}>
+    <div
+      className={`${styles.pageContainer} ${
+        isOwner
+          ? styles.pageContainerOwner
+          : ""
+      }`}
+    >
       <div className={styles.mainContent}>
         <CurrentUserContext.Provider value={currentUser}>
           <ServerActionContext.Provider value={{ executeAction }}>
-            {/* Page Header - Overall Page Level */}
-            <div className={styles.pageHeader}>
-              <div className={styles.pageHeaderContent}>
-                <div className={styles.headerTop}>
-                  <div className={styles.headerLeft}>
-                    <div className={styles.sourceLogoContainer}>
-                      <SourceLogo fact={insight} />
-                    </div>
-                    <div className={styles.headerInfo}>
-                      <EditableText
-                        insight={insight}
-                        apiRoot="/api/insights"
-                        fieldName="title"
-                        initialValue={insight.title}
-                        as="h1"
-                      />
-                      <EditableText
-                        insight={insight}
-                        apiRoot="/api/insights"
-                        fieldName="description"
-                        initialValue={insight.description}
-                        as="p"
-                        isTextarea={true}
-                        placeholder="Add a description..."
-                      />
-                      <div className={styles.headerSubtitle}>
-                        {createdOrUpdated}
-                      </div>
-                    </div>
-                  </div>
-                  <div className={styles.headerRight}>
-                    <div className={styles.reactionsContainer}>
-                      {insightReactions?.map((r) => r.reaction).join("") || (
-                        <span className="text-text-tertiary">
-                          😲 (no reactions)
+            <div className={styles.stickyHeader}>
+              <a href="/insights" className={styles.backLink}>
+                Insights
+              </a>
+              <header className={styles.pageHeader}>
+                <div className={styles.titleRow}>
+                  <EditableText
+                    insight={insight}
+                    apiRoot="/api/insights"
+                    fieldName="title"
+                    initialValue={insight.title}
+                    as="h1"
+                    canEdit={isOwner}
+                    className={styles.titleEditable}
+                  />
+                  {insightReactions && insightReactions.length > 0 && (
+                    <div
+                      className={styles.titleReactions}
+                      aria-label="Reactions"
+                    >
+                      {insightReactions.map((r) => (
+                        <span
+                          key={`reaction-${r.id ?? r.reaction}`}
+                          className={styles.titleReaction}
+                          aria-hidden
+                        >
+                          {r.reaction}
                         </span>
-                      )}
+                      ))}
                     </div>
-                    <div className={styles.citationsCount}>
-                      📄 {liveSnippetData.length ?? 0} citations
-                    </div>
-                  </div>
+                  )}
                 </div>
-
-                {/* Big Actions */}
-                {currentUser && insight.user_id == currentUser.id && (
+                <EditableText
+                  insight={insight}
+                  apiRoot="/api/insights"
+                  fieldName="description"
+                  initialValue={insight.description}
+                  as="p"
+                  isTextarea={true}
+                  placeholder="Add a description"
+                  canEdit={isOwner}
+                  className={styles.descriptionEditable}
+                />
+                <p className={styles.headerMeta}>
+                  {liveSnippetData.length ?? 0} citations
+                  {" · "}
+                  {prop<boolean>(insight, "is_public", "isPublic")
+                    ? "Public"
+                    : "Private"}
+                  {" · "}
+                  {createdOrUpdated}
+                </p>
+                {isOwner && (
                   <div className={styles.actionsSection}>
-                    {!insight.is_public && (
+                    {!prop<boolean>(insight, "is_public", "isPublic") && (
                       <button
-                        className={styles.actionButton}
-                        aria-label="Publish Insight"
-                        title="Publish Insight"
+                        type="button"
+                        className={styles.textAction}
                         onClick={async () => {
-                          if (token && confirm("Are you sure?")) {
-                            await publishInsights(
-                              { insights: [insight] },
-                              token,
-                            );
+                          if (token && confirm("Publish this insight?")) {
+                            await publishInsights({ insights: [insight] }, token);
                             setInsight({ ...insight, is_public: true });
                           }
                         }}
                       >
-                        <span>🌎</span>
-                        <span className="text-xs">Publish</span>
+                        Publish
                       </button>
                     )}
                     <button
-                      className="btn btn-sm btn-ghost text-text-secondary hover:text-text-primary hover:bg-background-secondary flex items-center gap-1"
-                      aria-label="Delete Insight"
-                      title="Delete Insight"
-                      onClick={async () => {
-                        if (token && confirm("Are you sure?")) {
-                          await deleteInsights({ insights: [insight] }, token);
-                          window.location.href = "/";
-                        }
-                      }}
+                      type="button"
+                      className={`${styles.textAction} ${styles.textActionDanger} ${styles.deleteAction}`}
+                      onClick={() => setIsDeleteInsightDialogOpen(true)}
                     >
-                      <span>🗑️</span>
-                      <span className="text-xs">Delete</span>
+                      Delete
                     </button>
                   </div>
                 )}
-              </div>
+              </header>
             </div>
 
+            <div className={styles.scrollBody}>
             {/* Parent Insights Section */}
             {(loggedIn || insight.parents.length > 0) && (
-              <div className={cardStyles.contentCard}>
-                <div className={cardStyles.contentCardHeader}>
-                  <div className={cardStyles.hierarchyIndicator}>
-                    <span className={cardStyles.hierarchyIcon}>⬆️</span>
-                    Parent Insights
-                  </div>
-                  <div className={cardStyles.sectionHeader}>
-                    <h3 className={cardStyles.sectionTitle}>
-                      This insight is important because:
-                    </h3>
-                    {currentUser?.id == insight.user_id && (
-                      <div className={cardStyles.sectionActions}>
+              <section className={styles.section}>
+                <div className={styles.sectionHeader}>
+                  <div className={styles.sectionHeaderRow}>
+                    <div>
+                      <h2 className={styles.sectionTitle}>Parents</h2>
+                      <p className={styles.sectionSubtitle}>
+                        {insight.parents.length > 0
+                          ? `${insight.parents.length}`
+                          : "None"}
+                      </p>
+                    </div>
+                    {isOwner && (
+                      <div className={styles.sectionActions}>
                         <button
                           onClick={() => {
                             setIsAddParentInsightsDialogOpen(true);
                           }}
-                          className={cardStyles.addButton}
+                          className={styles.addButton}
                           aria-label="Add Parent Insight"
                           title="Add Parent Insight"
                         >
-                          <span className={cardStyles.addButtonIcon}>+</span>
-                          <span className={cardStyles.addButtonText}>Add</span>
+                          <span className={styles.addButtonIcon}>+</span>
+                          <span className={styles.addButtonText}>Add</span>
                         </button>
                         {selectedParentInsights.length > 0 && (
                           <button
@@ -331,90 +463,90 @@ const ClientSidePage = ({
                                 );
                               }
                             }}
-                            className={`${cardStyles.addButton} ${cardStyles.removeButton}`}
+                            className={styles.removeButton}
                             aria-label="Remove Selected Parent Insights"
                             title="Remove Selected Parent Insights"
                           >
-                            <span className={cardStyles.addButtonIcon}>🗑️</span>
-                            <span className={cardStyles.addButtonText}>
-                              Remove
-                            </span>
+                            <span className={styles.addButtonText}>Remove</span>
                           </button>
                         )}
                       </div>
                     )}
                   </div>
-                  <div className={cardStyles.sectionSubtitle}>
-                    {insight.parents.length > 0
-                      ? `${insight.parents.length} parent insight${insight.parents.length !== 1 ? "s" : ""}`
-                      : "No parent insights yet"}
-                  </div>
                 </div>
-                <div className={cardStyles.contentCardBody}>
-                  <FactsDataContext.Provider
-                    value={{
-                      data:
-                        insight.parents.map((p) => ({
-                          ...p.parentInsight,
-                          ...p,
-                        })) ?? [],
-                      setData: (setStateActionOrFacts) => {
-                        if (typeof setStateActionOrFacts == "function") {
-                          setInsight({
-                            ...insight,
-                            parents: setStateActionOrFacts(
-                              insight.parents,
-                            ) as InsightLink[],
-                          });
-                        } else {
-                          setInsight({
-                            ...insight,
-                            parents: setStateActionOrFacts as InsightLink[],
-                          });
+                <div
+                  className={`${styles.sectionBody} ${
+                    insight.parents.length > 0 ? styles.sectionBodyScrollable : ""
+                  }`}
+                >
+                  {insight.parents.length > 0 ? (
+                    <FactsDataContext.Provider
+                      value={{
+                        data:
+                          insight.parents.map((p) => ({
+                            ...p.parentInsight,
+                            ...p,
+                          })) ?? [],
+                        setData: (setStateActionOrFacts) => {
+                          if (typeof setStateActionOrFacts == "function") {
+                            setInsight({
+                              ...insight,
+                              parents: setStateActionOrFacts(
+                                insight.parents,
+                              ) as InsightLink[],
+                            });
+                          } else {
+                            setInsight({
+                              ...insight,
+                              parents: setStateActionOrFacts as InsightLink[],
+                            });
+                          }
+                        },
+                      }}
+                    >
+                      <FactsListView
+                        factName="parentInsights"
+                        selectedFacts={selectedParentInsights}
+                        setSelectedFacts={
+                          setSelectedParentInsights as React.Dispatch<
+                            React.SetStateAction<Fact[]>
+                          >
                         }
-                      },
-                    }}
-                  >
-                    <FactsListView
-                      factName="parentInsights"
-                      selectedFacts={selectedParentInsights}
-                      setSelectedFacts={
-                        setSelectedParentInsights as React.Dispatch<
-                          React.SetStateAction<Fact[]>
-                        >
-                      }
-                      selectedActions={[]}
-                      hideHead={true}
-                    />
-                  </FactsDataContext.Provider>
+                        selectedActions={[]}
+                        hideHead={true}
+                      />
+                    </FactsDataContext.Provider>
+                  ) : (
+                    <p className={styles.sectionBodyEmpty}>No parent insights</p>
+                  )}
                 </div>
-              </div>
+              </section>
             )}
 
             {/* Child Insights Section */}
-            <div className={cardStyles.contentCard}>
-              <div className={cardStyles.contentCardHeader}>
-                <div className={cardStyles.hierarchyIndicator}>
-                  <span className={cardStyles.hierarchyIcon}>📋</span>
-                  Child Insights
-                </div>
-                <div className={cardStyles.sectionHeader}>
-                  <h3 className={cardStyles.sectionTitle}>
-                    Insights that build upon this one:
-                  </h3>
-                  {currentUser?.id == insight.user_id && (
-                    <div className={cardStyles.sectionActions}>
+            <section className={styles.section}>
+              <div className={styles.sectionHeader}>
+                <div className={styles.sectionHeaderRow}>
+                  <div>
+                    <h2 className={styles.sectionTitle}>Children</h2>
+                    <p className={styles.sectionSubtitle}>
+                      {insight.children.length > 0
+                        ? `${insight.children.length}`
+                        : "None"}
+                    </p>
+                  </div>
+                  {isOwner && (
+                    <div className={styles.sectionActions}>
                       <button
                         onClick={() => {
-                          // This will now be handled by the dialog directly using context
-                          // setIsAddChildInsightsDialogOpen(true);
+                          setIsAddChildInsightsDialogOpen(true);
                         }}
-                        className={cardStyles.addButton}
+                        className={styles.addButton}
                         aria-label="Add Child Insight"
                         title="Add Child Insight"
                       >
-                        <span className={cardStyles.addButtonIcon}>+</span>
-                        <span className={cardStyles.addButtonText}>Add</span>
+                        <span className={styles.addButtonIcon}>+</span>
+                        <span className={styles.addButtonText}>Add</span>
                       </button>
                       {selectedChildInsights.length > 0 && (
                         <button
@@ -430,131 +562,110 @@ const ClientSidePage = ({
                               );
                             }
                           }}
-                          className={`${cardStyles.addButton} ${cardStyles.removeButton}`}
+                          className={styles.removeButton}
                           aria-label="Remove Selected Child Insights"
                           title="Remove Selected Child Insights"
                         >
-                          <span className={cardStyles.addButtonIcon}>🗑️</span>
-                          <span className={cardStyles.addButtonText}>
-                            Remove
-                          </span>
+                          <span className={styles.addButtonText}>Remove</span>
                         </button>
                       )}
                     </div>
                   )}
                 </div>
-                <div className={cardStyles.sectionSubtitle}>
-                  {insight.children.length > 0
-                    ? `${insight.children.length} child insight${insight.children.length !== 1 ? "s" : ""}`
-                    : "No child insights yet"}
-                </div>
               </div>
-              <div className={cardStyles.contentCardBody}>
-                <FactsDataContext.Provider
-                  value={{
-                    data: insight.children.map((c) => ({
-                      ...c.childInsight,
-                      ...c,
-                    })),
-                    setData: (setStateActionOrFacts) => {
-                      if (typeof setStateActionOrFacts == "function") {
-                        setInsight({
-                          ...insight,
-                          children: setStateActionOrFacts(
-                            insight.children,
-                          ) as InsightLink[],
-                        });
-                      } else {
-                        setInsight({
-                          ...insight,
-                          children: setStateActionOrFacts as InsightLink[],
-                        });
+              <div
+                className={`${styles.sectionBody} ${
+                  insight.children.length > 0 ? styles.sectionBodyScrollable : ""
+                }`}
+              >
+                {insight.children.length > 0 ? (
+                  <FactsDataContext.Provider
+                    value={{
+                      data: insight.children.map((c) => ({
+                        ...c.childInsight,
+                        ...c,
+                      })),
+                      setData: (setStateActionOrFacts) => {
+                        if (typeof setStateActionOrFacts == "function") {
+                          setInsight({
+                            ...insight,
+                            children: setStateActionOrFacts(
+                              insight.children,
+                            ) as InsightLink[],
+                          });
+                        } else {
+                          setInsight({
+                            ...insight,
+                            children: setStateActionOrFacts as InsightLink[],
+                          });
+                        }
+                      },
+                    }}
+                  >
+                    <FactsListView
+                      factName="childInsights"
+                      selectedFacts={selectedChildInsights}
+                      setSelectedFacts={
+                        setSelectedChildInsights as React.Dispatch<
+                          React.SetStateAction<Fact[]>
+                        >
                       }
-                    },
-                  }}
-                >
-                  <FactsListView
-                    factName="childInsights"
-                    selectedFacts={selectedChildInsights}
-                    setSelectedFacts={
-                      setSelectedChildInsights as React.Dispatch<
-                        React.SetStateAction<Fact[]>
-                      >
-                    }
-                    selectedActions={[]}
-                    columns={[
-                      {
-                        name: "📄",
-                        dataColumn: "childInsight.evidence",
-                        display: (insightLink: Fact | InsightLink) => (
-                          <span className="badge text-bg-danger">
-                            {insightLink.childInsight.directEvidenceCount ?? 0}
-                          </span>
-                        ),
-                      },
-                      {
-                        name: "🌎",
-                        dataColumn: "childInsight.is_public",
-                        display: (insight: Fact | Insight) => (
-                          <span>{insight.is_public ? "✅" : ""}</span>
-                        ),
-                      },
-                    ]}
-                  />
-                </FactsDataContext.Provider>
+                      selectedActions={[]}
+                      columns={[
+                        {
+                          name: "Citations",
+                          dataColumn: "childInsight.evidence",
+                          display: (insightLink: Fact | InsightLink) => (
+                            <span className={styles.metaChip}>
+                              {insightLink.childInsight.directEvidenceCount ?? 0}
+                            </span>
+                          ),
+                        },
+                        {
+                          name: "Public",
+                          dataColumn: "childInsight.is_public",
+                          display: (insightRow: Fact | Insight) => (
+                            <span>
+                              {prop<boolean>(insightRow, "is_public", "isPublic")
+                                ? "Yes"
+                                : ""}
+                            </span>
+                          ),
+                        },
+                      ]}
+                    />
+                  </FactsDataContext.Provider>
+                ) : (
+                  <p className={styles.sectionBodyEmpty}>No child insights</p>
+                )}
               </div>
-            </div>
+            </section>
 
             {/* Evidence Section */}
-            <div className={cardStyles.contentCard}>
-              <div className={cardStyles.contentCardHeader}>
-                <div className={cardStyles.hierarchyIndicator}>
-                  <span className={cardStyles.hierarchyIcon}>📄</span>
-                  Evidence
-                </div>
-                <div className={cardStyles.sectionHeader}>
-                  <h3 className={cardStyles.sectionTitle}>
-                    Supporting evidence and citations:
-                  </h3>
-                  {currentUser?.id == insight.user_id && (
-                    <div className={cardStyles.sectionActions}>
+            <section className={styles.section}>
+              <div className={styles.sectionHeader}>
+                <div className={styles.sectionHeaderRow}>
+                  <div>
+                    <h2 className={styles.sectionTitle}>Evidence</h2>
+                    <p className={styles.sectionSubtitle}>
+                      {liveSnippetData.length > 0
+                        ? `${liveSnippetData.length}`
+                        : "None"}
+                    </p>
+                  </div>
+                  {isOwner && (
+                    <div className={styles.sectionActions}>
                       <button
                         onClick={() => {
                           setIsAddLinksAsEvidenceDialogOpen(true);
                         }}
-                        className={cardStyles.addButton}
+                        className={styles.addButton}
                         aria-label="Add Evidence"
                         title="Add Evidence"
                       >
-                        <span className={cardStyles.addButtonIcon}>+</span>
-                        <span className={cardStyles.addButtonText}>Add</span>
+                        <span className={styles.addButtonIcon}>+</span>
+                        <span className={styles.addButtonText}>Add</span>
                       </button>
-                      {/* TODO: move citations button should be a selected action
-                    <button
-                      onClick={() => {
-                        setIsAddCitationsToOtherInsightsDialogOpen(true);
-                        // Set the active server function so it gets called when the dialog submits
-                        setActiveServerFunctionForSnippets({
-                          function: async (
-                            input: doAddCitationsToOtherInsightsSchema,
-                          ) => {
-                            if (token) {
-                              return doAddCitationsToOtherInsights(
-                                input,
-                                token,
-                              );
-                            }
-                            return Promise.resolve();
-                          },
-                        });
-                      }}
-                      className={cardStyles.addButton}
-                      aria-label="Add Evidence"
-                      title="Add Evidence"
-                    >
-                      <span className={cardStyles.addButtonIcon}>🔄</span>
-                      <span className={cardStyles.addButtonText}>Move</span>
-                    </button> */}
                       {selectedCitations.length > 0 && (
                         <button
                           onClick={() => {
@@ -568,106 +679,182 @@ const ClientSidePage = ({
                               });
                             }
                           }}
-                          className={`${cardStyles.addButton} ${cardStyles.removeButton}`}
+                          className={styles.removeButton}
                           aria-label="Remove Selected Citations"
                           title="Remove Selected Citations"
                         >
-                          <span className={cardStyles.addButtonIcon}>🗑️</span>
-                          <span className={cardStyles.addButtonText}>
-                            Remove
-                          </span>
+                          <span className={styles.addButtonText}>Remove</span>
                         </button>
                       )}
                     </div>
                   )}
                 </div>
-                <div className={cardStyles.sectionSubtitle}>
-                  {liveSnippetData.length > 0
-                    ? `${liveSnippetData.length} citation${liveSnippetData.length !== 1 ? "s" : ""}`
-                    : "No evidence yet"}
-                </div>
               </div>
-              <div className={cardStyles.contentCardBody}>
-                <InfiniteScrollLoader
-                  data={liveSnippetData}
-                  setData={
-                    setLiveSnippetData as React.Dispatch<
-                      React.SetStateAction<Fact[] | undefined>
-                    >
-                  }
-                  limit={20}
-                  getDataFunctionParams={{ insightUid: insight.uid ?? "" }}
-                  getDataFunction={async (
-                    offset,
-                    token,
-                    getDataFunctionParams,
-                  ) => {
-                    if (getDataFunctionParams) {
-                      const response = await fetch(
-                        `/api/insights/${getDataFunctionParams.insightUid}?offset=${offset}`,
-                        {
-                          method: "GET",
-                          headers: {
-                            "Content-Type": "application/json",
-                            "x-access-token": token,
-                          },
-                        },
-                      );
-                      const json = (await response.json()) as Insight;
-                      return await json.citations;
-                    }
-                    return Promise.resolve([]);
-                  }}
-                >
-                  <FactsListView
-                    factName="snippet"
-                    selectedFacts={selectedCitations}
-                    setSelectedFacts={
-                      setSelectedCitations as React.Dispatch<
-                        React.SetStateAction<Fact[]>
+              <div
+                className={`${styles.sectionBody} ${
+                  liveSnippetData.length > 0 ? styles.sectionBodyScrollable : ""
+                }`}
+              >
+                {liveSnippetData.length > 0 ? (
+                  <InfiniteScrollLoader
+                    data={liveSnippetData}
+                    setData={
+                      setLiveSnippetData as React.Dispatch<
+                        React.SetStateAction<Fact[] | undefined>
                       >
                     }
-                    selectedActions={[]}
-                  />
-                </InfiniteScrollLoader>
+                    limit={20}
+                    getDataFunctionParams={{ insightUid: insight.uid ?? "" }}
+                    getDataFunction={async (
+                      offset,
+                      token,
+                      getDataFunctionParams,
+                    ) => {
+                      if (getDataFunctionParams) {
+                        const response = await fetch(
+                          `/api/insights/${getDataFunctionParams.insightUid}?offset=${offset}`,
+                          {
+                            method: "GET",
+                            headers: {
+                              "Content-Type": "application/json",
+                              "x-access-token": token,
+                            },
+                          },
+                        );
+                        const json = (await response.json()) as Insight;
+                        return await json.citations;
+                      }
+                      return Promise.resolve([]);
+                    }}
+                  >
+                    <FactsListView
+                      factName="snippet"
+                      selectedFacts={selectedCitations}
+                      setSelectedFacts={
+                        setSelectedCitations as React.Dispatch<
+                          React.SetStateAction<Fact[]>
+                        >
+                      }
+                      selectedActions={[]}
+                    />
+                  </InfiniteScrollLoader>
+                ) : (
+                  <p className={styles.sectionBodyEmpty}>No evidence yet</p>
+                )}
               </div>
-            </div>
+            </section>
 
             {/* Feedback Section */}
-            <div className={cardStyles.contentCard}>
-              <div className={cardStyles.contentCardHeader}>
-                <div className={cardStyles.hierarchyIndicator}>
-                  <span className={cardStyles.hierarchyIcon}>💬</span>
-                  Feedback
-                </div>
-                <h3 className={cardStyles.sectionTitle}>
-                  Reactions and comments:
-                </h3>
-                <div className="flex items-center justify-center space-x-8">
-                  <FeedbackLink
-                    actionVerb="React"
-                    icon="😲"
-                    setOnClickFunction={() =>
-                      currentUser
-                        ? setIsEditingReaction(true)
-                        : confirmAndRegister()
-                    }
-                  />
-                  <FeedbackLink
-                    actionVerb="Comment"
-                    icon="💬"
-                    setOnClickFunction={() =>
-                      currentUser
-                        ? setIsEditingComment(true)
-                        : confirmAndRegister()
-                    }
-                  />
+            <section className={styles.section}>
+              <div className={styles.sectionHeader}>
+                <div className={styles.sectionHeaderRow}>
+                  <div>
+                    <h2 className={styles.sectionTitle}>Feedback</h2>
+                  </div>
+                  <div className={styles.sectionActions}>
+                    <button
+                      type="button"
+                      className={styles.addButton}
+                      aria-label="React"
+                      title="React"
+                      onClick={() =>
+                        currentUser
+                          ? setIsEditingReaction(true)
+                          : confirmAndRegister()
+                      }
+                    >
+                      <span className={styles.addButtonIcon} aria-hidden>
+                        😲
+                      </span>
+                      <span className={styles.addButtonText}>React</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.addButton}
+                      aria-label="Comment"
+                      title="Comment"
+                      onClick={() =>
+                        currentUser
+                          ? setIsEditingComment(true)
+                          : confirmAndRegister()
+                      }
+                    >
+                      <span className={styles.addButtonIcon} aria-hidden>
+                        💬
+                      </span>
+                      <span className={styles.addButtonText}>Comment</span>
+                    </button>
+                  </div>
                 </div>
               </div>
-              <div className={cardStyles.contentCardBody}>
-                {/* Comments */}
-                {insightComments && insightComments.length > 0 && (
-                  <div className="space-y-3">
+              <div className={`${styles.sectionBody} ${styles.sectionBodyScrollable}`}>
+                {currentUser && isEditingReaction && (
+                  <FeedbackInputElement
+                    actionType="reaction"
+                    submitFunc={(reaction) => {
+                      if (token) {
+                        return submitReaction(
+                          { reaction, insight_id: insight.id },
+                          token,
+                        );
+                      }
+                      return Promise.resolve();
+                    }}
+                    directions="Pick a reaction"
+                    afterSubmit={(newObject) => {
+                      if (newObject) {
+                        const existingReaction = insight.reactions?.find((r) => {
+                          const userId = prop<number>(r, "user_id", "userId");
+                          const insightId = prop<number>(
+                            r,
+                            "insight_id",
+                            "insightId",
+                          );
+                          return (
+                            userId == currentUser?.id && insightId == insight.id
+                          );
+                        });
+                        const existingReactions = insight.reactions?.filter(
+                          (r) => r.id !== existingReaction?.id,
+                        );
+                        setInsight({
+                          ...insight,
+                          reactions: [
+                            ...(existingReactions ?? []),
+                            newObject as FactReaction,
+                          ],
+                        });
+                      }
+                    }}
+                    closeFunc={() => setIsEditingReaction(false)}
+                  />
+                )}
+                {currentUser && isEditingComment && (
+                  <FeedbackInputElement
+                    actionType="comment"
+                    submitFunc={(comment) => {
+                      if (token) {
+                        return submitComment(
+                          { comment, insight_id: insight.id },
+                          token,
+                        );
+                      }
+                      return Promise.resolve();
+                    }}
+                    directions="Write a short comment"
+                    afterSubmit={(newObject) => {
+                      if (newObject) {
+                        setInsight({
+                          ...insight,
+                          comments: [...(insight.comments ?? []), newObject],
+                        });
+                      }
+                    }}
+                    closeFunc={() => setIsEditingComment(false)}
+                  />
+                )}
+                {insightComments && insightComments.length > 0 ? (
+                  <div className={styles.commentsList}>
                     {insightComments.map((comment) => (
                       <Comment
                         key={`Insight Comment #${comment.id}`}
@@ -683,78 +870,46 @@ const ClientSidePage = ({
                       />
                     ))}
                   </div>
-                )}
-                {(!insightComments || insightComments.length === 0) && (
-                  <p className="text-text-tertiary text-center py-4">
-                    No comments yet. Be the first to share your thoughts!
-                  </p>
+                ) : (
+                  !isEditingReaction &&
+                  !isEditingComment && (
+                    <p className={styles.sectionBodyEmpty}>
+                      No comments yet. Be the first to share your thoughts.
+                    </p>
+                  )
                 )}
               </div>
+            </section>
             </div>
 
-            {/* Feedback Input Elements */}
-            {currentUser && isEditingReaction && (
-              <FeedbackInputElement
-                actionType="reaction"
-                submitFunc={(reaction) => {
-                  if (token) {
-                    return submitReaction(
-                      { reaction, insight_id: insight.id },
-                      token,
-                    );
-                  }
-                  return Promise.resolve();
-                }}
-                directions="Select an emoji character"
-                afterSubmit={(newObject) => {
-                  if (newObject) {
-                    const existingReaction = insight.reactions?.find(
-                      (r) =>
-                        r.user_id == currentUser?.id &&
-                        r.insight_id == insight.id,
-                    );
-                    const existingReactions = insight.reactions?.filter(
-                      (r) => r.id !== existingReaction?.id,
-                    );
-                    setInsight({
-                      ...insight,
-                      reactions: [
-                        ...(existingReactions ?? []),
-                        newObject as FactReaction,
-                      ],
-                    });
-                  }
-                }}
-                closeFunc={() => setIsEditingReaction(false)}
-              />
-            )}
-            {currentUser && isEditingComment && (
-              <FeedbackInputElement
-                actionType="comment"
-                submitFunc={(comment) => {
-                  if (token) {
-                    return submitComment(
-                      { comment, insight_id: insight.id },
-                      token,
-                    );
-                  }
-                  return Promise.resolve();
-                }}
-                directions="Enter a text comment"
-                afterSubmit={(newObject) => {
-                  if (newObject) {
-                    setInsight({
-                      ...insight,
-                      comments: [...(insight.comments ?? []), newObject],
-                    });
-                  }
-                }}
-                closeFunc={() => setIsEditingComment(false)}
-              />
+            {isOwner && (
+              <div className={styles.mobileActionsDock}>
+                <button
+                  type="button"
+                  className={`${styles.textAction} ${styles.textActionDanger} ${styles.deleteAction}`}
+                  onClick={() => setIsDeleteInsightDialogOpen(true)}
+                >
+                  Delete
+                </button>
+                {!prop<boolean>(insight, "is_public", "isPublic") && (
+                  <button
+                    type="button"
+                    className={styles.textAction}
+                    onClick={async () => {
+                      if (token && confirm("Publish this insight?")) {
+                        await publishInsights({ insights: [insight] }, token);
+                        setInsight({ ...insight, is_public: true });
+                      }
+                    }}
+                  >
+                    Publish
+                  </button>
+                )}
+              </div>
             )}
 
             {/* Dialogs - Child Level */}
-            {currentUser && insight.user_id == currentUser.id && (
+            {isOwner && (
               <>
                 <AddLinksAsEvidenceDialog
                   id={ADD_LINKS_AS_EVIDENCE_DIALOG_ID}
@@ -772,10 +927,8 @@ const ClientSidePage = ({
                 />
                 <AddChildInsightsDialog
                   id={ADD_CHILD_INSIGHTS_DIALOG_ID}
-                  isOpen={false} // This dialog's open state is now managed internally or via a different trigger
-                  onClose={() => {
-                    /* handle close */
-                  }}
+                  isOpen={isAddChildInsightsDialogOpen}
+                  onClose={() => setIsAddChildInsightsDialogOpen(false)}
                   insight={insight}
                 />
                 <AddParentInsightsDialog
@@ -784,6 +937,43 @@ const ClientSidePage = ({
                   onClose={() => setIsAddParentInsightsDialogOpen(false)}
                   insight={insight}
                 />
+                <Modal
+                  id="deleteInsightDialog"
+                  title="Delete insight?"
+                  isOpen={isDeleteInsightDialogOpen}
+                  onClose={() => {
+                    if (!isDeletingInsight) {
+                      setIsDeleteInsightDialogOpen(false);
+                    }
+                  }}
+                  size="small"
+                  closeOnBackdropClick={!isDeletingInsight}
+                  closeOnEscape={!isDeletingInsight}
+                >
+                  <ModalBody>
+                    <p className={styles.deleteConfirmCopy}>
+                      This permanently deletes{" "}
+                      <strong>{insight.title || "this insight"}</strong> and
+                      cannot be undone.
+                    </p>
+                  </ModalBody>
+                  <ModalFooter>
+                    <ModalButton
+                      variant="secondary"
+                      onClick={() => setIsDeleteInsightDialogOpen(false)}
+                      disabled={isDeletingInsight}
+                    >
+                      Cancel
+                    </ModalButton>
+                    <ModalButton
+                      variant="danger"
+                      onClick={handleConfirmDeleteInsight}
+                      disabled={isDeletingInsight}
+                    >
+                      {isDeletingInsight ? "Deleting…" : "Delete permanently"}
+                    </ModalButton>
+                  </ModalFooter>
+                </Modal>
               </>
             )}
           </ServerActionContext.Provider>

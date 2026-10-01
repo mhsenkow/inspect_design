@@ -96,11 +96,17 @@ const AddLinksAsEvidenceDialog = ({
 
   const handleSubmit = useCallback(() => {
     if (serverActionContext) {
-      serverActionContext.executeAction(addCitationsToInsight, {
-        insight,
-        evidence: selectedCitations,
-        newLinkUrl,
-      });
+      void serverActionContext
+        .executeAction(addCitationsToInsight, {
+          insight,
+          evidence: selectedCitations,
+          newLinkUrl,
+        })
+        .then(() => {
+          resetStateValues();
+          onClose();
+        });
+      return;
     }
     resetStateValues();
     onClose();
@@ -213,7 +219,7 @@ const AddLinksAsEvidenceDialog = ({
   return (
     <Modal
       id={id}
-      title={`Add Links to Insight: ${insight.title}`}
+      title="Add evidence"
       isOpen={isOpen}
       onClose={handleClose}
       size="large"

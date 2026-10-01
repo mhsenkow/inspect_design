@@ -37,11 +37,9 @@ describe("RichTextEditor", () => {
   });
 
   it("opens the insert link dialog", async () => {
-    const { getByAltText } = render(
-      <RichTextEditor html="Some text" setHtml={setHtmlMock} />,
-    );
+    render(<RichTextEditor html="Some text" setHtml={setHtmlMock} />);
 
-    const linkButton = getByAltText("Insert Link");
+    const linkButton = screen.getByRole("button", { name: "Insert link" });
     fireEvent.click(linkButton);
 
     await waitFor(() => {

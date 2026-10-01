@@ -78,6 +78,7 @@ CREATE TABLE public.insights (
     user_id integer NOT NULL,
     uid text NOT NULL,
     title text NOT NULL,
+    description text,
     created_at timestamp with time zone,
     updated_at timestamp with time zone,
     is_public boolean DEFAULT false

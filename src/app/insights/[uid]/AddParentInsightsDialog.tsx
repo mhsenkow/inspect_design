@@ -72,11 +72,17 @@ const AddParentInsightsDialog = ({
 
   const handleSubmit = useCallback(() => {
     if (serverActionContext) {
-      serverActionContext.executeAction(doAddParentInsights, {
-        childInsight: insight,
-        newParentInsights: selectedParentInsights,
-        newInsightName,
-      });
+      void serverActionContext
+        .executeAction(doAddParentInsights, {
+          childInsight: insight,
+          newParentInsights: selectedParentInsights,
+          newInsightName,
+        })
+        .then(() => {
+          resetStateValues();
+          onClose();
+        });
+      return;
     }
     resetStateValues();
     onClose();
@@ -149,7 +155,7 @@ const AddParentInsightsDialog = ({
   return (
     <Modal
       id={id}
-      title={`Add Parent Insights to Insight: ${insight.title}`}
+      title="Add parent insights"
       isOpen={isOpen}
       onClose={handleClose}
       size="large"

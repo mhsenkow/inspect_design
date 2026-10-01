@@ -9,31 +9,28 @@ import { POST } from "./route";
 import { getAuthUser } from "../../functions";
 import { ForeignKeyViolationError } from "objection";
 
-jest.mock("../../functions");
-jest.mock("../models/comments", () => {
-  const mockQueryBuilder = {
-    insert: jest.fn().mockReturnThis(),
-    withGraphFetched: jest.fn().mockReturnThis(),
-    then: jest.fn(),
-  };
-
-  const MockInsightModelConstructor = jest.fn();
-  Object.assign(MockInsightModelConstructor, {
-    query: jest.fn(() => mockQueryBuilder),
-  });
-
-  return {
-    CommentModel: MockInsightModelConstructor,
-  };
-});
-
 jest.mock("../../functions", () => ({
   getAuthUser: jest.fn(),
+}));
+
+const insertAndFetch = jest.fn();
+const findById = jest.fn();
+const withGraphFetched = jest.fn();
+
+jest.mock("../models/comments", () => ({
+  CommentModel: {
+    query: jest.fn(() => ({
+      insertAndFetch,
+      findById,
+      withGraphFetched,
+    })),
+  },
 }));
 
 describe("POST /api/comments", () => {
   const mockAuthUser = { id: 1, name: "Test User" };
   const mockComment = {
+    id: 10,
     comment: "hi",
     user_id: 1,
     summary_id: 2,
@@ -42,11 +39,9 @@ describe("POST /api/comments", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (CommentModel.query().insert as jest.Mock).mockReturnThis();
-    (CommentModel.query().withGraphFetched as jest.Mock).mockReturnThis();
-    (CommentModel.query().then as jest.Mock).mockImplementation((callback) =>
-      Promise.resolve(callback(mockComment)),
-    );
+    insertAndFetch.mockResolvedValue(mockComment);
+    findById.mockReturnValue({ withGraphFetched });
+    withGraphFetched.mockResolvedValue(mockComment);
     (getAuthUser as jest.Mock).mockResolvedValue(mockAuthUser);
   });
 
@@ -55,9 +50,8 @@ describe("POST /api/comments", () => {
       ...mockComment,
       summary_id: undefined,
     };
-    (CommentModel.query().then as jest.Mock).mockImplementationOnce(
-      (callback) => Promise.resolve(callback(localMockComment)),
-    );
+    insertAndFetch.mockResolvedValueOnce(localMockComment);
+    withGraphFetched.mockResolvedValueOnce(localMockComment);
     const req = {
       json: jest.fn().mockResolvedValue(localMockComment),
     } as any;
@@ -73,9 +67,8 @@ describe("POST /api/comments", () => {
       ...mockComment,
       insight_id: undefined,
     };
-    (CommentModel.query().then as jest.Mock).mockImplementationOnce(
-      (callback) => Promise.resolve(callback(localMockComment)),
-    );
+    insertAndFetch.mockResolvedValueOnce(localMockComment);
+    withGraphFetched.mockResolvedValueOnce(localMockComment);
     const req = {
       json: jest.fn().mockResolvedValue({
         summary_id: 1,
@@ -124,12 +117,11 @@ describe("POST /api/comments", () => {
 
   // eslint-disable-next-line jest/no-disabled-tests -- can't figure out how to throw ForeignKeyViolationError
   it.skip("returns 409 on ForeignKeyViolationError", async () => {
-    (CommentModel.query().then as jest.Mock).mockReset();
-    (CommentModel.query().then as jest.Mock).mockRejectedValueOnce({
-      nativeError: {
+    insertAndFetch.mockRejectedValueOnce(
+      Object.assign(new ForeignKeyViolationError({} as any), {
         message: "FK error",
-      } as unknown as typeof ForeignKeyViolationError,
-    });
+      }),
+    );
     const req = {
       json: jest.fn().mockResolvedValue({
         insight_id: 1,
@@ -141,16 +133,13 @@ describe("POST /api/comments", () => {
     const res = await POST(req);
 
     expect(res.status).toBe(409);
-    expect(await res.json()).toEqual({
+    expect(await res.json()).toMatchObject({
       statusText: "Either the summary_id or insight_id is invalid",
     });
   });
 
-  it("throws error for other database errors", async () => {
-    (CommentModel.query().then as jest.Mock).mockReset();
-    (CommentModel.query().then as jest.Mock).mockImplementationOnce(() => {
-      throw new Error("DB error");
-    });
+  it("returns 500 JSON for other database errors", async () => {
+    insertAndFetch.mockRejectedValueOnce(new Error("DB error"));
     const req = {
       json: jest.fn().mockResolvedValue({
         insight_id: 1,
@@ -159,6 +148,11 @@ describe("POST /api/comments", () => {
       }),
     } as any;
 
-    await expect(POST(req)).rejects.toThrow("DB error");
+    const res = await POST(req);
+    expect(res.status).toBe(500);
+    expect(await res.json()).toEqual({
+      message: "Unable to save comment.",
+      statusText: "Unable to save comment.",
+    });
   });
 });

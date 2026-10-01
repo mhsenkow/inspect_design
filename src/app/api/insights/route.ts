@@ -63,7 +63,9 @@ export async function GET(req: NextRequest): Promise<GetInsightsRouteResponse> {
 
 export type PostInsightsRouteRequestBody = Promise<{
   title?: string;
+  description?: string;
   citations?: InsightEvidence[];
+  evidence?: InsightEvidence[];
 }>;
 
 interface PostInsightsRouteRequest extends NextRequest {
@@ -81,11 +83,15 @@ export async function POST(
     const uid = Date.now().toString(36);
     const authUser = await getAuthUser(headers);
 
-    if (!authUser) {
+    if (!authUser?.id) {
       return NextResponse.json({ statusText: "Unauthorized" }, { status: 401 });
     }
 
-    const { title, citations } = await req.json();
+    const body = await req.json();
+    const title = body.title?.trim();
+    const description =
+      typeof body.description === "string" ? body.description : undefined;
+    const citations = body.citations ?? body.evidence;
 
     if (!title) {
       return NextResponse.json(
@@ -95,12 +101,17 @@ export async function POST(
     }
 
     // First create the insight without evidence
+    const insertData: Partial<InsightModel> = {
+      user_id: authUser.id,
+      uid,
+      title,
+    };
+    if (description !== undefined) {
+      insertData.description = description;
+    }
+
     const newInsight = (await InsightModel.query()
-      .insert({
-        user_id: authUser.id,
-        uid,
-        title,
-      })
+      .insert(insertData)
       .withGraphFetched("evidence")) as InsightModel;
 
     // Then add evidence if provided
@@ -125,7 +136,12 @@ export async function POST(
   } catch (error) {
     console.error("Error in POST /api/insights:", error);
     return NextResponse.json(
-      { statusText: "Internal server error while creating insight" },
+      {
+        statusText:
+          error instanceof Error
+            ? error.message
+            : "Internal server error while creating insight",
+      },
       { status: 500 },
     );
   }
