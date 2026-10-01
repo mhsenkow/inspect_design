@@ -48,8 +48,6 @@ describe("AddLinksAsEvidenceDialog", () => {
     },
   ];
 
-  const mockSetServerFunctionInput = jest.fn();
-  const mockSetActiveServerFunction = jest.fn();
   const executeAction = jest.fn().mockResolvedValue(undefined);
 
   beforeEach(() => {
@@ -99,9 +97,7 @@ describe("AddLinksAsEvidenceDialog", () => {
       />,
     );
     await waitFor(() => {
-      expect(
-        screen.getByText("Add evidence"),
-      ).toBeInTheDocument();
+      expect(screen.getByText("Add evidence")).toBeInTheDocument();
     });
   });
 

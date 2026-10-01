@@ -137,7 +137,9 @@ describe("AddChildInsightsDialog", () => {
 
   it("calls cancelDialog on dialog background click", () => {
     renderDialog();
-    const modal = document.querySelector('[role="presentation"]') as HTMLElement;
+    const modal = document.querySelector(
+      '[role="presentation"]',
+    ) as HTMLElement;
     fireEvent.click(modal, { target: modal, currentTarget: modal });
     expect(setServerFunctionInput).toHaveBeenCalledWith(undefined);
     expect(setActiveServerFunction).toHaveBeenCalledWith(undefined);

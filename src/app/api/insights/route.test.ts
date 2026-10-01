@@ -354,9 +354,7 @@ describe("/api/insights", () => {
       expect(response.status).toBe(500);
 
       const json = await response.json();
-      expect(json.statusText).toBe(
-        "Database connection failed",
-      );
+      expect(json.statusText).toBe("Database connection failed");
     });
 
     it("should handle unique constraint violations", async () => {

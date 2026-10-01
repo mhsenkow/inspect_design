@@ -94,8 +94,7 @@ describe("getShowConfirmationFunction", () => {
     global.confirm = jest.fn(() => true);
     const setServerFunctionInput = jest.fn();
     // const fn = getShowConfirmationFunction(setServerFunctionInput);
-    const selectedLinks = [{ id: 1 }];
-    // fn(selectedLinks as any);
+    // fn([{ id: 1 }] as any);
     expect(setServerFunctionInput).not.toHaveBeenCalled();
   });
 

@@ -79,7 +79,9 @@ describe("POST /api/reactions", () => {
     const json = await response.json();
 
     expect(json).toEqual(localMockReaction);
-    expect(ReactionModel.query().insertAndFetch as jest.Mock).toHaveBeenCalledWith({
+    expect(
+      ReactionModel.query().insertAndFetch as jest.Mock,
+    ).toHaveBeenCalledWith({
       insight_id: 3,
       summary_id: undefined,
       reaction: "hi",
@@ -105,7 +107,9 @@ describe("POST /api/reactions", () => {
     const json = await response.json();
 
     expect(json).toEqual(localMockReaction);
-    expect(ReactionModel.query().insertAndFetch as jest.Mock).toHaveBeenCalledWith({
+    expect(
+      ReactionModel.query().insertAndFetch as jest.Mock,
+    ).toHaveBeenCalledWith({
       insight_id: undefined,
       summary_id: 2,
       reaction: "hi",
@@ -114,11 +118,13 @@ describe("POST /api/reactions", () => {
   });
 
   it("should update an existing reaction", async () => {
-    (ReactionModel.query().first as jest.Mock).mockResolvedValueOnce({ id: 10 });
+    (ReactionModel.query().first as jest.Mock).mockResolvedValueOnce({
+      id: 10,
+    });
     const updatedReaction = { ...mockReaction, reaction: "updated" };
-    (ReactionModel.query().patchAndFetchById as jest.Mock).mockResolvedValueOnce(
-      updatedReaction,
-    );
+    (
+      ReactionModel.query().patchAndFetchById as jest.Mock
+    ).mockResolvedValueOnce(updatedReaction);
     const req = {
       json: jest.fn().mockResolvedValue({
         insight_id: 3,

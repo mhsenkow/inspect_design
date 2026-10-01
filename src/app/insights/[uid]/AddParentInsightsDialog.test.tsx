@@ -136,7 +136,9 @@ describe("AddParentInsightsDialog", () => {
 
   it("closes dialog on click outside dialog content", () => {
     renderDialog();
-    const modal = document.querySelector('[role="presentation"]') as HTMLElement;
+    const modal = document.querySelector(
+      '[role="presentation"]',
+    ) as HTMLElement;
     fireEvent.click(modal, { target: modal, currentTarget: modal });
     expect(setServerFunctionInput).toHaveBeenCalledWith(undefined);
     expect(setActiveServerFunction).toHaveBeenCalledWith(undefined);
