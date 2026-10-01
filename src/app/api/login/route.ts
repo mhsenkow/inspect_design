@@ -21,7 +21,10 @@ export async function POST(
 ): Promise<PostLoginSessionResponse> {
   const { email, password } = await req.json();
 
-  if (!(email && password)) {
+  const normalizedEmail = email?.toLocaleLowerCase().trim();
+  const trimmedPassword = password?.trim();
+
+  if (!(normalizedEmail && trimmedPassword)) {
     return NextResponse.json(
       {
         message: "All input is required",
@@ -32,29 +35,32 @@ export async function POST(
 
   const resultRows = await UserLibSqlModel.query().where(
     "email",
-    email.toLocaleLowerCase().trim(),
+    normalizedEmail,
   );
-  if (!resultRows || resultRows.length == 0) {
+  if (!resultRows || resultRows.length === 0) {
     return NextResponse.json(
       {
-        message: "User does not Exist. Please register",
+        message: "User does not exist. Please register.",
       },
       { status: 404 },
     );
   }
   const user = resultRows[0] as UserLibSqlModel;
 
-  if (user && (await bcrypt.compare(password.trim(), user.password!))) {
+  if (user?.password && (await bcrypt.compare(trimmedPassword, user.password))) {
     const token = await createSession(user);
-    user.token = token;
 
     return NextResponse.json({
-      ...user,
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      token,
     });
   }
+
   return NextResponse.json(
     {
-      message: "Invalid Credentials",
+      message: "Invalid credentials",
     },
     { status: 401 },
   );

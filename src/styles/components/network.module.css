@@ -1,0 +1,62 @@
+.networkRoot {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  color: var(--color-muted);
+}
+
+.networkMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  padding: 0 0.15rem;
+  flex-shrink: 0;
+}
+
+.networkHint {
+  color: var(--color-muted);
+  opacity: 0.8;
+  font-weight: 400;
+}
+
+.networkCanvas {
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-bg-elev, #fff);
+  overflow: hidden;
+  touch-action: none;
+}
+
+.networkSvg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: grab;
+  color: var(--color-muted);
+}
+
+.networkSvg:active {
+  cursor: grabbing;
+}
+
+@media (max-width: 640px) {
+  .networkMeta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .networkCanvas {
+    border-radius: 10px;
+  }
+}

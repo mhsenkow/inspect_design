@@ -1,118 +1,83 @@
 /* ===================================
-   DESIGN TOKENS - CSS CUSTOM PROPERTIES
+   DESIGN TOKENS — ibm.io suite + Inspect aliases
    =================================== */
 
+@import "./ibm-tokens.css";
+@import "./motion.css";
+
 :root {
-  /* ===================================
-     CORE DESIGN TOKENS
-     =================================== */
+  /* Map legacy Inspect semantic tokens → ibm.io tokens so existing CSS keeps working */
+  --color-text-primary: var(--color-text);
+  --color-text-secondary: var(--color-muted);
+  --color-text-tertiary: var(--color-muted);
+  --color-text-muted: var(--color-muted);
+  --color-text-inverse: var(--color-bg-elev);
 
-  /* Base Color - Professional Blue Spectrum */
-  --color-base-50: #f0f4ff;
-  --color-base-100: #e0e9ff;
-  --color-base-200: #c7d6ff;
-  --color-base-300: #a5b8ff;
-  --color-base-400: #7c93ff;
-  --color-base-500: #1877f2;
-  --color-base-600: #166fe5;
-  --color-base-700: #1464d0;
-  --color-base-800: #1259bb;
-  --color-base-900: #104ea6;
-  --color-base-950: #0e4391;
+  --color-background-primary: var(--color-bg-elev);
+  --color-background-secondary: var(--color-bg);
+  --color-background-tertiary: color-mix(in oklab, var(--color-bg) 88%, var(--color-text));
+  --color-background-inverse: var(--color-text);
 
-  /* Neutral Colors - Derived from Base Blue */
-  --color-neutral-50: #ffffff;
-  --color-neutral-100: #f8f9ff;
-  --color-neutral-200: #eef1ff;
-  --color-neutral-300: #e4e8ff;
-  --color-neutral-400: #d1d8ff;
-  --color-neutral-500: #b8c2ff;
-  --color-neutral-600: #9aa6ff;
-  --color-neutral-700: #7c8aff;
-  --color-neutral-800: #5e6eff;
-  --color-neutral-900: #4052ff;
-  --color-neutral-950: #2236ff;
+  --color-border-primary: var(--color-border);
+  --color-border-secondary: var(--color-border);
+  --color-border-focus: var(--color-accent);
 
-  /* Semantic Colors - All Derived from Base Spectrum */
-  --color-text-primary: #0e4391;
-  --color-text-secondary: #4052ff;
-  --color-text-tertiary: #7c8aff;
-  --color-text-muted: #b8c2ff;
-  --color-text-inverse: #ffffff;
+  --color-link-primary: var(--color-accent);
+  --color-link-hover: var(--color-accent);
+  --color-link-active: var(--color-accent-2);
 
-  --color-background-primary: #ffffff;
-  --color-background-secondary: #f8f9ff;
-  --color-background-tertiary: #eef1ff;
-  --color-background-inverse: #0e4391;
+  /* Brand scale collapses to accent for leftover base-* consumers */
+  --color-base-50: var(--color-bg-elev);
+  --color-base-100: var(--color-bg-elev);
+  --color-base-200: var(--color-bg);
+  --color-base-300: var(--color-border);
+  --color-base-400: var(--color-muted);
+  --color-base-500: var(--color-accent);
+  --color-base-600: var(--color-accent);
+  --color-base-700: var(--color-accent-2);
+  --color-base-800: var(--color-text);
+  --color-base-900: var(--color-text);
+  --color-base-950: var(--color-text);
 
-  --color-border-primary: #e4e8ff;
-  --color-border-secondary: #d1d8ff;
-  --color-border-focus: #1877f2;
+  --color-neutral-50: var(--color-bg-elev);
+  --color-neutral-100: var(--color-bg-elev);
+  --color-neutral-200: var(--color-bg);
+  --color-neutral-300: var(--color-border);
+  --color-neutral-400: var(--color-muted);
+  --color-neutral-500: var(--color-muted);
+  --color-neutral-600: var(--color-muted);
+  --color-neutral-700: var(--color-text);
+  --color-neutral-800: var(--color-text);
+  --color-neutral-900: var(--color-text);
+  --color-neutral-950: var(--color-text);
 
-  --color-link-primary: #1877f2;
-  --color-link-hover: #166fe5;
-  --color-link-active: #1464d0;
-
-  /* Success Colors */
-  --color-success-50: #f0fdf4;
-  --color-success-100: #dcfce7;
-  --color-success-200: #bbf7d0;
-  --color-success-300: #86efac;
-  --color-success-400: #4ade80;
+  /* Keep success/warning/error for alerts */
   --color-success-500: #22c55e;
   --color-success-600: #16a34a;
-  --color-success-700: #15803d;
-  --color-success-800: #166534;
-  --color-success-900: #14532d;
-
-  /* Warning Colors */
-  --color-warning-50: #fffbeb;
-  --color-warning-100: #fef3c7;
-  --color-warning-200: #fde68a;
-  --color-warning-300: #fcd34d;
-  --color-warning-400: #fbbf24;
   --color-warning-500: #f59e0b;
   --color-warning-600: #d97706;
-  --color-warning-700: #b45309;
-  --color-warning-800: #92400e;
-  --color-warning-900: #78350f;
+  --color-error-500: var(--color-accent-2);
+  --color-error-600: var(--color-accent-2);
+  --color-error-700: var(--color-accent-2);
+  --color-error-50: color-mix(in oklab, var(--color-accent-2) 12%, var(--color-bg-elev));
+  --color-error-100: color-mix(in oklab, var(--color-accent-2) 18%, var(--color-bg-elev));
 
-  /* Error Colors */
-  --color-error-50: #fef2f2;
-  --color-error-100: #fee2e2;
-  --color-error-200: #fecaca;
-  --color-error-300: #fca5a5;
-  --color-error-400: #f87171;
-  --color-error-500: #ef4444;
-  --color-error-600: #dc2626;
-  --color-error-700: #b91c1c;
-  --color-error-800: #991b1b;
-  --color-error-900: #7f1d1d;
+  --font-family-sans: Helvetica, "Helvetica Neue", Arial, ui-sans-serif, system-ui,
+    -apple-system, sans-serif;
+  --font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-sans: var(--font-family-sans);
+  --font-mono: var(--font-family-mono);
 
-  /* ===================================
-     TYPOGRAPHY
-     =================================== */
+  --font-size-xs: var(--size-0);
+  --font-size-sm: var(--size-1);
+  --font-size-base: var(--size-2);
+  --font-size-lg: var(--size-3);
+  --font-size-xl: var(--size-4);
+  --font-size-2xl: var(--size-5);
+  --font-size-3xl: var(--size-6);
+  --font-size-4xl: var(--size-7);
+  --font-size-5xl: var(--size-8);
 
-  /* Font Families */
-  --font-family-sans:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
-    Arial, sans-serif;
-  --font-family-mono:
-    "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New",
-    monospace;
-
-  /* Font Sizes */
-  --font-size-xs: 0.75rem; /* 12px */
-  --font-size-sm: 0.875rem; /* 14px */
-  --font-size-base: 1rem; /* 16px */
-  --font-size-lg: 1.125rem; /* 18px */
-  --font-size-xl: 1.25rem; /* 20px */
-  --font-size-2xl: 1.5rem; /* 24px */
-  --font-size-3xl: 1.875rem; /* 30px */
-  --font-size-4xl: 2.25rem; /* 36px */
-  --font-size-5xl: 3rem; /* 48px */
-
-  /* Font Weights */
   --font-weight-light: 300;
   --font-weight-normal: 400;
   --font-weight-medium: 500;
@@ -120,85 +85,51 @@
   --font-weight-bold: 700;
   --font-weight-extrabold: 800;
 
-  /* Line Heights */
   --line-height-tight: 1.25;
-  --line-height-normal: 1.5;
-  --line-height-relaxed: 1.75;
-
-  /* ===================================
-     SPACING
-     =================================== */
+  --line-height-normal: 1.45;
+  --line-height-relaxed: 1.65;
 
   --spacing-0: 0;
-  --spacing-1: 0.25rem; /* 4px */
-  --spacing-2: 0.5rem; /* 8px */
-  --spacing-3: 0.75rem; /* 12px */
-  --spacing-4: 1rem; /* 16px */
-  --spacing-5: 1.25rem; /* 20px */
-  --spacing-6: 1.5rem; /* 24px */
-  --spacing-8: 2rem; /* 32px */
-  --spacing-10: 2.5rem; /* 40px */
-  --spacing-12: 3rem; /* 48px */
-  --spacing-16: 4rem; /* 64px */
-  --spacing-20: 5rem; /* 80px */
-  --spacing-24: 6rem; /* 96px */
-  --spacing-32: 8rem; /* 128px */
-
-  /* ===================================
-     BORDER RADIUS
-     =================================== */
+  --spacing-1: var(--space-1);
+  --spacing-2: var(--space-2);
+  --spacing-3: var(--space-3);
+  --spacing-4: var(--space-4);
+  --spacing-5: var(--space-5);
+  --spacing-6: var(--space-6);
+  --spacing-8: var(--space-8);
+  --spacing-10: var(--space-10);
+  --spacing-12: var(--space-12);
+  --spacing-16: var(--space-16);
+  --spacing-20: 5rem;
+  --spacing-24: 6rem;
+  --spacing-32: 8rem;
 
   --radius-none: 0;
-  --radius-sm: 0.125rem; /* 2px */
-  --radius-base: 0.25rem; /* 4px */
-  --radius-md: 0.375rem; /* 6px */
-  --radius-lg: 0.5rem; /* 8px */
-  --radius-xl: 0.75rem; /* 12px */
-  --radius-2xl: 1rem; /* 16px */
-  --radius-3xl: 1.5rem; /* 24px */
+  --radius-base: 4px;
+  --radius-xl: var(--radius-lg);
+  --radius-2xl: 20px;
+  --radius-3xl: 24px;
   --radius-full: 9999px;
 
-  /* ===================================
-     SHADOWS
-     =================================== */
-
-  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-  --shadow-base:
-    0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-md:
-    0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-lg:
-    0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-  --shadow-xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
-  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  --shadow-xs: var(--shadow-1);
+  --shadow-sm: var(--shadow-1);
+  --shadow-base: var(--shadow-2);
+  --shadow-md: var(--shadow-2);
+  --shadow-lg: var(--shadow-3);
+  --shadow-xl: var(--shadow-4);
+  --shadow-2xl: var(--shadow-4);
   --shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
 
-  /* ===================================
-     LAYOUT & SIZING
-     =================================== */
-
-  --container-max-width: 1200px;
-  --container-padding: var(--spacing-4);
-
-  --header-height: 4rem;
+  --container-max-width: var(--content-width);
+  --container-padding: var(--space-4);
+  --header-height: var(--header-h);
   --sidebar-width: 16rem;
 
-  /* ===================================
-     TRANSITIONS & ANIMATIONS
-     =================================== */
-
-  --transition-fast: 150ms ease-in-out;
-  --transition-base: 250ms ease-in-out;
-  --transition-slow: 350ms ease-in-out;
-
-  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --transition-fast: var(--motion-fast) var(--ease-standard);
+  --transition-base: var(--motion-base) var(--ease-standard);
+  --transition-slow: var(--motion-slow) var(--ease-standard);
+  --ease-in-out: var(--ease-standard);
   --ease-in: cubic-bezier(0.4, 0, 1, 1);
-
-  /* ===================================
-     Z-INDEX SCALE
-     =================================== */
 
   --z-dropdown: 1000;
   --z-sticky: 1020;
@@ -208,19 +139,86 @@
   --z-popover: 1060;
   --z-tooltip: 1070;
   --z-header: 1080;
+
+  /* Card recipe defaults for light until theme sets glass */
+  --card-bg: var(--surface-card);
+  --card-border: var(--border-weak);
+  --card-border-hover: var(--border-strong);
+  --card-radius: var(--radius-md);
+  --card-shadow: var(--shadow-1);
+  --card-shadow-hover: var(--shadow-2);
+  --card-blur: none;
+  --card-sheen: none;
+  --card-pad: var(--space-5);
 }
 
 /* ===================================
    BASE STYLES
    =================================== */
 
-/* Base body styles */
+html {
+  font-size: 16px;
+}
+
 body {
   font-family: var(--font-family-sans);
   font-size: var(--font-size-base);
   line-height: var(--line-height-normal);
-  color: var(--color-text-primary);
-  background-color: var(--color-background-secondary);
+  color: var(--color-text);
+  background-color: var(--color-bg);
   margin: 0;
   padding: 0;
+  -webkit-font-smoothing: antialiased;
+  transition:
+    background-color var(--motion-slow) var(--ease-standard),
+    color var(--motion-slow) var(--ease-standard);
+}
+
+html[data-theme="glass"] body {
+  background:
+    radial-gradient(1200px 700px at 12% -10%, rgba(147, 51, 234, 0.18), transparent 55%),
+    radial-gradient(900px 600px at 88% 8%, rgba(59, 130, 246, 0.16), transparent 50%),
+    radial-gradient(800px 500px at 50% 110%, rgba(14, 165, 233, 0.12), transparent 55%),
+    #e8eef8;
+  background-attachment: fixed;
+}
+
+html[data-theme="frost"] body {
+  background:
+    radial-gradient(1100px 700px at 10% -8%, rgba(139, 92, 246, 0.28), transparent 55%),
+    radial-gradient(900px 600px at 92% 0%, rgba(59, 130, 246, 0.18), transparent 50%),
+    radial-gradient(700px 500px at 40% 120%, rgba(15, 23, 42, 0.9), transparent 55%),
+    #070b16;
+  background-attachment: fixed;
+}
+
+html[data-theme="loom"] body {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(212, 168, 75, 0.08), transparent 50%),
+    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.18) 2px, rgba(0, 0, 0, 0.18) 3px),
+    linear-gradient(135deg, #0a0a0f 0%, #0d0d15 100%);
+  background-attachment: fixed;
+}
+
+html[data-theme="tank"] body {
+  background: linear-gradient(180deg, #0b1a22 0%, #163040 42%, #1d3b22 72%, #2c1f15 88%, #1a120c 100%);
+  background-attachment: fixed;
+}
+
+html[data-theme="nes"] body {
+  background: repeating-linear-gradient(90deg, #209cee 0 10px, #1f97e8 10px 20px);
+  background-attachment: fixed;
+}
+
+::selection {
+  background: var(--selection-bg);
+  color: var(--selection-text);
+}
+
+a {
+  color: var(--color-accent);
+}
+
+a:hover {
+  color: var(--color-accent-2);
 }

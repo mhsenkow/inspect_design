@@ -33,7 +33,7 @@
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg, var(--color-base-500), var(--color-base-600));
+  background: var(--color-accent);
 }
 
 .cardHeaderTitle {
@@ -73,8 +73,8 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--color-base-500), var(--color-base-600));
+  height: 3px;
+  background: var(--color-accent);
 }
 
 .pageHeaderCardContent {

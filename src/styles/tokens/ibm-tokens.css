@@ -1,0 +1,383 @@
+/**
+ * Portfolio design tokens.
+ *
+ * Themes: `data-theme` on <html> — catalog in `src/theme/system.ts`
+ * Fonts:  `data-font` on <html> — next/font vars also on <html>
+ * Motion: `src/styles/motion.css` + `src/theme/motion.ts`
+ * Cards:  `--card-*` recipe → `.glass-card` / `.project-card`
+ */
+:root {
+    /* color — defaults match wordcount light until data-theme applies */
+    --color-bg: #f2f2f0;
+    --color-bg-elev: #fafaf8;
+    --color-text: #111111;
+    --color-muted: #757575;
+    --color-accent: #c45c26;
+    --color-accent-2: #c62828;
+
+    /* borders (semantic) */
+    --color-border: rgba(255, 255, 255, 0.12);
+    --border-weak: 1px solid rgba(255,255,255,0.06);
+    --border: 1px solid rgba(255,255,255,0.08);
+    --border-strong: 1px solid rgba(255,255,255,0.12);
+
+    /* surfaces (semantic) */
+    --surface-card: var(--color-bg-elev);
+    --surface-image-frame: #ffffff;
+
+    /* focus */
+    --focus-ring: 2px solid var(--color-accent);
+
+    /* selection */
+    --selection-bg: rgba(110,231,249,0.25);
+    --selection-text: var(--color-text);
+
+    /* spacing */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+    --space-12: 48px;
+    --space-16: 64px;
+
+    /* radius */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+
+    /* typography — next/font vars (--font-geist, etc.) live on <html> */
+    --font-sans: var(--font-inter), var(--font-geist), ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Ubuntu, Cantarell, Helvetica Neue, Arial, sans-serif;
+    --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+    /* company / system stacks (optional data-font targets) */
+    --font-sf-pro: -apple-system, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+    --font-segoe: "Segoe UI", "Segoe UI Variable", Roboto, system-ui, sans-serif;
+    --font-optimistic: "Optimistic Display", -apple-system, system-ui, sans-serif;
+
+    /* type roles */
+    --type-primary: var(--size-2);
+    --type-secondary: var(--size-1);
+    --type-tertiary: var(--size-0);
+
+    /* tight title / label tracking — prefer condensed over airy */
+    --track-title: -0.035em;
+    --track-title-md: -0.028em;
+    --track-title-sm: -0.022em;
+    --track-label: 0.01em;
+    --leading-title: 1.02;
+    --leading-title-md: 1.08;
+    --leading-label: 1.15;
+    /* body copy — denser scientific / editorial measure */
+    --leading-body: 1.4;
+    --leading-body-tight: 1.32;
+    --prose-gap: 0.75em;
+
+    --size-0: clamp(12px, 0.75rem, 0.75rem);
+    --size-1: clamp(14px, 0.875rem, 0.875rem);
+    --size-2: clamp(16px, 1rem, 1rem);
+    --size-3: clamp(18px, 1.125rem, 1.125rem);
+    --size-4: clamp(20px, 1.25rem, 1.25rem);
+    --size-5: clamp(24px, 1.5rem, 1.5rem);
+    --size-6: clamp(30px, 1.875rem, 1.875rem);
+    --size-7: clamp(36px, 2.25rem, 2.25rem);
+    --size-8: clamp(48px, 3rem, 3rem);
+
+    /* shadows */
+    --shadow-1: 0 1px 2px rgba(0,0,0,0.18);
+    --shadow-2: 0 4px 10px rgba(0,0,0,0.20), 0 1px 2px rgba(0,0,0,0.14);
+    --shadow-3: 0 8px 24px rgba(0,0,0,0.24), 0 2px 6px rgba(0,0,0,0.16);
+    --shadow-4: 0 12px 32px rgba(0,0,0,0.30), 0 4px 10px rgba(0,0,0,0.20);
+
+    /* glass/material levels (overridden per theme for proper alpha) */
+    --glass-1: rgba(20,20,22,0.40);
+    --glass-2: rgba(20,20,22,0.55);
+    --glass-3: rgba(20,20,22,0.70);
+    --glass-sheen: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0));
+    --glass-blur-1: saturate(1.1) blur(6px);
+    --glass-blur-2: saturate(1.2) blur(8px);
+    --glass-blur-3: saturate(1.3) blur(10px);
+
+    /* elegant glass card recipe — plays across themes */
+    --card-bg: var(--glass-2);
+    --card-border: var(--border-weak);
+    --card-border-hover: var(--border-strong);
+    --card-radius: var(--radius-lg);
+    --card-radius-media: var(--radius-md);
+    --card-shadow: var(--shadow-1);
+    --card-shadow-hover: var(--shadow-2);
+    --card-blur: var(--glass-blur-2);
+    --card-sheen: var(--glass-sheen);
+    --card-pad: var(--space-4);
+
+    /* layout */
+    --content-width: 1120px;
+    --panel-width: 300px;
+    --panel-handle: 36px;
+    --header-h: 56px;
+    --footer-h: 40px;
+  }
+
+  /* explicit theme overrides via data-theme on <html>
+     Palettes aligned with ibm.io/wordcount */
+  :root[data-theme="light"] {
+    --color-bg: #f2f2f0;
+    --color-bg-elev: #fafaf8;
+    --color-text: #111111;
+    --color-muted: #757575;
+    --color-accent: #c45c26;
+    --color-accent-2: #c62828;
+    --color-border: #c8c8c4;
+    --border-weak: 1px solid #e4e4e0;
+    --border: 1px solid #c8c8c4;
+    --border-strong: 1px solid #a8a8a4;
+    --surface-card: #fafaf8;
+    --surface-image-frame: #ffffff;
+    --focus-ring: 2px solid var(--color-accent);
+    --glass-1: rgba(250, 250, 248, 0.72);
+    --glass-2: rgba(250, 250, 248, 0.85);
+    --glass-3: rgba(250, 250, 248, 0.94);
+    --glass-sheen: linear-gradient(180deg, rgba(255,255,255,0.7), rgba(255,255,255,0));
+    --selection-bg: rgba(196, 92, 38, 0.22);
+    --selection-text: #111111;
+    --shadow-1: 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-2: 0 4px 12px rgba(0,0,0,0.08);
+    --shadow-3: 0 8px 24px rgba(0,0,0,0.10);
+    --shadow-4: 0 12px 32px rgba(0,0,0,0.12);
+  }
+
+  :root[data-theme="dark"] {
+    --color-bg: #161616;
+    --color-bg-elev: #1c1c1c;
+    --color-text: #f0f0ee;
+    --color-muted: #8a8a8a;
+    --color-accent: #e07a45;
+    --color-accent-2: #e57373;
+    --color-border: #3a3a3a;
+    --border-weak: 1px solid #2a2a2a;
+    --border: 1px solid #3a3a3a;
+    --border-strong: 1px solid #4a4a4a;
+    --surface-card: #1c1c1c;
+    --surface-image-frame: #ffffff;
+    --focus-ring: 2px solid var(--color-accent);
+    --glass-1: rgba(28, 28, 28, 0.72);
+    --glass-2: rgba(28, 28, 28, 0.85);
+    --glass-3: rgba(28, 28, 28, 0.94);
+    --selection-bg: rgba(224, 122, 69, 0.28);
+    --selection-text: #f0f0ee;
+  }
+
+  :root[data-theme="contrast"],
+  :root[data-theme="hc"] {
+    --color-bg: #000000;
+    --color-bg-elev: #000000;
+    --color-text: #ffffff;
+    --color-muted: #b0b0b0;
+    --color-accent: #ffff00;
+    --color-accent-2: #ffff00;
+    --color-border: #ffffff;
+    --border-weak: 2px solid #ffffff;
+    --border: 2px solid #ffffff;
+    --border-strong: 3px solid #ffffff;
+    --surface-card: #000000;
+    --surface-image-frame: #ffffff;
+    --focus-ring: 3px solid #ffffff;
+    --glass-1: rgba(0,0,0,0.95);
+    --glass-2: rgba(0,0,0,0.98);
+    --glass-3: rgba(0,0,0,1);
+    --shadow-1: none;
+    --shadow-2: none;
+    --shadow-3: none;
+    --shadow-4: none;
+    --selection-bg: #ffffff;
+    --selection-text: #000000;
+  }
+
+  :root[data-theme="paper"] {
+    --color-bg: #e8e2d6;
+    --color-bg-elev: #f3efe6;
+    --color-text: #1c1914;
+    --color-muted: #6e685c;
+    --color-accent: #8b4510;
+    --color-accent-2: #9b2c2c;
+    --color-border: #c4bbaa;
+    --border-weak: 1px solid #d9d1c3;
+    --border: 1px solid #c4bbaa;
+    --border-strong: 1px solid #a89f8c;
+    --surface-card: #f3efe6;
+    --surface-image-frame: #e8e2d6;
+    --focus-ring: 2px solid #8b4510;
+    --glass-1: rgba(243, 239, 230, 0.78);
+    --glass-2: rgba(243, 239, 230, 0.88);
+    --glass-3: rgba(243, 239, 230, 0.96);
+    --glass-sheen: linear-gradient(180deg, rgba(255,250,245,0.5), rgba(196,187,170,0.2));
+    --selection-bg: rgba(139, 69, 16, 0.2);
+    --selection-text: #1c1914;
+    --shadow-1: 2px 2px 6px rgba(28, 25, 20, 0.08);
+    --shadow-2: 4px 4px 12px rgba(28, 25, 20, 0.1);
+  }
+
+  :root[data-theme="glass"] {
+    --color-bg: #e8eef8;
+    --color-bg-elev: rgba(255, 255, 255, 0.55);
+    --color-text: #0f172a;
+    --color-muted: #64748b;
+    --color-accent: #7c3aed;
+    --color-accent-2: #dc2626;
+    --color-border: rgba(148, 163, 184, 0.45);
+    --border-weak: 1px solid rgba(255, 255, 255, 0.55);
+    --border: 1px solid rgba(148, 163, 184, 0.45);
+    --border-strong: 1px solid rgba(148, 163, 184, 0.65);
+    --surface-card: rgba(255, 255, 255, 0.55);
+    --surface-image-frame: #ffffff;
+    --focus-ring: 2px solid #7c3aed;
+    --glass-1: rgba(255, 255, 255, 0.45);
+    --glass-2: rgba(255, 255, 255, 0.65);
+    --glass-3: rgba(255, 255, 255, 0.8);
+    --glass-sheen: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0));
+    --glass-blur-1: blur(14px) saturate(140%);
+    --glass-blur-2: blur(22px) saturate(160%) brightness(110%);
+    --glass-blur-3: blur(28px) saturate(170%);
+    --selection-bg: rgba(124, 58, 237, 0.22);
+    --selection-text: #0f172a;
+    --shadow-1: 0 2px 10px rgba(147, 51, 234, 0.06);
+    --shadow-2: 0 8px 28px rgba(59, 130, 246, 0.1);
+  }
+
+  :root[data-theme="frost"] {
+    --color-bg: #070b16;
+    --color-bg-elev: rgba(15, 23, 42, 0.72);
+    --color-text: #e2e8f0;
+    --color-muted: #94a3b8;
+    --color-accent: #a78bfa;
+    --color-accent-2: #f87171;
+    --color-border: rgba(148, 163, 184, 0.22);
+    --border-weak: 1px solid rgba(148, 163, 184, 0.14);
+    --border: 1px solid rgba(148, 163, 184, 0.22);
+    --border-strong: 1px solid rgba(148, 163, 184, 0.35);
+    --surface-card: rgba(15, 23, 42, 0.72);
+    --surface-image-frame: #ffffff;
+    --focus-ring: 2px solid #a78bfa;
+    --glass-1: rgba(15, 23, 42, 0.55);
+    --glass-2: rgba(15, 23, 42, 0.72);
+    --glass-3: rgba(15, 23, 42, 0.88);
+    --glass-sheen: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0));
+    --glass-blur-1: blur(16px) saturate(160%);
+    --glass-blur-2: blur(24px) saturate(180%) brightness(120%);
+    --glass-blur-3: blur(30px) saturate(180%);
+    --selection-bg: rgba(167, 139, 250, 0.28);
+    --selection-text: #e2e8f0;
+    --shadow-1: 0 2px 12px rgba(139, 92, 246, 0.12);
+    --shadow-2: 0 8px 32px rgba(0, 0, 0, 0.45);
+  }
+
+  :root[data-theme="brutal"] {
+    --color-bg: #ffffff;
+    --color-bg-elev: #ffffff;
+    --color-text: #000000;
+    --color-muted: #000000;
+    --color-accent: #ff0000;
+    --color-accent-2: #0000ff;
+    --color-border: #000000;
+    --border-weak: 3px solid #000000;
+    --border: 3px solid #000000;
+    --border-strong: 3px solid #000000;
+    --surface-card: #ffffff;
+    --surface-image-frame: #ffffff;
+    --focus-ring: 3px solid #ff0000;
+    --radius-sm: 0;
+    --radius-md: 0;
+    --radius-lg: 0;
+    --glass-1: #ffffff;
+    --glass-2: #ffffff;
+    --glass-3: #ffffff;
+    --glass-sheen: none;
+    --shadow-1: 3px 3px 0 #000;
+    --shadow-2: 5px 5px 0 #000;
+    --shadow-3: 7px 7px 0 #000;
+    --shadow-4: 9px 9px 0 #000;
+    --selection-bg: #ff0000;
+    --selection-text: #ffffff;
+  }
+
+  :root[data-theme="loom"] {
+    --color-bg: #0a0a0f;
+    --color-bg-elev: #12121a;
+    --color-text: #e8e6e3;
+    --color-muted: #a8a5a0;
+    --color-accent: #d4a84b;
+    --color-accent-2: #8b5cf6;
+    --color-border: #2a2a35;
+    --border-weak: 1px solid #1a1a25;
+    --border: 1px solid #2a2a35;
+    --border-strong: 1px solid #3a3a48;
+    --surface-card: #12121a;
+    --surface-image-frame: #d4a84b;
+    --focus-ring: 2px solid #d4a84b;
+    --glass-1: rgba(18, 18, 26, 0.72);
+    --glass-2: rgba(18, 18, 26, 0.85);
+    --glass-3: rgba(18, 18, 26, 0.94);
+    --selection-bg: rgba(212, 168, 75, 0.28);
+    --selection-text: #e8e6e3;
+    --shadow-1: 0 0 12px rgba(212, 168, 75, 0.06);
+    --shadow-2: 0 0 24px rgba(212, 168, 75, 0.1);
+  }
+
+  :root[data-theme="tank"] {
+    --color-bg: #0b1a22;
+    --color-bg-elev: #163040;
+    --color-text: #c5e2e7;
+    --color-muted: #69a1b3;
+    --color-accent: #57a253;
+    --color-accent-2: #e6c92a;
+    --color-border: #23475a;
+    --border-weak: 1px solid #1d3b22;
+    --border: 2px solid #23475a;
+    --border-strong: 2px solid #356379;
+    --surface-card: #163040;
+    --surface-image-frame: #57a253;
+    --focus-ring: 2px solid #79c069;
+    --radius-sm: 0;
+    --radius-md: 0;
+    --radius-lg: 0;
+    --glass-1: rgba(22, 48, 64, 0.85);
+    --glass-2: rgba(22, 48, 64, 0.92);
+    --glass-3: #163040;
+    --selection-bg: rgba(87, 162, 83, 0.35);
+    --selection-text: #c5e2e7;
+    --shadow-1: 3px 3px 0 #1a120c;
+    --shadow-2: 4px 4px 0 #1a120c;
+  }
+
+  :root[data-theme="nes"] {
+    --color-bg: #209cee;
+    --color-bg-elev: #f8f8f8;
+    --color-text: #000000;
+    --color-muted: #1a1a1a;
+    --color-accent: #e4002b;
+    --color-accent-2: #fce100;
+    --color-border: #000000;
+    --border-weak: 2px solid #000000;
+    --border: 4px solid #000000;
+    --border-strong: 4px solid #000000;
+    --surface-card: #f8f8f8;
+    --surface-image-frame: #fce100;
+    --focus-ring: 3px solid #e4002b;
+    --radius-sm: 0;
+    --radius-md: 0;
+    --radius-lg: 0;
+    --glass-1: #f8f8f8;
+    --glass-2: #f8f8f8;
+    --glass-3: #f8f8f8;
+    --card-bg: #f8f8f8;
+    --card-border: 4px solid #000000;
+    --card-shadow: 4px 4px 0 #000;
+    --selection-bg: #e4002b;
+    --selection-text: #ffffff;
+    --shadow-1: 3px 3px 0 #000;
+    --shadow-2: 4px 4px 0 #000;
+    --shadow-3: 4px 4px 0 #000;
+  }

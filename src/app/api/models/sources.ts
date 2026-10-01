@@ -1,8 +1,7 @@
-import { Model } from "objection";
-
 import { Source } from "../../types";
+import { PostgresBaseModel } from "./postgres_models";
 
-export class SourceModel extends Model implements Source {
+export class SourceModel extends PostgresBaseModel implements Source {
   static tableName = "sources";
 
   id?: number;

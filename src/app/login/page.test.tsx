@@ -1,19 +1,27 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
-import LoginPage from "./page";
+import LoginForm from "./LoginForm";
 import { handleLogin } from "./LoginPageFunctions";
 
 jest.mock("./LoginPageFunctions");
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({ push: jest.fn() }),
+  useSearchParams: () => new URLSearchParams(),
+}));
+jest.mock("../hooks/useUser", () => () => ({
+  setLoggedIn: jest.fn(),
+  setToken: jest.fn(),
+}));
 
-describe("LoginPage", () => {
+describe("LoginForm", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it("renders login form", () => {
-    render(<LoginPage />);
+    render(<LoginForm />);
     expect(screen.getByLabelText(/Email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Password/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Login" })).toBeInTheDocument();
@@ -24,7 +32,7 @@ describe("LoginPage", () => {
     const mockHandleLogin = handleLogin as jest.Mock;
     mockHandleLogin.mockResolvedValueOnce(user);
 
-    render(<LoginPage />);
+    render(<LoginForm />);
 
     fireEvent.change(screen.getByLabelText(/Email/i), {
       target: { value: "test@example.com" },
@@ -39,34 +47,5 @@ describe("LoginPage", () => {
       "test@example.com",
       "password",
     );
-  });
-
-  // // when rean with other tests: InvalidCharacterError: The string to be decoded contains invalid characters
-  // eslint-disable-next-line jest/no-disabled-tests
-  it.skip("handles login failure", async () => {
-    const errorMessage = "Login failed";
-    const mockHandleLogin = handleLogin as jest.Mock;
-    mockHandleLogin.mockRejectedValueOnce(new Error(errorMessage));
-
-    render(<LoginPage />);
-
-    fireEvent.change(screen.getByLabelText(/Email/i), {
-      target: { value: "test@example.com" },
-    });
-    fireEvent.change(screen.getByLabelText(/Password/i), {
-      target: { value: "password" },
-    });
-    fireEvent.click(screen.getByText("Login"));
-
-    expect(mockHandleLogin).toHaveBeenCalled();
-
-    const errorDiv = screen.getByRole("button", { name: "Login" })
-      .nextSibling as HTMLElement;
-    await waitFor(() => {
-      expect(errorDiv).toBeInTheDocument();
-      expect(errorDiv.tagName.toLowerCase()).toBe("div");
-      expect(errorDiv.style.color).toBe("red");
-      expect(errorDiv.innerHTML).toBe("Login failed");
-    });
   });
 });

@@ -13,6 +13,7 @@ export class UserLibSqlModel extends LibSqlBaseModel implements User {
   username!: string;
   email!: string;
   password?: string;
+  passwordResetKey?: string | null;
   token?: string;
 
   static jsonSchema = {
@@ -22,6 +23,7 @@ export class UserLibSqlModel extends LibSqlBaseModel implements User {
       id: { type: "integer" },
       username: { type: "string" },
       email: { type: "string" },
+      passwordResetKey: { type: ["string", "null"] },
     },
   };
 
@@ -52,6 +54,8 @@ export class UserPostgresModel extends PostgresBaseModel implements User {
   id?: number;
   username!: string;
   email!: string;
+  password?: string;
+  passwordResetKey?: string | null;
 
   static jsonSchema = {
     type: "object",
@@ -60,6 +64,8 @@ export class UserPostgresModel extends PostgresBaseModel implements User {
       id: { type: "integer" },
       username: { type: "string" },
       email: { type: "string" },
+      password: { type: "string" },
+      passwordResetKey: { type: ["string", "null"] },
     },
   };
 

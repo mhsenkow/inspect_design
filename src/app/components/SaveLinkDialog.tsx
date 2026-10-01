@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import { Fact, Insight } from "../types";
 import FactsTable from "./FactsTable";
@@ -11,15 +11,13 @@ import {
   ModalBody,
   ModalFooter,
   FormGroup,
+  FormLabel,
   FormInput,
   ModalButton,
   ModalContentSection,
   ModalLoadingState,
 } from "./Modal";
-// import ServerActionContext from "../contexts/ServerActionContext";
 
-// need to create a schema here
-// because processing of it to get the insights is necessary before createInsights() is called
 export type ServerFunctionInputSchemaForSavedLinks = {
   url?: string;
   selectedInsights?: Insight[];
@@ -31,20 +29,22 @@ const SaveLinkDialog = ({
   isOpen,
   onClose,
   potentialInsightsFromServer,
+  onSubmit,
 }: {
   id: string;
   isOpen: boolean;
   onClose: () => void;
   potentialInsightsFromServer: Insight[];
+  onSubmit?: (input: ServerFunctionInputSchemaForSavedLinks) => Promise<void>;
 }): React.JSX.Element => {
-  // const serverActionContext = useContext(ServerActionContext);
-
-  const [linkUrl, setLinkUrl] = useState<string>("");
-  const [dataFilter, setDataFilter] = useState<string>("");
+  const [linkUrl, setLinkUrl] = useState("");
+  const [dataFilter, setDataFilter] = useState("");
   const [selectedInsights, setSelectedInsights] = useState<Insight[]>([]);
-  const [newInsightName, setNewInsightName] = useState<string>("");
-  const [pageTitle, setPageTitle] = useState<string>("");
+  const [newInsightName, setNewInsightName] = useState("");
+  const [pageTitle, setPageTitle] = useState("");
   const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [potentialInsights, setPotentialInsights] = useState<Insight[]>(
     potentialInsightsFromServer,
   );
@@ -54,10 +54,16 @@ const SaveLinkDialog = ({
     query: linkUrl ? (`url=${linkUrl}` as string) : null,
   });
   const existingLinks = useLinksReturn[0];
-  const [linkUrlError, setLinkUrlError] = useState<string>("");
-  const [urlValidationTimeout, setUrlValidationTimeout] = useState<ReturnType<
-    typeof setTimeout
-  > | null>(null);
+  const [linkUrlError, setLinkUrlError] = useState("");
+  const urlValidationTimeout = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+
+  useEffect(() => {
+    if (isOpen) {
+      setPotentialInsights(potentialInsightsFromServer);
+    }
+  }, [isOpen, potentialInsightsFromServer]);
 
   const resetStateValues = useCallback(() => {
     setSelectedInsights([]);
@@ -67,46 +73,77 @@ const SaveLinkDialog = ({
     setLinkUrlError("");
     setPageTitle("");
     setLoading(false);
-    if (urlValidationTimeout) {
-      clearTimeout(urlValidationTimeout);
-      setUrlValidationTimeout(null);
+    setSubmitting(false);
+    setSubmitError("");
+    if (urlValidationTimeout.current) {
+      clearTimeout(urlValidationTimeout.current);
+      urlValidationTimeout.current = null;
     }
-  }, [urlValidationTimeout]);
+  }, []);
 
   const handleClose = useCallback(() => {
+    if (submitting) return;
     resetStateValues();
     onClose();
-  }, [resetStateValues, onClose]);
+  }, [resetStateValues, onClose, submitting]);
 
-  const handleSubmit = useCallback(() => {
-    // Validate URL before submitting
+  const normalizeUrl = (raw: string): string => {
+    const trimmed = raw.trim();
+    return trimmed.startsWith("http") ? trimmed : `https://${trimmed}`;
+  };
+
+  const handleSubmit = useCallback(async () => {
+    const fullUrl = normalizeUrl(linkUrl);
     try {
-      new URL(linkUrl);
+      new URL(fullUrl);
     } catch {
       setLinkUrlError("Invalid URL format");
       return;
     }
 
-    // FIXME: Find the function to call in executeFunction
-    // if (serverActionContext) {
-    //   serverActionContext.executeAction(noop as ServerFunction<any>, {
-    //     url: linkUrl,
-    //     selectedInsights: [...selectedInsights],
-    //     newInsightName,
-    //   });
-    //   resetStateValues();
-    //   onClose();
-    // }
-  }, [linkUrl]);
+    if (!(selectedInsights.length > 0 || newInsightName.trim())) {
+      setSubmitError("Pick an existing insight or name a new one.");
+      return;
+    }
 
-  // Cleanup timeout on unmount
+    if (!onSubmit) {
+      setSubmitError("Save handler is not configured.");
+      return;
+    }
+
+    setSubmitting(true);
+    setSubmitError("");
+    try {
+      await onSubmit({
+        url: fullUrl,
+        selectedInsights: [...selectedInsights],
+        newInsightName: newInsightName.trim(),
+      });
+      resetStateValues();
+      onClose();
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error ? error.message : "Failed to save link.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }, [
+    linkUrl,
+    selectedInsights,
+    newInsightName,
+    onSubmit,
+    resetStateValues,
+    onClose,
+  ]);
+
   useEffect(() => {
     return () => {
-      if (urlValidationTimeout) {
-        clearTimeout(urlValidationTimeout);
+      if (urlValidationTimeout.current) {
+        clearTimeout(urlValidationTimeout.current);
       }
     };
-  }, [urlValidationTimeout]);
+  }, []);
 
   const fetchPageTitle = useCallback((urlToFetch: string) => {
     setLoading(true);
@@ -116,7 +153,7 @@ const SaveLinkDialog = ({
       .then((title) => {
         setPageTitle(title);
       })
-      .catch((error) => {
+      .catch((error: Error) => {
         console.error("Error fetching page title:", error);
         if (
           error.message.includes("403") ||
@@ -124,11 +161,11 @@ const SaveLinkDialog = ({
           error.message.includes("Forbidden")
         ) {
           setLinkUrlError(
-            "Website blocks automated access - you can still save the link",
+            "Website blocks automated access — you can still save the link",
           );
         } else {
           setLinkUrlError(
-            "Could not get page title - you can still save the link",
+            "Could not get page title — you can still save the link",
           );
         }
       })
@@ -140,32 +177,45 @@ const SaveLinkDialog = ({
   const linkExistsError =
     existingLinks && existingLinks.length > 0 ? "Link already exists" : "";
   const displayError = linkUrlError || linkExistsError;
+  const canSubmit =
+    Boolean(linkUrl.trim()) &&
+    (selectedInsights.length > 0 || Boolean(newInsightName.trim())) &&
+    !submitting;
 
   return (
     <Modal
       id={id}
-      title="Save Link to Inspect"
+      title="Save link"
       isOpen={isOpen}
       onClose={handleClose}
       size="large"
+      closeOnBackdropClick={!submitting}
+      closeOnEscape={!submitting}
     >
       <ModalBody>
-        <ModalContentSection title="Enter the URL">
+        <ModalContentSection
+          title="Link URL"
+          subtitle="Paste a URL to save into Inspect."
+        >
           <FormGroup>
+            <FormLabel htmlFor="save-link-url">URL</FormLabel>
             <FormInput
-              type="text"
-              placeholder="Link URL..."
+              id="save-link-url"
+              type="url"
+              inputMode="url"
+              placeholder="https://example.com/article"
               value={linkUrl}
+              autoComplete="url"
+              disabled={submitting}
               onChange={(event) => {
                 const text = event.target.value;
                 setLinkUrl(text);
+                setSubmitError("");
 
-                // Clear any existing timeout
-                if (urlValidationTimeout) {
-                  clearTimeout(urlValidationTimeout);
+                if (urlValidationTimeout.current) {
+                  clearTimeout(urlValidationTimeout.current);
                 }
 
-                // Reset states immediately
                 setPageTitle("");
                 setLinkUrlError("");
                 setLoading(false);
@@ -175,29 +225,31 @@ const SaveLinkDialog = ({
                   text.match(/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\/.*)?$/);
 
                 if (isValidUrl) {
-                  // Debounce the URL validation and fetch to prevent rapid requests
-                  const timeout = setTimeout(() => {
-                    const fullUrl = text.startsWith("http")
-                      ? text
-                      : `https://${text}`;
-                    fetchPageTitle(fullUrl);
-                  }, 1000); // Wait 1 second after user stops typing
-                  setUrlValidationTimeout(timeout);
+                  urlValidationTimeout.current = setTimeout(() => {
+                    fetchPageTitle(normalizeUrl(text));
+                  }, 600);
+                }
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && canSubmit) {
+                  event.preventDefault();
+                  void handleSubmit();
                 }
               }}
               error={displayError}
             />
           </FormGroup>
-          {loading && <ModalLoadingState message="Fetching page title..." />}
+          {loading && <ModalLoadingState message="Fetching page title…" />}
           {!loading && pageTitle && (
-            <div style={{ fontWeight: "bold", marginTop: "var(--spacing-2)" }}>
-              {pageTitle}
-            </div>
+            <p className="modal-page-title-preview">{pageTitle}</p>
           )}
         </ModalContentSection>
 
-        <ModalContentSection title="Then: choose one or more existing insight">
-          <div style={{ height: "200px", overflowY: "scroll" }}>
+        <ModalContentSection
+          title="Add to existing insight"
+          subtitle="Optional — select one or more insights."
+        >
+          <div className="modal-insights-picker">
             <FactsTable
               factName="potentialInsight"
               data={potentialInsights}
@@ -238,29 +290,49 @@ const SaveLinkDialog = ({
           </div>
         </ModalContentSection>
 
-        <ModalContentSection title="Or: create a new insight to contain them">
+        <ModalContentSection
+          title="Or create a new insight"
+          subtitle="Use this if the link doesn’t belong to an existing insight yet."
+        >
           <FormGroup>
+            <FormLabel htmlFor="save-link-new-insight">
+              New insight name
+            </FormLabel>
             <FormInput
+              id="save-link-new-insight"
               type="text"
-              placeholder="New insight name"
+              placeholder="Name for a new insight"
               value={newInsightName}
-              onChange={(event) => setNewInsightName(event.target.value)}
+              disabled={submitting}
+              onChange={(event) => {
+                setNewInsightName(event.target.value);
+                setSubmitError("");
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && canSubmit) {
+                  event.preventDefault();
+                  void handleSubmit();
+                }
+              }}
             />
           </FormGroup>
         </ModalContentSection>
+        {submitError && <div className="modal-inline-error">{submitError}</div>}
       </ModalBody>
       <ModalFooter>
-        <ModalButton variant="secondary" onClick={handleClose}>
+        <ModalButton
+          variant="secondary"
+          onClick={handleClose}
+          disabled={submitting}
+        >
           Cancel
         </ModalButton>
         <ModalButton
           variant="primary"
-          onClick={handleSubmit}
-          disabled={
-            !linkUrl || !(selectedInsights.length > 0 || newInsightName)
-          }
+          onClick={() => void handleSubmit()}
+          disabled={!canSubmit}
         >
-          Submit
+          {submitting ? "Saving…" : "Save link"}
         </ModalButton>
       </ModalFooter>
     </Modal>

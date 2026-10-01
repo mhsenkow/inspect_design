@@ -1,5 +1,3 @@
-"use server";
-
 import React from "react";
 import { Metadata } from "next";
 import { cookies, headers } from "next/headers";

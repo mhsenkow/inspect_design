@@ -1,0 +1,393 @@
+/* ===================================
+   ibm.io UI chrome for Inspect
+   =================================== */
+
+/* --- Theme orb --- */
+.masthead-theme {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.masthead-orb-btn {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  color: var(--color-muted);
+}
+
+.masthead-orb-btn:hover {
+  color: var(--color-text);
+}
+
+.masthead-orb-btn:focus-visible {
+  color: var(--color-text);
+  outline: var(--focus-ring);
+  outline-offset: 3px;
+}
+
+.theme-orb {
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  background: transparent;
+  display: block;
+  transition:
+    transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    border-radius 0.35s ease,
+    background 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+html[data-theme="light"] .theme-orb {
+  background: transparent;
+}
+html[data-theme="dark"] .theme-orb {
+  background: currentColor;
+}
+html[data-theme="contrast"] .theme-orb,
+html[data-theme="hc"] .theme-orb {
+  background: linear-gradient(90deg, currentColor 50%, transparent 50%);
+}
+html[data-theme="paper"] .theme-orb {
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 1px currentColor;
+}
+html[data-theme="glass"] .theme-orb {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(167, 139, 250, 0.35));
+  border-color: rgba(148, 163, 184, 0.5);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 0 8px rgba(124, 58, 237, 0.25);
+}
+html[data-theme="frost"] .theme-orb {
+  background: linear-gradient(145deg, rgba(148, 163, 184, 0.35), rgba(139, 92, 246, 0.45));
+  border-color: rgba(167, 139, 250, 0.55);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 0 10px rgba(139, 92, 246, 0.35);
+}
+html[data-theme="brutal"] .theme-orb {
+  border-radius: 0;
+  background: #ff0000;
+  border-color: #000;
+  box-shadow: 2px 2px 0 #000;
+}
+html[data-theme="loom"] .theme-orb {
+  background: #d4a84b;
+  border-color: #d4a84b;
+  box-shadow: 0 0 10px rgba(212, 168, 75, 0.55);
+}
+html[data-theme="tank"] .theme-orb {
+  border-radius: 2px;
+  background: linear-gradient(#69a1b3 0 33%, #3e7f40 33% 66%, #5d4128 66% 100%);
+  border-color: #23475a;
+}
+html[data-theme="nes"] .theme-orb {
+  border-radius: 0;
+  background: #e4002b;
+  border: 2px solid #fce100;
+  box-shadow: 2px 2px 0 #209cee;
+}
+
+/* --- App shell header --- */
+.inspect-header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-header);
+  min-height: var(--header-h);
+  display: flex;
+  align-items: center;
+  background: color-mix(in oklab, var(--color-bg-elev) 88%, transparent);
+  border-bottom: var(--border-weak);
+  backdrop-filter: saturate(1.15) blur(10px);
+  -webkit-backdrop-filter: saturate(1.15) blur(10px);
+  padding-top: env(safe-area-inset-top);
+}
+
+.inspect-header__inner {
+  width: 100%;
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: 0.55rem var(--space-4);
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.inspect-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text);
+  text-decoration: none;
+  font-size: var(--size-3);
+  font-weight: 650;
+  letter-spacing: var(--track-title-sm);
+  min-width: 0;
+}
+
+.inspect-brand:hover {
+  color: var(--color-text);
+  opacity: 0.88;
+}
+
+.inspect-brand__text {
+  white-space: nowrap;
+}
+
+.inspect-brand__mark {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--border-weak);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  flex-shrink: 0;
+}
+
+.inspect-brand__mark--quiet {
+  opacity: 0.85;
+}
+
+.inspect-nav {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.inspect-nav__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.25rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  color: var(--color-muted);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 520;
+}
+
+.inspect-nav__link:hover {
+  color: var(--color-text);
+  background: color-mix(in oklab, var(--color-ink) 5%, transparent);
+}
+
+.inspect-header__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.inspect-main {
+  min-height: calc(100dvh - var(--header-h));
+}
+
+@media (min-width: 720px) {
+  .inspect-header__inner {
+    padding: 0.6rem var(--space-5);
+  }
+
+  .inspect-nav {
+    display: flex;
+  }
+}
+
+@media (max-width: 719px) {
+  .inspect-nav__link--desktop {
+    display: none;
+  }
+
+  .inspect-brand__mark--quiet {
+    display: none;
+  }
+}
+
+/* --- Glass / surface cards --- */
+.glass-card {
+  position: relative;
+  background: var(--card-bg);
+  border: var(--card-border);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  backdrop-filter: var(--card-blur);
+  -webkit-backdrop-filter: var(--card-blur);
+  overflow: hidden;
+}
+
+.glass-card--pad {
+  padding: var(--card-pad);
+}
+
+/* Auth / form surfaces */
+.auth-shell {
+  min-height: calc(100dvh - var(--header-h));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 28rem;
+  background: var(--surface-card);
+  border: var(--border-weak);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-2);
+  padding: var(--space-8);
+}
+
+.auth-card h2 {
+  margin: 0 0 var(--space-6);
+  text-align: center;
+  font-size: var(--size-5);
+  font-weight: 600;
+  letter-spacing: var(--track-title-md);
+  color: var(--color-text);
+}
+
+.form-label {
+  display: block;
+  margin-bottom: var(--space-2);
+  font-size: var(--size-1);
+  color: var(--color-muted);
+  letter-spacing: var(--track-label);
+}
+
+.form-input {
+  display: block;
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--size-2);
+  font-family: inherit;
+  color: var(--color-text);
+  background: var(--color-bg);
+  border: var(--border);
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition:
+    border-color var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-fast) var(--ease-standard);
+}
+
+.form-input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--color-accent) 25%, transparent);
+}
+
+.alert {
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  font-size: var(--size-1);
+}
+
+.alert-success {
+  background: color-mix(in srgb, var(--color-success, #2e7d32) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-success, #2e7d32) 35%, transparent);
+  color: var(--color-success, #2e7d32);
+}
+
+.alert-error {
+  background: color-mix(in oklab, var(--color-accent-2) 14%, var(--color-bg-elev));
+  border: 1px solid color-mix(in oklab, var(--color-accent-2) 40%, transparent);
+  color: var(--color-text);
+}
+
+.alert-message {
+  line-height: 1.4;
+}
+
+.bg-neutral-100 {
+  background-color: var(--color-bg);
+}
+
+/* Bootstrap card override for auth pages using .card */
+.auth-shell .card,
+.card.auth-card,
+.auth-shell .card.w-full {
+  background: var(--surface-card);
+  border: var(--border-weak);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-2);
+  color: var(--color-text);
+}
+
+.auth-shell .card-body {
+  padding: var(--space-8);
+}
+
+/* Quiet nav link style for header actions */
+.inspect-nav-link {
+  color: var(--color-muted);
+  text-decoration: none;
+  font-size: var(--size-1);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  transition: color var(--motion-fast) var(--ease-standard);
+}
+
+.inspect-nav-link:hover {
+  color: var(--color-text);
+}
+
+.inspect-nav-cta {
+  color: var(--color-bg-elev);
+  background: var(--color-accent);
+  text-decoration: none;
+  font-size: var(--size-1);
+  font-weight: 500;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  border: 0;
+  cursor: pointer;
+}
+
+.inspect-nav-cta:hover {
+  filter: brightness(1.05);
+  color: var(--color-bg-elev);
+}
+
+.modal-page-title-preview {
+  margin: var(--space-2, 0.5rem) 0 0;
+  font-weight: 600;
+  font-size: var(--size-1, 0.875rem);
+  color: var(--color-text);
+}
+
+.modal-insights-picker {
+  max-height: 220px;
+  overflow: auto;
+  border: var(--border-weak, 1px solid var(--color-border));
+  border-radius: var(--radius-md, 8px);
+  background: var(--color-bg-elev, #fff);
+}
+
+.modal-inline-error {
+  margin-top: var(--space-3, 0.75rem);
+  padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+  border-radius: var(--radius-sm, 6px);
+  background: color-mix(in oklab, var(--color-accent-2) 12%, transparent);
+  border: 1px solid color-mix(in oklab, var(--color-accent-2) 35%, transparent);
+  color: var(--color-text);
+  font-size: var(--size-1, 0.875rem);
+}
+
+html[data-theme="nes"] .inspect-main > * {
+  /* Keep content readable on striped bg */
+}

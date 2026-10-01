@@ -18,37 +18,35 @@ const LoginRegisterLinks = ({
   if (loggedIn) {
     return (
       <div className={styles.loginRegisterContainer}>
+        <Link
+          href="/change-password"
+          className={styles.accountLink}
+          title="Account"
+        >
+          Account
+        </Link>
         <button
+          type="button"
           onClick={() => {
             logout();
             window.location.href = path || "/";
           }}
           className={styles.logoutButton}
         >
-          Log Out
+          Log out
         </button>
-        <Link href="/insights" className={styles.myInsightsButton}>
-          My Insights
-        </Link>
       </div>
     );
   }
 
   return (
-    <div className={styles.loginRegisterContainer}>
-      <li className={path === "/login" ? "active" : ""}>
-        <Link href={`/login?return=${path}`} className={styles.loginButton}>
-          Login
-        </Link>
-      </li>
-      <li className={path === "/register" ? "active" : ""}>
-        <Link
-          href={`/register?return=${path}`}
-          className={styles.registerButton}
-        >
-          Register
-        </Link>
-      </li>
+    <div className={`${styles.loginRegisterContainer} ${styles.mobileAuth}`}>
+      <Link href={`/login?return=${path}`} className={styles.loginButton}>
+        Login
+      </Link>
+      <Link href={`/register?return=${path}`} className={styles.registerButton}>
+        Register
+      </Link>
     </div>
   );
 };

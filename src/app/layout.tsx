@@ -3,88 +3,101 @@ import { cookies } from "next/headers";
 import { CookiesProvider } from "next-client-cookies/server";
 import Image from "next/image";
 import Link from "next/link";
-
-import "bootstrap/dist/css/bootstrap.css";
+import Script from "next/script";
 
 import "../styles/index.css";
 import LoginRegisterLinks from "./components/LoginRegisterLinks";
-import ThemeSwitcher from "./components/ThemeSwitcher";
+import ThemeToggle from "./components/ThemeToggle";
 import BootstrapClient from "./components/BootstrapClient";
-// import { getUserFromServer } from "./api/functions";
 
 interface Props {
   children: React.ReactNode;
 }
 
+const themeBootScript = `
+(function(){
+  try {
+    var t = localStorage.getItem('inspect-theme') || 'light';
+    var legacy = {
+      hc:'contrast', electric:'frost', forest:'tank',
+      'theme-blue':'light','theme-green':'tank','theme-purple':'frost',
+      'theme-orange':'paper','theme-red':'brutal','theme-teal':'tank','theme-dark':'dark'
+    };
+    if (legacy[t]) t = legacy[t];
+    document.documentElement.setAttribute('data-theme', t);
+  } catch (e) {
+    document.documentElement.setAttribute('data-theme', 'light');
+  }
+})();
+`;
+
 const Dashboard = async ({ children }: Props): Promise<React.JSX.Element> => {
   const tokenCookie = (await cookies()).get("token");
   const loggedIn = !!tokenCookie;
-  // const authUser = await getAuthUser(headers);
-  // const origin = (await headers()).get("x-origin");
-  // const user = authUser
-  //   ? await getUserFromServer(
-  //       origin,
-  //       { id: authUser.id },
-  //       tokenCookie?.value,
-  //     )
-  //   : null;
 
   return (
-    <html>
-      <head></head>
-      <body className="bg-secondary min-h-screen">
+    <html lang="en" data-theme="light" suppressHydrationWarning>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <Script id="inspect-theme-boot" strategy="beforeInteractive">
+          {themeBootScript}
+        </Script>
+      </head>
+      <body>
         <BootstrapClient />
-        {/* Header - Parent Level */}
-        <header className="bg-inverse border-b border-primary shadow-sm sticky top-0 z-header">
-          <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
-            <div className="flex items-center justify-between h-16">
-              {/* Left Navigation */}
-              <div className="flex items-center space-x-4">
-                <LoginRegisterLinks loggedIn={loggedIn} />
-              </div>
+        <header className="inspect-header">
+          <div className="inspect-header__inner">
+            <Link href={loggedIn ? "/insights" : "/"} className="inspect-brand">
+              <span className="inspect-brand__mark">
+                <Image
+                  src="/images/icon.png"
+                  width={16}
+                  height={16}
+                  alt=""
+                />
+              </span>
+              <span className="inspect-brand__text">Inspect</span>
+            </Link>
 
-              {/* Center Brand */}
-              <div className="flex items-center">
-                <Link
-                  href="/"
-                  className="text-2xl font-bold text-inverse flex items-center tracking-tight hover:text-primary transition-colors duration-200"
-                >
-                  Inspect
-                  <div className="ml-3 w-8 h-8 bg-inverse rounded-lg flex items-center justify-center shadow-sm border border-primary hover:bg-primary hover:border-inverse transition-all duration-200">
-                    <Image
-                      src="/images/icon.png"
-                      width="18"
-                      height="18"
-                      alt="Inspect Logo"
-                      className="opacity-80"
-                    />
-                  </div>
+            <nav className="inspect-nav" aria-label="Primary">
+              {loggedIn && (
+                <Link href="/insights" className="inspect-nav__link">
+                  Insights
                 </Link>
-              </div>
+              )}
+              {!loggedIn && (
+                <>
+                  <Link href="/login" className="inspect-nav__link inspect-nav__link--desktop">
+                    Login
+                  </Link>
+                  <Link href="/register" className="inspect-nav__link inspect-nav__link--desktop">
+                    Register
+                  </Link>
+                </>
+              )}
+            </nav>
 
-              {/* Right Navigation */}
-              <div className="flex items-center space-x-4">
-                <ThemeSwitcher />
-                <Link
-                  href="http://datagotchi.net"
-                  target="_blank"
-                  className="flex items-center p-2 bg-primary rounded-lg hover:bg-secondary transition-all duration-200 shadow-sm hover:shadow-md"
-                >
-                  <Image
-                    src="/images/Color1.png"
-                    width="20"
-                    height="20"
-                    alt="Datagotchi Logo"
-                    className="opacity-85"
-                  />
-                </Link>
-              </div>
+            <div className="inspect-header__actions">
+              <ThemeToggle />
+              <LoginRegisterLinks loggedIn={loggedIn} />
+              <Link
+                href="http://datagotchi.net"
+                target="_blank"
+                className="inspect-brand__mark inspect-brand__mark--quiet"
+                title="Datagotchi Labs"
+              >
+                <Image
+                  src="/images/Color1.png"
+                  width={16}
+                  height={16}
+                  alt="Datagotchi"
+                />
+              </Link>
             </div>
           </div>
         </header>
 
-        {/* Main Content - Main Level */}
-        <main className="flex-1">
+        <main className="inspect-main">
           <CookiesProvider>{children}</CookiesProvider>
         </main>
       </body>

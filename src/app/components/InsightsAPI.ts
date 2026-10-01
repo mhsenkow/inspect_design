@@ -21,9 +21,16 @@ export const createInsights = (
           "x-access-token": token,
         },
       })
-        .then((response: Response | PostInsightsRouteResponse) => {
+        .then(async (response: Response | PostInsightsRouteResponse) => {
           if (!response.ok) {
-            throw new Error(response.statusText);
+            let message = response.statusText || "Request failed";
+            try {
+              const err = await response.json();
+              message = err.message || err.statusText || message;
+            } catch {
+              /* ignore parse errors */
+            }
+            throw new Error(message);
           }
           return response.json();
         })

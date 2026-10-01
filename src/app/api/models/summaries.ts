@@ -10,8 +10,9 @@ import {
 import { SourceModel } from "../models/sources";
 import { CommentModel } from "./comments";
 import { ReactionModel } from "./reactions";
+import { PostgresBaseModel } from "./postgres_models";
 
-export class SummaryModel extends Model implements Link {
+export class SummaryModel extends PostgresBaseModel implements Link {
   static tableName = "summaries";
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

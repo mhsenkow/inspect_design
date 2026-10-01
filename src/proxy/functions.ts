@@ -16,16 +16,10 @@ export const createSession = async (user: User): Promise<string> => {
   const expires = new Date();
   expires.setDate(expires.getDate() + 30);
 
-  // 3. Insert the new session into the database.
-  // await SessionModel.query().insert({
-  //   user_id: user.id!,
-  //   token: sessionToken,
-  //   expires: expires.toISOString(),
-  // });
   await SessionModel.query().insert({
     user_id: user.id!,
     token: sessionToken,
-    expires: expires.toDateString(),
+    expires: expires.toISOString(),
   } as Partial<SessionModel>);
 
   return sessionToken;
@@ -39,7 +33,7 @@ export const verifyTokenAndGetUser = async (
     // We'll eagerly load the related user with `withGraphFetched`.
     const session = (await SessionModel.query()
       .findOne({ token })
-      .where("expires", ">", new Date())
+      .where("expires", ">", new Date().toISOString())
       .withGraphFetched("user")) as SessionModel | undefined;
 
     // 2. If no session is found, or the session has no associated user,

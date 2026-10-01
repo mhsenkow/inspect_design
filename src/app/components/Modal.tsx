@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import styles from "../../styles/components/modal.module.css";
 
 interface ModalProps {
@@ -68,7 +68,6 @@ interface FormTextareaProps
   className?: string;
 }
 
-// Main Modal Component
 export const Modal: React.FC<ModalProps> = ({
   id,
   title,
@@ -82,19 +81,42 @@ export const Modal: React.FC<ModalProps> = ({
   closeOnEscape = true,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
-  // const [isVisible, setIsVisible] = useState(false);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
-  // useEffect(() => {
-  //   if (isOpen) {
-  //     setIsVisible(true);
-  //     // Focus the modal for accessibility
-  //     setTimeout(() => {
-  //       modalRef.current?.focus();
-  //     }, 100);
-  //   } else {
-  //     setIsVisible(false);
-  //   }
-  // }, [isOpen]);
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const focusTimer = window.setTimeout(() => {
+      const dialog = dialogRef.current;
+      if (!dialog) return;
+      const firstField = dialog.querySelector<HTMLElement>(
+        'input:not([disabled]):not([type="hidden"]), textarea:not([disabled]), select:not([disabled])',
+      );
+      (firstField || dialog).focus();
+    }, 30);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.clearTimeout(focusTimer);
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen || !closeOnEscape) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isOpen, closeOnEscape, onClose]);
 
   const handleBackdropClick = useCallback(
     (event: React.MouseEvent) => {
@@ -103,15 +125,6 @@ export const Modal: React.FC<ModalProps> = ({
       }
     },
     [closeOnBackdropClick, onClose],
-  );
-
-  const handleKeyDown = useCallback(
-    (event: React.KeyboardEvent) => {
-      if (closeOnEscape && event.key === "Escape") {
-        onClose();
-      }
-    },
-    [closeOnEscape, onClose],
   );
 
   const handleCloseClick = useCallback(() => {
@@ -133,13 +146,16 @@ export const Modal: React.FC<ModalProps> = ({
       ref={modalRef}
       className={`${styles.modal} ${className}`}
       onClick={handleBackdropClick}
-      onKeyDown={handleKeyDown}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby={`${id}-title`}
-      tabIndex={-1}
+      role="presentation"
     >
-      <div className={`${styles.modalDialog} ${sizeClass}`}>
+      <div
+        ref={dialogRef}
+        className={`${styles.modalDialog} ${sizeClass}`}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={`${id}-title`}
+        tabIndex={-1}
+      >
         <ModalHeader>
           <h2 id={`${id}-title`} className={styles.modalTitle}>
             {title}
@@ -147,7 +163,7 @@ export const Modal: React.FC<ModalProps> = ({
           {showCloseButton && (
             <button
               type="button"
-              className={styles.modalButton}
+              className={styles.modalCloseButton}
               onClick={handleCloseClick}
               aria-label="Close modal"
             >
@@ -161,7 +177,6 @@ export const Modal: React.FC<ModalProps> = ({
   );
 };
 
-// Modal Sub-components
 export const ModalHeader: React.FC<ModalHeaderProps> = ({
   children,
   className = "",
@@ -197,7 +212,6 @@ export const ModalFooter: React.FC<ModalFooterProps> = ({
   );
 };
 
-// Tab Navigation Component
 export const TabNav: React.FC<TabNavProps> = ({
   tabs,
   activeTab,
@@ -238,7 +252,6 @@ export const TabContent: React.FC<{
   </div>
 );
 
-// Form Components
 export const FormGroup: React.FC<FormGroupProps> = ({
   children,
   className = "",
@@ -260,7 +273,7 @@ export const FormInput: React.FC<FormInputProps> = ({
   className = "",
   ...props
 }) => (
-  <div>
+  <div className={styles.formField}>
     <input className={`${styles.formInput} ${className}`} {...props} />
     {error && <div className={styles.formError}>{error}</div>}
     {success && <div className={styles.formSuccess}>{success}</div>}
@@ -273,7 +286,7 @@ export const FormTextarea: React.FC<FormTextareaProps> = ({
   className = "",
   ...props
 }) => (
-  <div>
+  <div className={styles.formField}>
     <textarea
       className={`${styles.formInput} ${styles.formTextarea} ${className}`}
       {...props}
@@ -283,7 +296,6 @@ export const FormTextarea: React.FC<FormTextareaProps> = ({
   </div>
 );
 
-// Button Components
 export const ModalButton: React.FC<{
   children: React.ReactNode;
   variant?: "primary" | "secondary" | "danger";
@@ -317,7 +329,6 @@ export const ModalButton: React.FC<{
   );
 };
 
-// Loading State Component
 export const ModalLoadingState: React.FC<{
   message?: string;
   className?: string;
@@ -328,7 +339,6 @@ export const ModalLoadingState: React.FC<{
   </div>
 );
 
-// Content Section Component
 export const ModalContentSection: React.FC<{
   title?: string;
   subtitle?: string;

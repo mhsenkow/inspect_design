@@ -1,5 +1,3 @@
-"use server";
-
 import React from "react";
 import { cookies, headers } from "next/headers";
 
@@ -27,7 +25,7 @@ const InsightsPage = async (): Promise<React.JSX.Element> => {
   if (insights && Array.isArray(insights)) {
     return (
       <ClientSidePage
-        insights={insights.filter((i) => i.userId == authUser?.id)}
+        insights={insights}
         currentUser={currentUser || null}
       />
     );

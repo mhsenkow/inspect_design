@@ -21,48 +21,126 @@ export type RegisterPostRouteResponse = NextResponse<
   User | { message: string }
 >;
 
+const isUniqueEmailError = (error: unknown): boolean => {
+  if (error instanceof UniqueViolationError) {
+    return error.columns?.includes("email") ?? true;
+  }
+
+  if (error && typeof error === "object") {
+    const sqliteError = error as {
+      code?: string;
+      message?: string;
+      constraint?: string;
+    };
+
+    if (
+      sqliteError.code === "SQLITE_CONSTRAINT_UNIQUE" ||
+      sqliteError.code === "23505"
+    ) {
+      return (
+        sqliteError.message?.toLowerCase().includes("email") ||
+        sqliteError.constraint?.toLowerCase().includes("email") ||
+        true
+      );
+    }
+
+    if (sqliteError.message?.toLowerCase().includes("unique")) {
+      return sqliteError.message.toLowerCase().includes("email");
+    }
+  }
+
+  return false;
+};
+
+const toPublicUser = (user: UserLibSqlModel, token: string): User => {
+  const { password: _password, ...safeUser } = user;
+  return {
+    id: safeUser.id,
+    username: safeUser.username,
+    email: safeUser.email,
+    token,
+    enable_email_notifications: Boolean(
+      (safeUser as { enableEmailNotifications?: boolean })
+        .enableEmailNotifications,
+    ),
+  };
+};
+
 export async function POST(
   req: RegisterPostRouteRequest,
 ): Promise<RegisterPostRouteResponse> {
   const { username, email, password } = await req.json();
 
-  if (!(email && password && username)) {
+  const trimmedUsername = username?.trim();
+  const normalizedEmail = email?.toLocaleLowerCase().trim();
+  const trimmedPassword = password?.trim();
+
+  if (!(normalizedEmail && trimmedPassword && trimmedUsername)) {
     return NextResponse.json(
       { message: "All input is required" },
       { status: 400 },
     );
   }
 
-  const encryptedPassword = await bcrypt.hash(password, 10);
+  if (trimmedPassword.length < 6) {
+    return NextResponse.json(
+      { message: "Password must be at least 6 characters" },
+      { status: 400 },
+    );
+  }
+
+  const existingUser = await UserLibSqlModel.query().findOne({
+    email: normalizedEmail,
+  });
+  if (existingUser) {
+    return NextResponse.json(
+      { message: "User already exists. Please login or reset your password." },
+      { status: 409 },
+    );
+  }
+
+  const encryptedPassword = await bcrypt.hash(trimmedPassword, 10);
+  let createdSqliteUser: UserLibSqlModel | undefined;
 
   try {
-    const newUser = (await UserLibSqlModel.query().insert({
-      username,
-      email: email.toLocaleLowerCase().trim(),
+    createdSqliteUser = (await UserLibSqlModel.query().insert({
+      username: trimmedUsername,
+      email: normalizedEmail,
       password: encryptedPassword,
     })) as UserLibSqlModel;
 
-    const token = await createSession(newUser);
-    newUser.token = token;
-
+    // Postgres users.password is NOT NULL — keep both stores in sync.
     await UserPostgresModel.query().insert({
-      id: newUser.id,
-      username: newUser.username,
-      email: newUser.email,
-    });
+      id: createdSqliteUser.id,
+      username: createdSqliteUser.username,
+      email: createdSqliteUser.email,
+      password: encryptedPassword,
+    } as Partial<UserPostgresModel>);
 
-    delete newUser.password;
-    return NextResponse.json(newUser, { status: 201 });
+    const token = await createSession(createdSqliteUser);
+
+    return NextResponse.json(toPublicUser(createdSqliteUser, token), {
+      status: 201,
+    });
   } catch (error) {
-    if (
-      error instanceof UniqueViolationError &&
-      error.columns.includes("email")
-    ) {
+    if (createdSqliteUser?.id) {
+      try {
+        await UserLibSqlModel.query().deleteById(createdSqliteUser.id);
+      } catch (cleanupError) {
+        console.error(
+          "Failed to roll back SQLite user after registration error:",
+          cleanupError,
+        );
+      }
+    }
+
+    if (isUniqueEmailError(error)) {
       return NextResponse.json(
-        { message: "User Already Exists. Please Login" },
-        { status: 401 },
+        { message: "User already exists. Please login or reset your password." },
+        { status: 409 },
       );
     }
+
     console.error("Error during user registration:", error);
 
     return NextResponse.json(

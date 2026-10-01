@@ -12,36 +12,31 @@ import { UserLibSqlModel } from "../models/users";
 jest.mock("bcryptjs");
 jest.mock("../../../proxy/functions");
 
-jest.mock("../models/users", () => {
-  const mockQueryBuilder = {
-    where: jest.fn().mockReturnThis(),
-    then: jest.fn(),
-  };
+const mockQueryBuilder = {
+  where: jest.fn().mockReturnThis(),
+  then: jest.fn(),
+};
 
-  const MockInsightModelConstructor = jest.fn();
-  Object.assign(MockInsightModelConstructor, {
+jest.mock("../models/users", () => ({
+  UserLibSqlModel: {
     query: jest.fn(() => mockQueryBuilder),
-  });
-
-  return {
-    UserModel: MockInsightModelConstructor,
-  };
-});
+  },
+}));
 
 describe("POST /api/login", () => {
-  const mockUser = {};
-
   beforeEach(() => {
     jest.clearAllMocks();
-    (UserLibSqlModel.query().where as jest.Mock).mockReturnThis();
-    (UserLibSqlModel.query().then as jest.Mock).mockImplementation((callback) =>
-      Promise.resolve(callback(mockUser)),
+    mockQueryBuilder.where.mockReturnThis();
+    mockQueryBuilder.then.mockImplementation((callback) =>
+      Promise.resolve(callback([])),
     );
+    (UserLibSqlModel.query as jest.Mock).mockReturnValue(mockQueryBuilder);
   });
 
   it("should return 200 and user data if credentials are correct", async () => {
     const localUser = {
       id: 1,
+      username: "bob",
       email: "bobness@gmail.com",
       password: "W",
     };
@@ -55,8 +50,8 @@ describe("POST /api/login", () => {
         }),
       }),
     );
-    (UserLibSqlModel.query().then as jest.Mock).mockImplementationOnce(
-      (callback) => Promise.resolve(callback([localUser])),
+    mockQueryBuilder.then.mockImplementationOnce((callback) =>
+      Promise.resolve(callback([localUser])),
     );
     (bcrypt.compare as jest.Mock).mockResolvedValue(true);
     (createSession as jest.Mock).mockResolvedValue(token);
@@ -65,7 +60,9 @@ describe("POST /api/login", () => {
     expect(res.status).toBe(200);
 
     expect(await res.json()).toEqual({
-      ...localUser,
+      id: localUser.id,
+      username: localUser.username,
+      email: localUser.email,
       token,
     });
   });
@@ -105,16 +102,15 @@ describe("POST /api/login", () => {
         body: JSON.stringify({ email: "bobness@gmail.com", password: "asdf" }),
       }),
     );
-    (UserLibSqlModel.query().then as jest.Mock).mockImplementationOnce(
-      (callback) =>
-        Promise.resolve(callback([{ id: 1, password: "hashedpassword" }])),
+    mockQueryBuilder.then.mockImplementationOnce((callback) =>
+      Promise.resolve(callback([{ id: 1, password: "hashedpassword" }])),
     );
     (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
     const res = await POST(req);
 
     expect(res.status).toBe(401);
-    expect(await res.json()).toEqual({ message: "Invalid Credentials" });
+    expect(await res.json()).toEqual({ message: "Invalid credentials" });
   });
 
   it("should return 404 if user does not exist", async () => {
@@ -124,15 +120,15 @@ describe("POST /api/login", () => {
         body: JSON.stringify({ email: "test@example.com", password: "asdf" }),
       }),
     );
-    (UserLibSqlModel.query().then as jest.Mock).mockImplementationOnce(
-      (callback) => Promise.resolve(callback([])),
+    mockQueryBuilder.then.mockImplementationOnce((callback) =>
+      Promise.resolve(callback([])),
     );
 
     const res = await POST(req);
 
     expect(res.status).toBe(404);
     expect(await res.json()).toEqual({
-      message: "User does not Exist. Please register",
+      message: "User does not exist. Please register.",
     });
   });
 });

@@ -4,89 +4,120 @@
 
 .modal {
   position: fixed;
-  top: 0;
-  left: 0;
+  inset: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: color-mix(in oklab, var(--color-ink, #111) 45%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: var(--z-modal-backdrop, 1040);
   padding: var(--spacing-4);
+  animation: modalFadeIn 0.18s ease-out;
 }
 
 .modalDialog {
-  background-color: var(--color-background-primary);
-  border: 1px solid var(--color-border-primary);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-2xl);
+  background-color: var(--color-background-primary, var(--color-bg-elev));
+  border: 1px solid var(--color-border-primary, var(--color-border));
+  border-radius: var(--radius-xl, 12px);
+  box-shadow: var(--shadow-2xl, 0 24px 48px rgba(0, 0, 0, 0.18));
   width: 100%;
-  max-width: 48rem; /* 768px */
-  height: 70vh; /* Fixed height */
-  max-height: 70vh;
+  max-width: 36rem;
+  max-height: min(88vh, 56rem);
+  height: auto;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   position: relative;
+  animation: modalSlideIn 0.18s ease-out;
 }
 
 .modalDialogLarge {
-  max-width: 64rem; /* 1024px */
-  height: 80vh; /* Larger fixed height for large modals */
-  max-height: 80vh;
+  max-width: 52rem;
+  max-height: min(92vh, 64rem);
 }
 
 .modalDialogSmall {
-  max-width: 32rem; /* 512px */
-  height: 50vh; /* Smaller fixed height for small modals */
-  max-height: 50vh;
+  max-width: 28rem;
+  max-height: min(80vh, 32rem);
 }
 
 .modalHeader {
-  padding: var(--spacing-6);
-  border-bottom: 1px solid var(--color-border-primary);
-  background-color: var(--color-background-secondary);
+  padding: var(--spacing-5, 1.25rem) var(--spacing-6, 1.5rem);
+  border-bottom: 1px solid var(--color-border-primary, var(--color-border));
+  background-color: var(--color-background-secondary, var(--color-bg));
   position: relative;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--spacing-3, 0.75rem);
 }
 
 .modalHeader::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, var(--color-base-500), var(--color-base-600));
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    var(--color-accent, #c45c26),
+    color-mix(in oklab, var(--color-accent, #c45c26) 40%, transparent)
+  );
 }
 
 .modalTitle {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
+  font-size: var(--font-size-xl, 1.25rem);
+  font-weight: var(--font-weight-semibold, 600);
+  color: var(--color-text-primary, var(--color-ink));
   margin: 0;
-  line-height: var(--line-height-tight);
+  line-height: 1.25;
+}
+
+.modalCloseButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg, 8px);
+  background: transparent;
+  color: var(--color-text-secondary, var(--color-muted));
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.modalCloseButton:hover {
+  background: var(--color-background-tertiary, color-mix(in oklab, var(--color-ink) 6%, transparent));
+  color: var(--color-text-primary, var(--color-ink));
+}
+
+.modalCloseButton:focus-visible {
+  outline: var(--focus-ring, 2px solid var(--color-accent));
+  outline-offset: 2px;
 }
 
 .modalBody {
-  padding: var(--spacing-6);
+  padding: var(--spacing-6, 1.5rem);
   overflow-y: auto;
-  flex: 1;
+  flex: 1 1 auto;
   min-height: 0;
+  -webkit-overflow-scrolling: touch;
 }
 
 .modalFooter {
-  padding: var(--spacing-6);
-  border-top: 1px solid var(--color-border-primary);
-  background-color: var(--color-background-secondary);
+  padding: var(--spacing-4, 1rem) var(--spacing-6, 1.5rem);
+  border-top: 1px solid var(--color-border-primary, var(--color-border));
+  background-color: var(--color-background-secondary, var(--color-bg));
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: var(--spacing-3);
+  gap: var(--spacing-3, 0.75rem);
   flex-shrink: 0;
 }
 
@@ -104,10 +135,11 @@
 
 .tabNav {
   display: flex;
-  border-bottom: 1px solid var(--color-border-primary);
-  background-color: var(--color-background-secondary);
-  margin: calc(-1 * var(--spacing-6)) calc(-1 * var(--spacing-6)) var(--spacing-6);
-  padding: 0 var(--spacing-6);
+  border-bottom: 1px solid var(--color-border-primary, var(--color-border));
+  background-color: var(--color-background-secondary, var(--color-bg));
+  margin: calc(-1 * var(--spacing-6, 1.5rem)) calc(-1 * var(--spacing-6, 1.5rem))
+    var(--spacing-6, 1.5rem);
+  padding: 0 var(--spacing-6, 1.5rem);
 }
 
 .tabNavItem {
@@ -116,27 +148,27 @@
 
 .tabNavButton {
   width: 100%;
-  padding: var(--spacing-3) var(--spacing-4);
+  padding: var(--spacing-3, 0.75rem) var(--spacing-4, 1rem);
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary, var(--color-muted));
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: var(--font-weight-medium, 500);
   cursor: pointer;
-  transition: all var(--transition-base);
+  transition: color 0.15s ease, background-color 0.15s ease;
   text-align: center;
 }
 
 .tabNavButton:hover {
-  color: var(--color-text-primary);
-  background-color: var(--color-background-tertiary);
+  color: var(--color-text-primary, var(--color-ink));
+  background-color: color-mix(in oklab, var(--color-ink) 4%, transparent);
 }
 
 .tabNavButton.active {
-  color: var(--color-text-primary);
-  border-bottom-color: var(--color-base-500);
-  background-color: var(--color-background-primary);
+  color: var(--color-text-primary, var(--color-ink));
+  border-bottom-color: var(--color-accent, #c45c26);
+  background-color: var(--color-background-primary, var(--color-bg-elev));
 }
 
 .tabContent {
@@ -152,53 +184,70 @@
    =================================== */
 
 .formGroup {
-  margin-bottom: var(--spacing-4);
+  margin-bottom: var(--spacing-4, 1rem);
+}
+
+.formField {
+  width: 100%;
 }
 
 .formLabel {
   display: block;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
-  margin-bottom: var(--spacing-2);
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: var(--font-weight-medium, 500);
+  color: var(--color-text-primary, var(--color-ink));
+  margin-bottom: var(--spacing-2, 0.5rem);
 }
 
 .formInput {
   width: 100%;
-  padding: var(--spacing-3);
-  border: 1px solid var(--color-border-primary);
-  border-radius: var(--radius-lg);
-  background-color: var(--color-background-primary);
-  color: var(--color-text-primary);
-  font-size: var(--font-size-sm);
-  transition: all var(--transition-base);
+  min-height: 2.75rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--color-border-primary, var(--color-border));
+  border-radius: var(--radius-lg, 8px);
+  background-color: var(--color-background-primary, var(--color-bg-elev));
+  color: var(--color-text-primary, var(--color-ink));
+  font-size: 1rem;
+  line-height: 1.4;
+  font-family: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.formInput:hover:not(:disabled) {
+  border-color: color-mix(in oklab, var(--color-accent, #c45c26) 45%, var(--color-border));
 }
 
 .formInput:focus {
   outline: none;
-  border-color: var(--color-base-500);
-  box-shadow: 0 0 0 3px rgba(var(--color-base-500-rgb), 0.1);
+  border-color: var(--color-accent, #c45c26);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-accent, #c45c26) 22%, transparent);
+}
+
+.formInput:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 .formInput::placeholder {
-  color: var(--color-text-tertiary);
+  color: var(--color-text-tertiary, var(--color-muted));
 }
 
 .formTextarea {
   resize: vertical;
-  min-height: 6rem;
+  min-height: 7rem;
+  line-height: 1.5;
 }
 
 .formError {
-  color: var(--color-error);
-  font-size: var(--font-size-xs);
-  margin-top: var(--spacing-1);
+  color: var(--color-error, #c62828);
+  font-size: var(--font-size-xs, 0.75rem);
+  margin-top: var(--spacing-1, 0.25rem);
 }
 
 .formSuccess {
-  color: var(--color-success);
-  font-size: var(--font-size-xs);
-  margin-top: var(--spacing-1);
+  color: var(--color-success, #2e7d32);
+  font-size: var(--font-size-xs, 0.75rem);
+  margin-top: var(--spacing-1, 0.25rem);
 }
 
 /* ===================================
@@ -209,83 +258,65 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-2);
-  padding: var(--spacing-3) var(--spacing-4);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  line-height: var(--line-height-normal);
+  gap: var(--spacing-2, 0.5rem);
+  padding: 0.65rem 1.1rem;
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: var(--font-weight-medium, 500);
+  line-height: 1.25;
   border: 1px solid transparent;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-lg, 8px);
   cursor: pointer;
-  transition: all var(--transition-base);
-  font-family: var(--font-family-sans);
+  transition: background-color 0.15s ease, border-color 0.15s ease,
+    box-shadow 0.15s ease;
+  font-family: inherit;
   text-decoration: none;
   white-space: nowrap;
   min-height: 2.5rem;
-  box-shadow: var(--shadow-sm);
 }
 
 .modalButton:hover:not(:disabled) {
-  box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
-}
-
-.modalButton:active:not(:disabled) {
-  transform: translateY(0);
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.08));
 }
 
 .modalButton:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  transform: none;
+}
+
+.modalButton:focus-visible {
+  outline: var(--focus-ring, 2px solid var(--color-accent));
+  outline-offset: 2px;
 }
 
 .modalButtonPrimary {
-  background-color: var(--color-base-500);
-  border-color: var(--color-base-500);
-  color: var(--color-text-inverse);
+  background-color: var(--color-accent, #c45c26);
+  border-color: var(--color-accent, #c45c26);
+  color: #fff;
 }
 
 .modalButtonPrimary:hover:not(:disabled) {
-  background-color: var(--color-base-600);
-  border-color: var(--color-base-600);
-}
-
-.modalButtonPrimary:active:not(:disabled) {
-  background-color: var(--color-base-700);
-  border-color: var(--color-base-700);
+  background-color: color-mix(in oklab, var(--color-accent, #c45c26) 88%, #000);
+  border-color: color-mix(in oklab, var(--color-accent, #c45c26) 88%, #000);
 }
 
 .modalButtonSecondary {
-  background-color: var(--color-background-primary);
-  border-color: var(--color-border-primary);
-  color: var(--color-text-primary);
+  background-color: var(--color-background-primary, var(--color-bg-elev));
+  border-color: var(--color-border-primary, var(--color-border));
+  color: var(--color-text-primary, var(--color-ink));
 }
 
 .modalButtonSecondary:hover:not(:disabled) {
-  background-color: var(--color-background-secondary);
-  border-color: var(--color-border-secondary);
-}
-
-.modalButtonSecondary:active:not(:disabled) {
-  background-color: var(--color-background-tertiary);
-  border-color: var(--color-border-primary);
+  background-color: var(--color-background-secondary, var(--color-bg));
 }
 
 .modalButtonDanger {
-  background-color: var(--color-error);
-  border-color: var(--color-error);
-  color: var(--color-text-inverse);
+  background-color: var(--color-error, #c62828);
+  border-color: var(--color-error, #c62828);
+  color: #fff;
 }
 
 .modalButtonDanger:hover:not(:disabled) {
-  background-color: var(--color-error-dark);
-  border-color: var(--color-error-dark);
-}
-
-.modalButtonDanger:active:not(:disabled) {
-  background-color: var(--color-error-darker);
-  border-color: var(--color-error-darker);
+  background-color: color-mix(in oklab, var(--color-error, #c62828) 88%, #000);
 }
 
 /* ===================================
@@ -293,7 +324,7 @@
    =================================== */
 
 .modalContentSection {
-  margin-bottom: var(--spacing-6);
+  margin-bottom: var(--spacing-6, 1.5rem);
 }
 
 .modalContentSection:last-child {
@@ -301,126 +332,43 @@
 }
 
 .modalContentTitle {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-  margin: 0 0 var(--spacing-3);
-  line-height: var(--line-height-tight);
+  font-size: var(--font-size-base, 1rem);
+  font-weight: var(--font-weight-semibold, 600);
+  color: var(--color-text-primary, var(--color-ink));
+  margin: 0 0 var(--spacing-1, 0.25rem);
+  line-height: 1.3;
 }
 
 .modalContentSubtitle {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  margin: 0 0 var(--spacing-4);
-  line-height: var(--line-height-normal);
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--color-text-secondary, var(--color-muted));
+  margin: 0 0 var(--spacing-3, 0.75rem);
+  line-height: 1.45;
 }
 
 .modalLoadingState {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: var(--spacing-8);
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
+  justify-content: flex-start;
+  gap: var(--spacing-2, 0.5rem);
+  padding: var(--spacing-2, 0.5rem) 0;
+  color: var(--color-text-secondary, var(--color-muted));
+  font-size: var(--font-size-sm, 0.875rem);
 }
 
 .modalLoadingSpinner {
   width: 1rem;
   height: 1rem;
-  border: 2px solid var(--color-border-primary);
-  border-top: 2px solid var(--color-base-500);
+  border: 2px solid var(--color-border-primary, var(--color-border));
+  border-top: 2px solid var(--color-accent, #c45c26);
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  margin-right: var(--spacing-2);
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* ===================================
-   RESPONSIVE DESIGN
-   =================================== */
-
-@media (max-width: 768px) {
-  .modal {
-    padding: var(--spacing-2);
+  to {
+    transform: rotate(360deg);
   }
-  
-  .modalDialog {
-    max-height: 95vh;
-  }
-  
-  .modalHeader,
-  .modalBody,
-  .modalFooter {
-    padding: var(--spacing-4);
-  }
-  
-  .modalTitle {
-    font-size: var(--font-size-lg);
-  }
-  
-  .modalFooter {
-    flex-direction: column;
-    gap: var(--spacing-2);
-  }
-  
-  .modalButton {
-    width: 100%;
-  }
-  
-  .tabNavButton {
-    padding: var(--spacing-2) var(--spacing-3);
-    font-size: var(--font-size-xs);
-  }
-}
-
-@media (max-width: 480px) {
-  .modal {
-    padding: var(--spacing-1);
-  }
-  
-  .modalHeader,
-  .modalBody,
-  .modalFooter {
-    padding: var(--spacing-3);
-  }
-  
-  .modalTitle {
-    font-size: var(--font-size-base);
-  }
-}
-
-/* ===================================
-   ACCESSIBILITY IMPROVEMENTS
-   =================================== */
-
-.modal[aria-hidden="true"] {
-  display: none;
-}
-
-.modalButton:focus {
-  outline: 2px solid var(--color-base-500);
-  outline-offset: 2px;
-}
-
-.formInput:focus {
-  outline: 2px solid var(--color-base-500);
-  outline-offset: 2px;
-}
-
-/* ===================================
-   ANIMATION ENHANCEMENTS
-   =================================== */
-
-.modal {
-  animation: modalFadeIn 0.2s ease-out;
-}
-
-.modalDialog {
-  animation: modalSlideIn 0.2s ease-out;
 }
 
 @keyframes modalFadeIn {
@@ -435,40 +383,45 @@
 @keyframes modalSlideIn {
   from {
     opacity: 0;
-    transform: scale(0.95) translateY(-10px);
+    transform: translateY(8px) scale(0.98);
   }
   to {
     opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
-/* ===================================
-   UTILITY CLASSES
-   =================================== */
-
 .modalScrollable {
   overflow-y: auto;
-  max-height: 60vh;
 }
 
-.modalNoPadding {
-  padding: 0;
-}
+@media (max-width: 768px) {
+  .modal {
+    padding: var(--spacing-2, 0.5rem);
+    align-items: flex-end;
+  }
 
-.modalCompact {
-  max-width: 24rem; /* 384px */
-}
+  .modalDialog,
+  .modalDialogLarge,
+  .modalDialogSmall {
+    max-width: 100%;
+    max-height: 92vh;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
 
-.modalWide {
-  max-width: 80rem; /* 1280px */
-}
+  .modalHeader,
+  .modalBody,
+  .modalFooter {
+    padding: var(--spacing-4, 1rem);
+  }
 
-.modalFullHeight {
-  height: 90vh;
-}
+  .modalFooter {
+    flex-direction: column-reverse;
+    gap: var(--spacing-2, 0.5rem);
+  }
 
-.modalCentered {
-  align-items: center;
-  justify-content: center;
+  .modalButton {
+    width: 100%;
+  }
 }

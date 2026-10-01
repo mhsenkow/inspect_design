@@ -18,12 +18,18 @@ export const getInsights = async (
 
     if (response.status == 200) {
       return (await response.json()) as Insight[];
-    } else {
-      const err = await response.json();
-      throw new Error(
-        `Error fetching insights: ${err.message || err.statusText || ""}`,
-      );
     }
+
+    // Stale/expired sessions should fall through to the logged-out UI,
+    // not crash the whole page with a runtime error.
+    if (response.status === 401 || response.status === 403) {
+      return false;
+    }
+
+    const err = await response.json();
+    throw new Error(
+      `Error fetching insights: ${err.message || err.statusText || ""}`,
+    );
   }
 
   return Promise.resolve(false);

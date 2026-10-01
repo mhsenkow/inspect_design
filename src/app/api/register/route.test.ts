@@ -6,29 +6,29 @@ import bcrypt from "bcryptjs";
 import { POST } from "./route";
 import { createSession } from "../../../proxy/functions";
 import { NextRequest } from "next/server";
-import { UserLibSqlModel } from "../models/users";
-import { UniqueViolationError } from "objection";
+import { UserLibSqlModel, UserPostgresModel } from "../models/users";
 
 jest.mock("bcryptjs");
 jest.mock("../../../proxy/functions");
 
-jest.mock("../models/users", () => {
-  const mockQueryBuilder = {
-    insert: jest.fn().mockReturnThis(),
-    where: jest.fn().mockReturnThis(),
-    patch: jest.fn().mockReturnThis(),
-    then: jest.fn(),
-  };
+const mockSqliteQuery = {
+  insert: jest.fn(),
+  findOne: jest.fn(),
+  deleteById: jest.fn(),
+};
 
-  const MockInsightModelConstructor = jest.fn();
-  Object.assign(MockInsightModelConstructor, {
-    query: jest.fn(() => mockQueryBuilder),
-  });
+const mockPostgresQuery = {
+  insert: jest.fn(),
+};
 
-  return {
-    UserModel: MockInsightModelConstructor,
-  };
-});
+jest.mock("../models/users", () => ({
+  UserLibSqlModel: {
+    query: jest.fn(() => mockSqliteQuery),
+  },
+  UserPostgresModel: {
+    query: jest.fn(() => mockPostgresQuery),
+  },
+}));
 
 describe("POST /register", () => {
   let req: Pick<NextRequest, "json">;
@@ -38,20 +38,18 @@ describe("POST /register", () => {
       json: jest.fn(),
     };
     jest.clearAllMocks();
-    (UserLibSqlModel.query().where as jest.Mock).mockReturnThis();
-    (UserLibSqlModel.query().then as jest.Mock).mockImplementation((callback) =>
-      Promise.resolve(callback({})),
-    );
-  });
-
-  it("should create a new user and return 201", async () => {
-    const localUser = {
+    mockSqliteQuery.findOne.mockResolvedValue(undefined);
+    mockSqliteQuery.insert.mockResolvedValue({
       id: 1,
       username: "test",
       email: "test@test.com",
-      password: "password",
-    };
-    const encryptedPassword = "encryptedPassword";
+      password: "encryptedPassword",
+    });
+    mockSqliteQuery.deleteById.mockResolvedValue(1);
+    mockPostgresQuery.insert.mockResolvedValue({});
+  });
+
+  it("should create a new user and return 201", async () => {
     const token = "token";
 
     (req.json as jest.Mock).mockResolvedValueOnce({
@@ -60,17 +58,26 @@ describe("POST /register", () => {
       password: "password",
       enable_email_notifications: true,
     });
-    (UserLibSqlModel.query().then as jest.Mock).mockImplementation((callback) =>
-      Promise.resolve(callback(localUser)),
-    );
-    (bcrypt.hash as jest.Mock).mockResolvedValue(encryptedPassword);
+    (bcrypt.hash as jest.Mock).mockResolvedValue("encryptedPassword");
     (createSession as jest.Mock).mockResolvedValue(token);
 
     const response = await POST(req as NextRequest);
     expect(response.status).toBe(201);
 
     const json = await response.json();
-    expect(json).toEqual({ ...localUser, token });
+    expect(json).toEqual({
+      id: 1,
+      username: "test",
+      email: "test@test.com",
+      token,
+      enable_email_notifications: false,
+    });
+    expect(mockPostgresQuery.insert).toHaveBeenCalledWith({
+      id: 1,
+      username: "test",
+      email: "test@test.com",
+      password: "encryptedPassword",
+    });
   });
 
   it("should return 400 if input is missing", async () => {
@@ -87,23 +94,23 @@ describe("POST /register", () => {
     expect(json).toEqual({ message: "All input is required" });
   });
 
-  // eslint-disable-next-line jest/no-disabled-tests -- TODO: throwing a UniqueViolationError is hard
-  it.skip("should return 401 if user already exists", async () => {
+  it("should return 409 if user already exists", async () => {
     (req.json as jest.Mock).mockResolvedValueOnce({
       username: "test",
       email: "test@test.com",
       password: "password",
     });
-    (UserLibSqlModel.query().where as jest.Mock).mockImplementationOnce(() => {
-      throw new UniqueViolationError("Database error");
+    mockSqliteQuery.findOne.mockResolvedValueOnce({
+      id: 9,
+      email: "test@test.com",
     });
 
     const response = await POST(req as NextRequest);
-    expect(response.status).toBe(401);
+    expect(response.status).toBe(409);
 
     const json = await response.json();
     expect(json).toEqual({
-      message: "User Already Exists. Please Login",
+      message: "User already exists. Please login.",
     });
   });
 
@@ -113,10 +120,8 @@ describe("POST /register", () => {
       email: "test@test.com",
       password: "password",
     });
-
-    (UserLibSqlModel.query().where as jest.Mock).mockImplementationOnce(() => {
-      throw new Error("Database error");
-    });
+    (bcrypt.hash as jest.Mock).mockResolvedValue("encryptedPassword");
+    mockSqliteQuery.insert.mockRejectedValueOnce(new Error("Database error"));
 
     const response = await POST(req as NextRequest);
     expect(response.status).toBe(500);
