@@ -104,7 +104,18 @@ export async function POST(
   let createdSqliteUser: UserLibSqlModel | undefined;
 
   try {
+    const [sqliteMax, postgresMax] = await Promise.all([
+      UserLibSqlModel.query().max("id as maxId").first(),
+      UserPostgresModel.query().max("id as maxId").first(),
+    ]);
+    const nextId =
+      Math.max(
+        Number((sqliteMax as { maxId?: number } | undefined)?.maxId || 0),
+        Number((postgresMax as { maxId?: number } | undefined)?.maxId || 0),
+      ) + 1;
+
     createdSqliteUser = (await UserLibSqlModel.query().insert({
+      id: nextId,
       username: trimmedUsername,
       email: normalizedEmail,
       password: encryptedPassword,

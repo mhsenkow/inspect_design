@@ -12,16 +12,12 @@ export class EvidenceModel extends PostgresBaseModel implements EvidenceRecord {
   id?: number;
   summary_id?: number;
   insight_id?: number;
-  created_at?: string;
 
   // static idColumn = ["summary_id", "insight_id"];
 
   summary!: SummaryModel;
   title!: string;
   uid?: string;
-  // logo_uri!: number;
-  // updated_at!: string;
-  // source_baseurl!: string;
 
   static jsonSchema = {
     type: "object",
@@ -74,9 +70,5 @@ export class EvidenceModel extends PostgresBaseModel implements EvidenceRecord {
         },
       },
     };
-  }
-
-  $beforeInsert() {
-    this.created_at = new Date().toISOString();
   }
 }

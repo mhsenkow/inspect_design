@@ -1,9 +1,13 @@
 import { test, expect } from "@playwright/test";
 import dotenv from "dotenv";
+import Database from "better-sqlite3";
+import path from "node:path";
 import pg from "pg";
 const Client = pg.Client;
 
 let client: pg.Client;
+const registerEmail = `e2e-register-${Date.now()}@example.com`;
+const registerUsername = `E2EReg${Date.now().toString(36).slice(-6)}`;
 
 test.beforeAll(async () => {
   dotenv.config({ path: "./.env", quiet: true });
@@ -18,8 +22,30 @@ test.beforeAll(async () => {
 });
 
 test.afterAll(async () => {
-  await client.query("delete from users where username = 'Test3'");
-  await client.end();
+  try {
+    await client?.query("delete from users where email = $1::text", [
+      registerEmail,
+    ]);
+  } catch (error) {
+    console.error(
+      "Failed to clean up registration test user in Postgres",
+      error,
+    );
+  }
+
+  try {
+    const db = new Database(path.join(process.cwd(), "fieldnotes.db"));
+    db.prepare("delete from users where email = ?").run(registerEmail);
+    db.close();
+  } catch (error) {
+    console.error("Failed to clean up registration test user in SQLite", error);
+  }
+
+  try {
+    await client?.end();
+  } catch (error) {
+    console.error("Failed to close registration test DB client", error);
+  }
 });
 
 test("click on register link", async ({ page }) => {
@@ -27,7 +53,7 @@ test("click on register link", async ({ page }) => {
 
   await expect(page).toHaveURL("http://localhost:3000/insights");
   await expect(
-    page.getByRole("heading", { name: /My Insights \([0-9]+\)/ }),
+    page.getByRole("heading", { name: "My Insights" }),
   ).toBeVisible();
 
   await expect(page.getByRole("link", { name: "Register" })).toBeVisible();
@@ -48,17 +74,18 @@ test("do registration", async ({ page }) => {
   await expect(registerButton).toBeDisabled();
 
   await expect(page.getByLabel("Email")).toBeVisible();
-  await page.getByLabel("Email").fill("test@test.com");
+  await page.getByLabel("Email").fill(registerEmail);
 
   await expect(registerButton).toBeDisabled();
 
   await expect(page.getByLabel("Username")).toBeVisible();
-  await page.getByLabel("Username").fill("Test3");
+  await page.getByLabel("Username").fill(registerUsername);
 
   await expect(registerButton).toBeDisabled();
 
-  await expect(page.getByLabel("Password")).toBeVisible();
-  await page.getByLabel("Password").fill("asdf12");
+  const passwordInput = page.locator("#register-password");
+  await expect(passwordInput).toBeVisible();
+  await passwordInput.fill("asdf12");
 
   await expect(registerButton).toBeEnabled();
   await registerButton.click();

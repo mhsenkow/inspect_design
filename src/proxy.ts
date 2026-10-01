@@ -66,7 +66,11 @@ export const proxy = async (req: NextRequest): Promise<NextResponse> => {
 
   // const origin = `${protocol}://${host}`;
   // const url = `${origin}${req.nextUrl.pathname}${req.nextUrl.search}`;
-  if (process.env.NODE_ENV === "production") {
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.IS_LOCAL_PRODUCTION !== "true" &&
+    process.env.CI !== "true"
+  ) {
     origin = origin.replace(
       /http:\/\/localhost:3000/,
       "https://inspect.datagotchi.net",

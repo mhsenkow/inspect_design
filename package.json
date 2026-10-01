@@ -21,7 +21,8 @@
     "db:schema": "PGPASSWORD=${DATABASE_PASSWORD} psql -h ${DATABASE_HOST} -p ${DATABASE_PORT} -U ${DATABASE_USER} -d inspect < schema.sql",
     "export": "next export",
     "sqlite": "node src/scripts/sqlite-cli.js",
-    "db:seed-sample": "node scripts/seed-sample-insights.mjs"
+    "db:seed-sample": "node scripts/seed-sample-insights.mjs",
+    "db:seed-e2e": "node scripts/seed-e2e.mjs"
   },
   "dependencies": {
     "@libsql/client": "^0.17.0",

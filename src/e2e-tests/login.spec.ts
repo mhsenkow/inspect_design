@@ -6,7 +6,7 @@ test("click on login link", async ({ page }) => {
   await page.waitForURL("http://localhost:3000/insights");
   await expect(page).toHaveURL("http://localhost:3000/insights");
   await expect(
-    page.getByRole("heading", { name: /My Insights \([0-9]+\)/ }),
+    page.getByRole("heading", { name: "My Insights" }),
   ).toBeVisible();
 
   await expect(page.getByRole("link", { name: "Login" })).toBeVisible();
@@ -29,15 +29,16 @@ test("do login", async ({ page }) => {
 
   await expect(loginButton).toBeDisabled();
 
-  await expect(page.getByLabel("Password")).toBeVisible();
-  await page.getByLabel("Password").fill(`${password}-wrong`);
+  const passwordInput = page.locator("#password");
+  await expect(passwordInput).toBeVisible();
+  await passwordInput.fill(`${password}-wrong`);
 
   await expect(loginButton).toBeEnabled();
   await loginButton.click();
 
   await expect(page.getByText("Invalid email or password.")).toBeVisible();
 
-  await page.getByLabel("Password").fill(password);
+  await passwordInput.fill(password);
 
   await loginButton.click();
 

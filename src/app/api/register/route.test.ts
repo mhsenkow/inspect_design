@@ -14,10 +14,14 @@ const mockSqliteQuery = {
   insert: jest.fn(),
   findOne: jest.fn(),
   deleteById: jest.fn(),
+  max: jest.fn().mockReturnThis(),
+  first: jest.fn(),
 };
 
 const mockPostgresQuery = {
   insert: jest.fn(),
+  max: jest.fn().mockReturnThis(),
+  first: jest.fn(),
 };
 
 jest.mock("../models/users", () => ({
@@ -38,6 +42,8 @@ describe("POST /register", () => {
     };
     jest.clearAllMocks();
     mockSqliteQuery.findOne.mockResolvedValue(undefined);
+    mockSqliteQuery.max.mockReturnThis();
+    mockSqliteQuery.first.mockResolvedValue({ maxId: 0 });
     mockSqliteQuery.insert.mockResolvedValue({
       id: 1,
       username: "test",
@@ -45,6 +51,8 @@ describe("POST /register", () => {
       password: "encryptedPassword",
     });
     mockSqliteQuery.deleteById.mockResolvedValue(1);
+    mockPostgresQuery.max.mockReturnThis();
+    mockPostgresQuery.first.mockResolvedValue({ maxId: 0 });
     mockPostgresQuery.insert.mockResolvedValue({});
   });
 

@@ -22,15 +22,11 @@ const InsightsPage = async (): Promise<React.JSX.Element> => {
   insightSearchParams.sort();
   const insights = await getInsights(origin, token, insightSearchParams);
 
-  if (insights && Array.isArray(insights)) {
-    return (
-      <ClientSidePage insights={insights} currentUser={currentUser || null} />
-    );
-  }
   return (
-    <span>
-      No insights available for anonymous users. Please Login or Register.
-    </span>
+    <ClientSidePage
+      insights={Array.isArray(insights) ? insights : []}
+      currentUser={currentUser || null}
+    />
   );
 };
 

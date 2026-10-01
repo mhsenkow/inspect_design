@@ -20,11 +20,14 @@ export async function GET(
     .withGraphJoined("reactions");
 
   if (summary) {
-    summary.imageUrl = await getPageHeaderImageUrl(summary.url);
-    [summary.source_baseurl, summary.logo_uri] = [
-      summary.source.baseurl,
-      summary.source.logo_uri,
-    ];
+    try {
+      summary.imageUrl = await getPageHeaderImageUrl(summary.url);
+    } catch (error) {
+      console.error("Failed to fetch page header image:", error);
+      summary.imageUrl = undefined;
+    }
+    summary.source_baseurl = summary.source?.baseurl;
+    summary.logo_uri = summary.source?.logo_uri;
 
     return NextResponse.json(summary);
   } else {

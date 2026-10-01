@@ -144,6 +144,7 @@ export const Modal: React.FC<ModalProps> = ({
   return (
     <div
       ref={modalRef}
+      id={id}
       className={`${styles.modal} ${className}`}
       onClick={handleBackdropClick}
       role="presentation"

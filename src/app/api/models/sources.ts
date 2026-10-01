@@ -7,8 +7,6 @@ export class SourceModel extends PostgresBaseModel implements Source {
   id?: number;
   baseurl!: string;
   logo_uri!: string;
-  created_at?: string;
-  updated_at?: string;
 
   static jsonSchema = {
     type: "object",
@@ -19,13 +17,4 @@ export class SourceModel extends PostgresBaseModel implements Source {
       logo_uri: { type: "string" },
     },
   };
-
-  $beforeInsert() {
-    this.created_at = new Date().toISOString();
-    this.updated_at = new Date().toISOString();
-  }
-
-  $beforeUpdate() {
-    this.updated_at = new Date().toISOString();
-  }
 }
