@@ -151,18 +151,11 @@ const ClientSidePage = ({
           </div>
 
           <div className={styles.toolbar}>
-            <label className={styles.searchField}>
-              <span className={styles.srOnly}>Search insights</span>
-              <input
-                type="search"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search insights…"
-                className={styles.searchInput}
-              />
-            </label>
-
-            <div className={styles.viewToggle} role="group" aria-label="View mode">
+            <div
+              className={styles.viewToggle}
+              role="group"
+              aria-label="View mode"
+            >
               <button
                 type="button"
                 className={`${styles.viewToggleBtn} ${viewMode === "list" ? styles.viewToggleBtnActive : ""}`}
@@ -179,6 +172,19 @@ const ClientSidePage = ({
               >
                 Network
               </button>
+            </div>
+
+            <div className={styles.toolbarSearchRow}>
+              <label className={styles.searchField}>
+                <span className={styles.srOnly}>Search insights</span>
+                <input
+                  type="search"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Search insights…"
+                  className={styles.searchInput}
+                />
+              </label>
             </div>
           </div>
         </header>
