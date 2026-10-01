@@ -89,10 +89,32 @@ describe("InsightsAPI", () => {
     ]);
   });
 
-  it("deleteInsights should delete an insight", async () => {
-    mockFetchResponseJson.mockResolvedValue(mockInsight);
-    const response = await deleteInsights({ insights: [mockInsight] }, token);
+  it("deleteInsights should await each delete before returning", async () => {
+    let resolveFetch: (value: unknown) => void = () => undefined;
+    const fetchPromise = new Promise((resolve) => {
+      resolveFetch = resolve;
+    });
+    (global.fetch as jest.Mock).mockReturnValueOnce(fetchPromise);
 
+    let settled = false;
+    const pending = deleteInsights({ insights: [mockInsight] }, token).then(
+      (response) => {
+        settled = true;
+        return response;
+      },
+    );
+
+    // DELETE must not resolve until fetch completes.
+    await Promise.resolve();
+    expect(settled).toBe(false);
+
+    resolveFetch({
+      ok: true,
+      json: mockFetchResponseJson,
+    });
+
+    const response = await pending;
+    expect(settled).toBe(true);
     expect(fetch).toHaveBeenCalledWith(`/api/insights/${mockInsight.uid}`, {
       method: "DELETE",
       headers: {
@@ -101,5 +123,17 @@ describe("InsightsAPI", () => {
       },
     });
     expect(response).toEqual({ action: -1, facts: [mockInsight] });
+  });
+
+  it("deleteInsights should throw when the server rejects the delete", async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: false,
+      statusText: "Forbidden",
+      json: async () => ({ statusText: "Unauthorized" }),
+    });
+
+    await expect(
+      deleteInsights({ insights: [mockInsight] }, token),
+    ).rejects.toThrow("Unauthorized");
   });
 });

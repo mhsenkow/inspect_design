@@ -37,6 +37,8 @@ export async function POST(req: ResetPasswordRequest): Promise<NextResponse> {
     );
   }
 
+  // knex/libsql where* clauses need the raw DB column name; result rows are
+  // still mapped to camelCase via Objection snakeCaseMappers.
   const candidates = (await UserLibSqlModel.query().whereNotNull(
     "password_reset_key",
   )) as Array<UserLibSqlModel & { passwordResetKey?: string | null }>;
@@ -58,7 +60,15 @@ export async function POST(req: ResetPasswordRequest): Promise<NextResponse> {
   await updateUserPassword(user.id, encryptedPassword);
   await clearSessionsForUser(user.id);
 
-  return NextResponse.json({
+  const response = NextResponse.json({
     message: "Password updated. You can log in with your new password.",
   });
+  // Drop any pre-reset session cookie so /login does not treat the user as
+  // already signed in with a now-invalid token.
+  response.cookies.set("token", "", {
+    path: "/",
+    maxAge: 0,
+    sameSite: "lax",
+  });
+  return response;
 }

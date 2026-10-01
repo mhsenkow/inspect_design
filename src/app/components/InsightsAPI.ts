@@ -112,24 +112,38 @@ export const publishInsights = (
 export const deleteInsights = async (
   { insights }: InsightsAPISchema,
   token: string,
+  options: { cascade?: boolean } = {},
 ): Promise<FLVResponse> => {
-  const finalResponse: FLVResponse = insights.reduce(
-    (response: FLVResponse, insight) => {
-      fetch(`/api/insights/${insight.uid}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          "x-access-token": token,
+  const cascadeQuery = options.cascade ? "?cascade=1" : "";
+  // Must await each DELETE before returning — otherwise callers that navigate
+  // away (e.g. window.location) abort the request and the insight "comes back".
+  await Promise.all(
+    insights.map(async (insight) => {
+      const response = await fetch(
+        `/api/insights/${insight.uid}${cascadeQuery}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            "x-access-token": token,
+          },
         },
-      }).then((response) => {
-        if (!response.ok) {
-          throw new Error(response.statusText);
+      );
+      if (!response.ok) {
+        let message = response.statusText || "Unable to delete insight";
+        try {
+          const err = (await response.json()) as {
+            statusText?: string;
+            message?: string;
+          };
+          message = err.message || err.statusText || message;
+        } catch {
+          /* ignore parse errors */
         }
-      });
-      response.facts.push(insight);
-      return response;
-    },
-    { action: -1, facts: [] },
+        throw new Error(message);
+      }
+    }),
   );
-  return finalResponse;
+
+  return { action: -1, facts: insights };
 };

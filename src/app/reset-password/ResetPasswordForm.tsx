@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import Cookies from "js-cookie";
 
 const ResetPasswordForm = (): React.JSX.Element => {
   const router = useRouter();
@@ -15,6 +16,12 @@ const ResetPasswordForm = (): React.JSX.Element => {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Stale auth cookies make /login think you're already signed in after a
+  // reset (sessions were cleared server-side). Drop them up front.
+  useEffect(() => {
+    Cookies.remove("token", { path: "/" });
+  }, []);
 
   const canSubmit =
     Boolean(token && password && confirmPassword) && !isSubmitting;
@@ -48,8 +55,9 @@ const ResetPasswordForm = (): React.JSX.Element => {
         return;
       }
 
+      Cookies.remove("token", { path: "/" });
       setMessage(data.message || "Password updated. Redirecting to sign in…");
-      setTimeout(() => router.replace("/login"), 1000);
+      setTimeout(() => router.replace("/login?passwordReset=1"), 1000);
     } catch {
       setError("Unable to reset password.");
     } finally {

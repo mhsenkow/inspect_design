@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import Cookies from "js-cookie";
 
 import { handleLogin } from "./LoginPageFunctions";
 import useUser from "../hooks/useUser";
@@ -12,6 +13,7 @@ const LoginForm = (): React.JSX.Element => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const returnTo = safeReturnPath(searchParams.get("return"));
+  const fromPasswordReset = searchParams.get("passwordReset") === "1";
 
   const { loggedIn, setLoggedIn, setToken } = useUser();
   const [email, setEmail] = useState("");
@@ -19,14 +21,23 @@ const LoginForm = (): React.JSX.Element => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [ready, setReady] = useState(!fromPasswordReset);
 
   const canSubmit = Boolean(email.trim() && password) && !isSubmitting;
 
   useEffect(() => {
-    if (loggedIn) {
+    if (!fromPasswordReset) return;
+    Cookies.remove("token", { path: "/" });
+    setLoggedIn(false);
+    setReady(true);
+  }, [fromPasswordReset, setLoggedIn]);
+
+  useEffect(() => {
+    if (!ready) return;
+    if (loggedIn && !fromPasswordReset) {
       router.replace(returnTo);
     }
-  }, [loggedIn, returnTo, router]);
+  }, [loggedIn, returnTo, router, fromPasswordReset, ready]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,7 +63,7 @@ const LoginForm = (): React.JSX.Element => {
     }
   };
 
-  if (loggedIn) {
+  if (loggedIn && !fromPasswordReset) {
     return (
       <div className="auth-shell">
         <div className="auth-card auth-card--quiet">
@@ -69,7 +80,9 @@ const LoginForm = (): React.JSX.Element => {
           <p className="auth-eyebrow">Inspect</p>
           <h1 className="auth-title">Sign in</h1>
           <p className="auth-lead">
-            Welcome back. Use your email and password to continue.
+            {fromPasswordReset
+              ? "Your password was updated. Sign in with your new password."
+              : "Welcome back. Use your email and password to continue."}
           </p>
         </header>
 

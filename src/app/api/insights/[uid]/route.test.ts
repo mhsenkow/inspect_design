@@ -30,6 +30,7 @@ jest.mock("../../models/insights", () => {
     delete: jest.fn().mockReturnThis(),
     insert: jest.fn().mockReturnThis(),
     where: jest.fn().mockReturnThis(),
+    whereIn: jest.fn().mockReturnThis(),
     onConflict: jest.fn().mockReturnThis(),
     merge: jest.fn().mockReturnThis(),
     withGraphJoined: jest.fn().mockReturnThis(),
@@ -48,6 +49,19 @@ jest.mock("../../models/insights", () => {
     InsightModel: MockInsightModelConstructor,
   };
 });
+
+const mockLinkQueryBuilder = {
+  whereIn: jest.fn().mockReturnThis(),
+  select: jest.fn().mockResolvedValue([]),
+};
+
+jest.mock("../../models/insight_links", () => ({
+  InsightLinkModel: {
+    query: jest.fn(),
+  },
+}));
+
+import { InsightLinkModel } from "../../models/insight_links";
 
 const mockInsightData = {
   id: 1,
@@ -590,6 +604,7 @@ describe("DELETE /api/insights/[uid]", () => {
     (InsightModel.query().delete as jest.Mock).mockReturnThis();
     (InsightModel.query().insert as jest.Mock).mockReturnThis();
     (InsightModel.query().where as jest.Mock).mockReturnThis();
+    (InsightModel.query().whereIn as jest.Mock).mockReturnThis();
     (InsightModel.query().onConflict as jest.Mock).mockReturnThis();
     (InsightModel.query().merge as jest.Mock).mockReturnThis();
     (InsightModel.query().withGraphJoined as jest.Mock).mockReturnThis();
@@ -612,19 +627,50 @@ describe("DELETE /api/insights/[uid]", () => {
   describe("Logged in", () => {
     beforeEach(() => {
       (getAuthUser as jest.Mock).mockResolvedValue({ id: 1 });
+      mockLinkQueryBuilder.whereIn.mockReturnThis();
+      mockLinkQueryBuilder.select.mockResolvedValue([]);
+      (InsightLinkModel.query as jest.Mock).mockReturnValue(
+        mockLinkQueryBuilder,
+      );
     });
 
-    it("should delete insight data", async () => {
+    it("should delete insight data and owned descendants", async () => {
       props = {
         params: Promise.resolve({ uid: "asdf" }) as Promise<{
           uid: string;
         }>,
       };
+      (InsightModel.query().findOne as jest.Mock).mockResolvedValueOnce({
+        id: 10,
+        uid: "asdf",
+        user_id: 1,
+      });
+      (InsightModel.query().whereIn as jest.Mock).mockResolvedValueOnce(1);
+
       const response = await DELETE(req, props);
       expect(response.status).toBe(200);
 
       const json = await response.json();
       expect(json).toEqual({ statusText: "success" });
+      expect(InsightModel.query().delete).toHaveBeenCalled();
+      expect(InsightModel.query().whereIn).toHaveBeenCalledWith("id", [10]);
+    });
+
+    it("should return 404 if insight is missing for this user", async () => {
+      props = {
+        params: Promise.resolve({ uid: "asdf" }) as Promise<{
+          uid: string;
+        }>,
+      };
+      (InsightModel.query().findOne as jest.Mock).mockResolvedValueOnce(
+        undefined,
+      );
+
+      const response = await DELETE(req, props);
+      expect(response.status).toBe(404);
+      expect(await response.json()).toEqual({
+        statusText: "Insight not found",
+      });
     });
 
     it("should return 400 if uid is missing or invalid", async () => {
@@ -645,7 +691,7 @@ describe("DELETE /api/insights/[uid]", () => {
 
     it("should return 401", async () => {
       props = {
-        params: Promise.resolve({ uid: "[object object]" }) as Promise<{
+        params: Promise.resolve({ uid: "asdf" }) as Promise<{
           uid: string;
         }>,
       };

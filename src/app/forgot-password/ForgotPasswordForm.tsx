@@ -7,7 +7,7 @@ const ForgotPasswordForm = (): React.JSX.Element => {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
-  const [resetUrl, setResetUrl] = useState("");
+  const [resetPath, setResetPath] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const canSubmit = Boolean(email.trim()) && !isSubmitting;
@@ -16,7 +16,7 @@ const ForgotPasswordForm = (): React.JSX.Element => {
     e.preventDefault();
     setError("");
     setMessage("");
-    setResetUrl("");
+    setResetPath("");
     setIsSubmitting(true);
 
     try {
@@ -28,6 +28,7 @@ const ForgotPasswordForm = (): React.JSX.Element => {
       const data = (await response.json()) as {
         message?: string;
         resetUrl?: string;
+        resetPath?: string;
       };
 
       if (!response.ok) {
@@ -36,8 +37,13 @@ const ForgotPasswordForm = (): React.JSX.Element => {
       }
 
       setMessage(data.message || "Check your email for a reset link.");
-      if (data.resetUrl) {
-        setResetUrl(data.resetUrl);
+      const path =
+        data.resetPath ||
+        (data.resetUrl
+          ? data.resetUrl.replace(/^https?:\/\/[^/]+/i, "")
+          : "");
+      if (path.startsWith("/reset-password")) {
+        setResetPath(path);
       }
     } catch {
       setError("Unable to start password reset.");
@@ -53,7 +59,8 @@ const ForgotPasswordForm = (): React.JSX.Element => {
           <p className="auth-eyebrow">Inspect</p>
           <h1 className="auth-title">Forgot password</h1>
           <p className="auth-lead">
-            Enter your account email and we&apos;ll send a reset link.
+            Enter your account email. Locally, a reset link will appear on this
+            page (email sending is not wired up yet).
           </p>
         </header>
 
@@ -99,9 +106,12 @@ const ForgotPasswordForm = (): React.JSX.Element => {
               <div className="alert-message">{message}</div>
             </div>
           )}
-          {resetUrl && (
+          {resetPath && (
             <p className="auth-reset-link">
-              Local reset link: <Link href={resetUrl}>{resetUrl}</Link>
+              Local reset link:{" "}
+              <Link href={resetPath} data-testid="local-reset-link">
+                Open reset page
+              </Link>
             </p>
           )}
 

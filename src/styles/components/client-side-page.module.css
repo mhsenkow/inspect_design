@@ -189,6 +189,13 @@
   font-weight: 600;
 }
 
+.deleteConfirmHint {
+  margin: 0.75rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--color-text-muted, color-mix(in oklab, var(--color-text) 72%, transparent));
+}
+
 .mobileActionsDock {
   display: none;
 }

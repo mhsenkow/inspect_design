@@ -165,17 +165,27 @@ const ClientSidePage = ({
     }
   }, [returnPath]);
 
-  const handleConfirmDeleteInsight = useCallback(async () => {
-    if (!token || isDeletingInsight) return;
-    setIsDeletingInsight(true);
-    try {
-      await deleteInsights({ insights: [insight] }, token);
-      window.location.href = "/insights";
-    } catch (error) {
-      console.error("Failed to delete insight", error);
-      setIsDeletingInsight(false);
-    }
-  }, [token, isDeletingInsight, insight]);
+  const handleConfirmDeleteInsight = useCallback(
+    async (cascade: boolean) => {
+      if (!token || isDeletingInsight) return;
+      setIsDeletingInsight(true);
+      try {
+        await deleteInsights({ insights: [insight] }, token, { cascade });
+        // Hard navigate only after the DELETE has fully finished.
+        window.location.assign("/insights");
+      } catch (error) {
+        console.error("Failed to delete insight", error);
+        setIsDeletingInsight(false);
+        setIsDeleteInsightDialogOpen(false);
+        alert(
+          error instanceof Error
+            ? error.message
+            : "Unable to delete this insight. Please try again.",
+        );
+      }
+    },
+    [token, isDeletingInsight, insight],
+  );
 
   const executeAction = useCallback(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -986,10 +996,21 @@ const ClientSidePage = ({
                 >
                   <ModalBody>
                     <p className={styles.deleteConfirmCopy}>
-                      This permanently deletes{" "}
-                      <strong>{insight.title || "this insight"}</strong> and
-                      cannot be undone.
+                      Permanently delete{" "}
+                      <strong>{insight.title || "this insight"}</strong>?
                     </p>
+                    {(insight.children?.length ?? 0) > 0 ? (
+                      <p className={styles.deleteConfirmHint}>
+                        It has {insight.children!.length} child
+                        {insight.children!.length === 1 ? "" : "ren"}. Choose
+                        whether to keep those as top-level insights or delete
+                        them too.
+                      </p>
+                    ) : (
+                      <p className={styles.deleteConfirmHint}>
+                        This cannot be undone.
+                      </p>
+                    )}
                   </ModalBody>
                   <ModalFooter>
                     <ModalButton
@@ -999,13 +1020,36 @@ const ClientSidePage = ({
                     >
                       Cancel
                     </ModalButton>
-                    <ModalButton
-                      variant="danger"
-                      onClick={handleConfirmDeleteInsight}
-                      disabled={isDeletingInsight}
-                    >
-                      {isDeletingInsight ? "Deleting…" : "Delete permanently"}
-                    </ModalButton>
+                    {(insight.children?.length ?? 0) > 0 ? (
+                      <>
+                        <ModalButton
+                          variant="danger"
+                          onClick={() => handleConfirmDeleteInsight(false)}
+                          disabled={isDeletingInsight}
+                        >
+                          {isDeletingInsight
+                            ? "Deleting…"
+                            : "Delete this only"}
+                        </ModalButton>
+                        <ModalButton
+                          variant="danger"
+                          onClick={() => handleConfirmDeleteInsight(true)}
+                          disabled={isDeletingInsight}
+                        >
+                          {isDeletingInsight
+                            ? "Deleting…"
+                            : "Delete with children"}
+                        </ModalButton>
+                      </>
+                    ) : (
+                      <ModalButton
+                        variant="danger"
+                        onClick={() => handleConfirmDeleteInsight(false)}
+                        disabled={isDeletingInsight}
+                      >
+                        {isDeletingInsight ? "Deleting…" : "Delete permanently"}
+                      </ModalButton>
+                    )}
                   </ModalFooter>
                 </Modal>
               </>
