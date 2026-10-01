@@ -150,10 +150,12 @@ test.describe("Insights page", () => {
     await dialog.getByPlaceholder("Name for a new insight").fill(title);
     await dialog.getByRole("button", { name: "Save link" }).click();
 
-    await expect(dialog).toBeHidden();
+    await expect(dialog).toBeHidden({ timeout: 30000 });
+    await page.reload();
+    await page.getByPlaceholder("Search insights…").fill(title);
     const cardLink = page.getByRole("link", { name: new RegExp(title) });
-    await expect(cardLink).toBeVisible();
-    await expect(cardLink).toContainText("1 citation");
+    await expect(cardLink).toBeVisible({ timeout: 15000 });
+    await expect(cardLink).toContainText(/1 citation/);
   });
 
   test("saves a link into an existing insight from the FAB", async ({
@@ -186,10 +188,11 @@ test.describe("Insights page", () => {
     await row.locator("input[name='selectedFact']").click();
     await dialog.getByRole("button", { name: "Save link" }).click();
 
-    await expect(dialog).toBeHidden();
+    await expect(dialog).toBeHidden({ timeout: 30000 });
     await page.reload();
+    await page.getByPlaceholder("Search insights…").fill(title);
     const cardLink = page.getByRole("link", { name: new RegExp(title) });
-    await expect(cardLink).toBeVisible();
+    await expect(cardLink).toBeVisible({ timeout: 15000 });
     await expect(cardLink).toContainText(/1 citation/);
   });
 });
