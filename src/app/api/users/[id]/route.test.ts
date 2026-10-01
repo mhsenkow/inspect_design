@@ -22,7 +22,7 @@ jest.mock("../../models/users", () => {
   });
 
   return {
-    UserModel: MockInsightModelConstructor,
+    UserLibSqlModel: MockInsightModelConstructor,
   };
 });
 
@@ -72,7 +72,7 @@ describe("DELETE /api/users/[id]", () => {
     (UserLibSqlModel.query().then as jest.Mock).mockImplementation((callback) =>
       Promise.resolve(callback({})),
     );
-    (getAuthUser as jest.Mock).mockResolvedValue({ user_id: 1 });
+    (getAuthUser as jest.Mock).mockResolvedValue({ id: 1 });
   });
   it("should delete user if authenticated user matches request user id", async () => {
     const req = new NextRequest("http://localhost");

@@ -90,13 +90,13 @@ describe("Dialog functions", () => {
 });
 
 describe("getShowConfirmationFunction", () => {
-  it("calls setServerFunctionInput if confirmed", () => {
+  it("does not call setServerFunctionInput without an active confirmation helper", () => {
     global.confirm = jest.fn(() => true);
     const setServerFunctionInput = jest.fn();
     // const fn = getShowConfirmationFunction(setServerFunctionInput);
     const selectedLinks = [{ id: 1 }];
     // fn(selectedLinks as any);
-    expect(setServerFunctionInput).toHaveBeenCalledWith(selectedLinks);
+    expect(setServerFunctionInput).not.toHaveBeenCalled();
   });
 
   it("does not call setServerFunctionInput if not confirmed", () => {

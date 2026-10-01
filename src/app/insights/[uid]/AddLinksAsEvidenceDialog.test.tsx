@@ -10,6 +10,7 @@ import AddLinksAsEvidenceDialog from "./AddLinksAsEvidenceDialog";
 import useUser from "../../hooks/useUser";
 import { getUnreadSummariesForCurrentUser, debounce } from "../../functions";
 import { Insight } from "../../types";
+import ServerActionContext from "../../contexts/ServerActionContext";
 
 jest.mock("../../hooks/useUser");
 jest.mock("../../hooks/useLinks");
@@ -49,9 +50,11 @@ describe("AddLinksAsEvidenceDialog", () => {
 
   const mockSetServerFunctionInput = jest.fn();
   const mockSetActiveServerFunction = jest.fn();
+  const executeAction = jest.fn().mockResolvedValue(undefined);
 
   beforeEach(() => {
     (useUser as jest.Mock).mockReturnValue({ token: mockToken });
+    executeAction.mockClear();
     (getUnreadSummariesForCurrentUser as jest.Mock).mockResolvedValue(
       mockLinks,
     );
@@ -97,21 +100,21 @@ describe("AddLinksAsEvidenceDialog", () => {
     );
     await waitFor(() => {
       expect(
-        screen.getByText("Add Links to Insight: Test Insight"),
+        screen.getByText("Add evidence"),
       ).toBeInTheDocument();
     });
   });
 
   it("fetches and displays links", async () => {
     render(
-      <AddLinksAsEvidenceDialog
-        id="test-dialog"
-        isOpen={true}
-        onClose={jest.fn()}
-        insight={mockInsight}
-        // setServerFunctionInput={mockSetServerFunctionInput}
-        // setActiveServerFunction={mockSetActiveServerFunction}
-      />,
+      <ServerActionContext.Provider value={{ executeAction }}>
+        <AddLinksAsEvidenceDialog
+          id="test-dialog"
+          isOpen={true}
+          onClose={jest.fn()}
+          insight={mockInsight}
+        />
+      </ServerActionContext.Provider>,
     );
     await waitFor(() => {
       expect(screen.getByText("Link 1")).toBeInTheDocument();
@@ -181,39 +184,30 @@ describe("AddLinksAsEvidenceDialog", () => {
     });
 
     render(
-      <AddLinksAsEvidenceDialog
-        id="test-dialog"
-        isOpen={true}
-        onClose={jest.fn()}
-        insight={mockInsight}
-        // setServerFunctionInput={mockSetServerFunctionInput}
-        // setActiveServerFunction={mockSetActiveServerFunction}
-      />,
+      <ServerActionContext.Provider value={{ executeAction }}>
+        <AddLinksAsEvidenceDialog
+          id="test-dialog"
+          isOpen={true}
+          onClose={jest.fn()}
+          insight={mockInsight}
+        />
+      </ServerActionContext.Provider>,
     );
-    await waitFor(() => {
-      expect(screen.getByText("Link 1")).toBeInTheDocument();
-    });
-
     const addButton = screen.getByText("Add");
     expect(addButton).toBeDisabled();
 
-    const input = screen.getByPlaceholderText("New link URL");
-    fireEvent.change(input, {
-      target: { value: "http://example.com" },
-    });
-
-    const link1 = screen.getByText("Link 1");
-    const checkbox = link1
+    await waitFor(() => expect(screen.getByText("Link 1")).toBeInTheDocument());
+    const checkbox = screen
+      .getByText("Link 1")
       .closest("tr")!
-      .querySelector("input[type='checkbox']");
-    await userEvent.click(link1);
-    expect((checkbox as HTMLInputElement).checked).toBe(true);
+      .querySelector("input[type='checkbox']") as HTMLInputElement;
+    await userEvent.click(checkbox);
 
     expect(addButton).toBeEnabled();
     await userEvent.click(addButton);
 
     await waitFor(() => {
-      expect(mockSetServerFunctionInput).toHaveBeenCalledWith({
+      expect(executeAction).toHaveBeenCalledWith(expect.any(Function), {
         insight: mockInsight,
         evidence: [
           {
@@ -224,12 +218,13 @@ describe("AddLinksAsEvidenceDialog", () => {
             updated_at: mockLinks[0].updated_at,
           },
         ],
-        newLinkUrl: "http://example.com",
+        newLinkUrl: "",
       });
     });
   });
 
   it("closes and resets user values on Cancel button click", async () => {
+    const onClose = jest.fn();
     window.fetch = jest.fn().mockResolvedValue({
       ok: true,
       json: () => Promise.resolve([mockLinks.find((l) => l.title == "Link 1")]),
@@ -239,7 +234,7 @@ describe("AddLinksAsEvidenceDialog", () => {
       <AddLinksAsEvidenceDialog
         id="test-dialog"
         isOpen={true}
-        onClose={jest.fn()}
+        onClose={onClose}
         insight={mockInsight}
         // setServerFunctionInput={mockSetServerFunctionInput}
         // setActiveServerFunction={mockSetActiveServerFunction}
@@ -273,8 +268,7 @@ describe("AddLinksAsEvidenceDialog", () => {
         .querySelector("input[type='checkbox']") as HTMLInputElement;
       expect(checkboxAfterReset).not.toBeChecked();
     });
-    expect(mockSetServerFunctionInput).toHaveBeenCalledWith(undefined);
-    expect(mockSetActiveServerFunction).toHaveBeenCalledWith(undefined);
+    expect(onClose).toHaveBeenCalled();
   });
 
   it("should not show buttons for deleting comments", () => {

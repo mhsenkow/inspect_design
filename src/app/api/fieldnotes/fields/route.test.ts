@@ -5,10 +5,9 @@
 import { FieldModel } from "../models/Fields";
 import { GET, POST } from "./route";
 import { DELETE } from "./[id]/route";
-import { getAuthUser } from "../../../functions";
 import { NextRequest } from "next/server";
 
-jest.mock("../models/fields", () => {
+jest.mock("../models/Fields", () => {
   const mockQueryBuilder = {
     select: jest.fn().mockReturnThis(),
     leftJoin: jest.fn().mockReturnThis(),
@@ -42,20 +41,12 @@ describe("fieldnotes/fields routes", () => {
     beforeEach(() => {
       jest.clearAllMocks();
       (FieldModel.query().where as jest.Mock).mockReturnThis();
-      (FieldModel.query().withGraphJoined as jest.Mock).mockReturnThis();
+      (FieldModel.query().orWhereNull as jest.Mock).mockReturnThis();
+      (FieldModel.query().groupBy as jest.Mock).mockReturnThis();
       (FieldModel.query().orderBy as jest.Mock).mockReturnThis();
-      (FieldModel.query().page as jest.Mock).mockReturnThis();
-      (FieldModel.query().insert as jest.Mock).mockReturnThis();
-      (FieldModel.query().withGraphFetched as jest.Mock).mockReturnThis();
       (FieldModel.query().then as jest.Mock).mockImplementation((callback) =>
-        Promise.resolve(
-          callback({
-            results: mockFields,
-          }),
-        ),
+        Promise.resolve(callback(mockFields)),
       );
-      const mockAuthUser = { user_id: 1, name: "Test User" };
-      (getAuthUser as jest.Mock).mockResolvedValue(mockAuthUser);
     });
 
     it("should return 200 with a list of fifelds", async () => {
@@ -81,7 +72,7 @@ describe("fieldnotes/fields routes", () => {
 
       const res = await POST(req);
       expect(res.status).toBe(400);
-      expect(res.statusText).toEqual({ statusText: "Name is required" });
+      expect(await res.json()).toEqual({ statusText: "Name is required" });
     });
 
     it("should return 201 and create field with valid authentication and name", async () => {
@@ -106,7 +97,7 @@ describe("fieldnotes/fields routes", () => {
 
       const res = await POST(req);
 
-      expect(res.status).toBe(200);
+      expect(res.status).toBe(201);
       const json = await res.json();
       expect(json).toEqual({
         ...localMockField,
@@ -117,16 +108,18 @@ describe("fieldnotes/fields routes", () => {
 
   describe("DELETE /:id", () => {
     it("should delete a field and return 204", async () => {
+      (FieldModel.query().andWhere as jest.Mock).mockResolvedValue(1);
       const req = {
-        params: { id: "1" },
+        nextUrl: {
+          searchParams: new URLSearchParams({ id: "1" }),
+        },
       } as unknown as NextRequest;
 
       const res = await DELETE(req);
 
-      expect(FieldModel.query).toHaveBeenCalledWith({
-        text: expect.stringContaining("delete from fields"),
-        values: ["1", 1],
-      });
+      expect(FieldModel.query().delete).toHaveBeenCalled();
+      expect(FieldModel.query().where).toHaveBeenCalledWith("id", "1");
+      expect(FieldModel.query().andWhere).toHaveBeenCalledWith("user_id", 1);
       expect(res.status).toBe(204);
     });
   });

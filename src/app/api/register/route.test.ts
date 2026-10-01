@@ -109,7 +109,7 @@ describe("POST /register", () => {
 
     const json = await response.json();
     expect(json).toEqual({
-      message: "User already exists. Please login.",
+      message: "User already exists. Please login or reset your password.",
     });
   });
 

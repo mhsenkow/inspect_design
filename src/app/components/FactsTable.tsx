@@ -535,8 +535,14 @@ const FactsTable = ({
                                       {
                                         reaction,
                                         // TODO: update this submitReaction logic
-                                        summary_id: fact.summary_id,
-                                        insight_id: fact.insight_id,
+                                        summary_id:
+                                          factName == "snippet"
+                                            ? (fact.summary_id ?? fact.id)
+                                            : fact.summary_id,
+                                        insight_id:
+                                          factName == "insight"
+                                            ? (fact.insight_id ?? fact.id)
+                                            : fact.insight_id,
                                       },
                                       token,
                                     );
@@ -576,8 +582,14 @@ const FactsTable = ({
                                     return submitComment(
                                       {
                                         comment,
-                                        summary_id: fact.summary_id,
-                                        insight_id: fact.insight_id,
+                                        summary_id:
+                                          factName == "snippet"
+                                            ? (fact.summary_id ?? fact.id)
+                                            : fact.summary_id,
+                                        insight_id:
+                                          factName == "insight"
+                                            ? (fact.insight_id ?? fact.id)
+                                            : fact.insight_id,
                                       },
                                       token,
                                     );

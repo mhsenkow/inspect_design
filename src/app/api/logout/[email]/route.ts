@@ -19,16 +19,13 @@ export async function DELETE(req: NextRequest, props: DeleteSessionRouteProps) {
         .where("email", email)
         .where("token", token);
 
-      return NextResponse.json({
-        statusText: "Successfully logged out",
+      return new NextResponse(null, {
         status: 204,
+        statusText: "Successfully logged out",
       });
     }
 
-    return NextResponse.json({
-      statusText: "Unauthorized",
-      status: 401,
-    });
+    return NextResponse.json({ statusText: "Unauthorized" }, { status: 401 });
   } catch (err) {
     console.error("Error in DELETE /api/logout:", err);
     return NextResponse.json(

@@ -36,30 +36,24 @@ describe("LoginRegisterLinks", () => {
   });
 
   describe("Logged in", () => {
-    it("renders Log Out and My Insights links when logged in", () => {
+    it("renders Account and Log out controls when logged in", () => {
       render(<LoginRegisterLinks loggedIn={true} />);
 
-      expect(screen.getByText("Log Out")).toBeInTheDocument();
-      expect(screen.getByText("My Insights")).toBeInTheDocument();
+      expect(screen.getByText("Account")).toBeInTheDocument();
+      expect(screen.getByText("Log out")).toBeInTheDocument();
+      expect(screen.queryByText("My Insights")).not.toBeInTheDocument();
 
       expect(screen.queryByText("Login")).not.toBeInTheDocument();
       expect(screen.queryByText("Register")).not.toBeInTheDocument();
     });
 
-    it("calls logout and redirects to home when Log Out is clicked", () => {
+    it("calls logout and redirects to current path when Log out is clicked", () => {
       render(<LoginRegisterLinks loggedIn={true} />);
 
-      const logoutLink = screen.getByText("Log Out");
+      const logoutLink = screen.getByText("Log out");
       fireEvent.click(logoutLink);
 
       expect(mockLogout).toHaveBeenCalled();
-      expect(window.location.href).toBe("http://localhost/");
-    });
-
-    it("goes to the dashboard when My Insights is clicked", () => {
-      render(<LoginRegisterLinks loggedIn={true} />);
-      const insightsLink = screen.getByText("My Insights");
-      fireEvent.click(insightsLink);
       expect(window.location.href).toBe("http://localhost/");
     });
   });
@@ -90,16 +84,14 @@ describe("LoginRegisterLinks", () => {
       (usePathname as jest.Mock).mockReturnValue("/login");
       render(<LoginRegisterLinks loggedIn={false} />);
 
-      const loginListItem = screen.getByText("Login").closest("li");
-      expect(loginListItem).toHaveClass("active");
+      expect(screen.queryByText("Login")).not.toBeInTheDocument();
     });
 
-    it("applies active class to Register link when on /register path", () => {
+    it("hides Register link when on /register path", () => {
       (usePathname as jest.Mock).mockReturnValue("/register");
       render(<LoginRegisterLinks loggedIn={false} />);
 
-      const registerListItem = screen.getByText("Register").closest("li");
-      expect(registerListItem).toHaveClass("active");
+      expect(screen.queryByText("Register")).not.toBeInTheDocument();
     });
   });
 });

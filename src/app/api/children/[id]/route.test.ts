@@ -69,7 +69,7 @@ describe("DELETE", () => {
   });
 
   it("returns 400 if id is missing", async () => {
-    (getAuthUser as jest.Mock).mockResolvedValue({ user_id: 123 });
+    (getAuthUser as jest.Mock).mockResolvedValue({ id: 123 });
 
     const res = await DELETE(mockReq, { params: Promise.resolve({}) as any });
     expect(res.status).toBe(400);
@@ -79,7 +79,7 @@ describe("DELETE", () => {
   });
 
   it("returns 400 if id is not a number", async () => {
-    (getAuthUser as jest.Mock).mockResolvedValue({ user_id: 123 });
+    (getAuthUser as jest.Mock).mockResolvedValue({ id: 123 });
 
     const res = await DELETE(mockReq, {
       params: Promise.resolve({ id: "abc" }),
@@ -91,7 +91,7 @@ describe("DELETE", () => {
   });
 
   it("returns 404 if it's someone else's child or parent insight instead of 403 for security reasons", async () => {
-    (getAuthUser as jest.Mock).mockResolvedValue({ user_id: 456 });
+    (getAuthUser as jest.Mock).mockResolvedValue({ id: 456 });
     (InsightLinkModel.query().then as jest.Mock).mockReset();
     (InsightLinkModel.query().then as jest.Mock).mockImplementationOnce(
       (callback) =>
@@ -112,7 +112,7 @@ describe("DELETE", () => {
   });
 
   it("returns 404 if child insight not found after trying to delete it", async () => {
-    (getAuthUser as jest.Mock).mockResolvedValue({ user_id: 123 });
+    (getAuthUser as jest.Mock).mockResolvedValue({ id: 123 });
     (InsightLinkModel.query().then as jest.Mock).mockReset();
     (InsightLinkModel.query().then as jest.Mock).mockImplementationOnce(
       (callback) => Promise.resolve(callback(0)),
@@ -127,7 +127,7 @@ describe("DELETE", () => {
   });
 
   it("deletes child insight and returns success", async () => {
-    (getAuthUser as jest.Mock).mockResolvedValue({ user_id: 123 });
+    (getAuthUser as jest.Mock).mockResolvedValue({ id: 123 });
 
     const res = await DELETE(mockReq, { params: Promise.resolve({ id: "1" }) });
 

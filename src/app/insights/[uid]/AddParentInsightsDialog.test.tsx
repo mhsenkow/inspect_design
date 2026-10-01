@@ -4,6 +4,7 @@ import "@testing-library/jest-dom";
 
 import AddParentInsightsDialog from "./AddParentInsightsDialog";
 import { Insight } from "../../types";
+import ServerActionContext from "../../contexts/ServerActionContext";
 
 const mockInsight: Insight = {
   id: 1,
@@ -19,11 +20,13 @@ const mockPotentialInsights: Insight[] = [
 describe("AddParentInsightsDialog", () => {
   let setServerFunctionInput: jest.Mock;
   let setActiveServerFunction: jest.Mock;
+  let executeAction: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
     setServerFunctionInput = jest.fn();
     setActiveServerFunction = jest.fn();
+    executeAction = jest.fn().mockResolvedValue(undefined);
     // Create a dialog element in the DOM for dialog API
     const dialog = document.createElement("dialog");
     dialog.setAttribute("id", "test-dialog");
@@ -60,22 +63,20 @@ describe("AddParentInsightsDialog", () => {
     };
 
     return render(
-      <AddParentInsightsDialog
-        id="test-dialog"
-        isOpen={true}
-        onClose={handleClose}
-        insight={mockInsight}
-        // setServerFunctionInput={setServerFunctionInput}
-        // setActiveServerFunction={setActiveServerFunction}
-      />,
+      <ServerActionContext.Provider value={{ executeAction }}>
+        <AddParentInsightsDialog
+          id="test-dialog"
+          isOpen={true}
+          onClose={handleClose}
+          insight={mockInsight}
+        />
+      </ServerActionContext.Provider>,
     );
   }
 
   it("renders dialog with correct title", () => {
     renderDialog();
-    expect(
-      screen.getByText(/Add Parent Insights to Insight: Test Insight/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Add parent insights")).toBeInTheDocument();
   });
 
   it("renders tabs for existing and new insights", () => {
@@ -118,7 +119,7 @@ describe("AddParentInsightsDialog", () => {
       name: /Submit/i,
     });
     fireEvent.click(submitBtn);
-    expect(setServerFunctionInput).toHaveBeenCalledWith({
+    expect(executeAction).toHaveBeenCalledWith(expect.any(Function), {
       childInsight: mockInsight,
       newParentInsights: [],
       newInsightName: "My New Insight",
@@ -135,7 +136,7 @@ describe("AddParentInsightsDialog", () => {
 
   it("closes dialog on click outside dialog content", () => {
     renderDialog();
-    const modal = screen.getByRole("dialog");
+    const modal = document.querySelector('[role="presentation"]') as HTMLElement;
     fireEvent.click(modal, { target: modal, currentTarget: modal });
     expect(setServerFunctionInput).toHaveBeenCalledWith(undefined);
     expect(setActiveServerFunction).toHaveBeenCalledWith(undefined);

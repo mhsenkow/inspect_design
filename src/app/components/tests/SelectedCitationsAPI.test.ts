@@ -99,7 +99,11 @@ describe("SelectedCitationsAPI", () => {
 
   it("should add children to an existing insight", async () => {
     const token = "test-token";
-    const insight = { uid: "insight-uid", title: "Parent Insight" } as Insight;
+    const insight = {
+      id: 3,
+      uid: "insight-uid",
+      title: "Parent Insight",
+    } as Insight;
     const childrenInsights = [
       { id: 1, title: "Child Insight 1" },
       { id: 2, title: "Child Insight 2" },
@@ -108,11 +112,13 @@ describe("SelectedCitationsAPI", () => {
     mockModifyInsight.mockResolvedValue({ action: 0, facts: [insight] });
     global.fetch = jest.fn().mockResolvedValueOnce({
       ok: true,
-      json: () =>
+      text: () =>
         Promise.resolve(
-          childrenInsights.map((c) => ({
-            childInsight: c,
-          })),
+          JSON.stringify(
+            childrenInsights.map((c) => ({
+              childInsight: c,
+            })),
+          ),
         ),
     });
 
@@ -122,7 +128,10 @@ describe("SelectedCitationsAPI", () => {
     );
     expect(global.fetch).toHaveBeenCalledWith("/api/children", {
       body: JSON.stringify({
-        children: [{ child_id: 1 }, { child_id: 2 }],
+        children: [
+          { child_id: 1, parent_id: 3 },
+          { child_id: 2, parent_id: 3 },
+        ],
       }),
       headers: {
         "Content-Type": "application/json",

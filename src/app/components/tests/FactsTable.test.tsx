@@ -275,7 +275,9 @@ describe("FactsTable", () => {
       expect(submitReaction as jest.Mock).toHaveBeenCalledTimes(1);
       expect(submitReaction as jest.Mock).toHaveBeenCalledWith(
         {
-          reaction: "😀",
+          insight_id: 1,
+          reaction: "👍",
+          summary_id: undefined,
         },
         "token",
       );
@@ -298,7 +300,7 @@ describe("FactsTable", () => {
       reaction: "😀",
     }));
     (submitReaction as jest.Mock).mockImplementationOnce(() => ({
-      reaction: "😈",
+      reaction: "🔥",
     }));
 
     render(
@@ -332,7 +334,9 @@ describe("FactsTable", () => {
       expect(submitReaction as jest.Mock).toHaveBeenCalledTimes(1);
       expect(submitReaction as jest.Mock).toHaveBeenCalledWith(
         {
-          reaction: "😀",
+          insight_id: 1,
+          reaction: "👍",
+          summary_id: undefined,
         },
         "token",
       );
@@ -356,26 +360,26 @@ describe("FactsTable", () => {
     await waitFor(() => {
       expect(screen.getByText("Select an emoji character")).toBeInTheDocument();
     });
-    // select 😈
-    const selectElement = screen.getByRole("combobox", {
-      name: /Select Reaction/i,
-    });
-    fireEvent.change(selectElement, { target: { value: "😈" } });
-    screen.getByRole("button", { name: "Submit Reaction" }).click();
+    await userEvent.click(screen.getByRole("option", { name: "🔥" }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "Submit Reaction" }),
+    );
 
     await waitFor(() => {
       expect(submitReaction as jest.Mock).toHaveBeenCalledTimes(2);
       expect(submitReaction as jest.Mock).toHaveBeenNthCalledWith(
         2,
         {
-          reaction: "😈",
+          insight_id: 1,
+          reaction: "🔥",
+          summary_id: undefined,
         },
         "token",
       );
     });
 
     await waitFor(() => {
-      expect(emojiElement?.textContent).toContain("😈");
+      expect(emojiElement?.textContent).toContain("🔥");
       expect(emojiElement?.textContent).not.toContain("😀");
     });
   });
@@ -424,6 +428,8 @@ describe("FactsTable", () => {
       expect(submitComment as jest.Mock).toHaveBeenCalledWith(
         {
           comment: "Nice fact!",
+          insight_id: 1,
+          summary_id: undefined,
         },
         "token",
       );

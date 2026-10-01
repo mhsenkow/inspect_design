@@ -131,7 +131,8 @@ describe("notes routes", () => {
   describe("DELETE /[id]", () => {
     it("should delete a note and return 204", async () => {
       const noteId = "1";
-      (NoteModel.query().deleteById as jest.Mock).mockResolvedValue(1);
+      (NoteModel.query().deleteById as jest.Mock).mockReturnThis();
+      (NoteModel.query().where as jest.Mock).mockResolvedValue(1);
 
       const res = await DELETE({} as NextRequest, {
         params: Promise.resolve({ id: noteId }),

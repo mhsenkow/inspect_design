@@ -6,8 +6,12 @@ import { NextRequest } from "next/server";
 import { DELETE, DeleteSessionRouteProps } from "./route";
 import { UserLibSqlModel } from "@/app/api/models/users";
 
-// Mock the UserModel from the database layer
-jest.mock("@/app/api/models/users");
+// Mock the UserLibSqlModel from the database layer
+jest.mock("@/app/api/models/users", () => ({
+  UserLibSqlModel: {
+    query: jest.fn(),
+  },
+}));
 
 describe("DELETE /api/logout", () => {
   const mockQueryBuilder = {
@@ -62,8 +66,7 @@ describe("DELETE /api/logout", () => {
 
     // Verify the response
     expect(response.status).toBe(204);
-    const body = await response.json();
-    expect(body.statusText).toBe("Successfully logged out");
+    expect(response.statusText).toBe("Successfully logged out");
   });
 
   it("should return 401 Unauthorized if no token is provided", async () => {

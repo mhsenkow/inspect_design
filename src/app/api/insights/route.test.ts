@@ -13,6 +13,8 @@ jest.mock("../../functions");
 jest.mock("../models/insights", () => {
   const mockQueryBuilder = {
     where: jest.fn().mockReturnThis(),
+    whereNotExists: jest.fn().mockReturnThis(),
+    whereRaw: jest.fn().mockReturnThis(),
     orderBy: jest.fn().mockReturnThis(),
     clone: jest.fn().mockReturnThis(),
     select: jest.fn().mockReturnThis(),
@@ -52,13 +54,15 @@ describe("/api/insights", () => {
     },
   ];
   beforeEach(() => {
-    const mockAuthUser = { user_id: 1, name: "Test User" };
+    const mockAuthUser = { id: 1, name: "Test User" };
     (getAuthUser as jest.Mock).mockResolvedValue(mockAuthUser);
   });
   describe("GET /api/insights", () => {
     beforeEach(() => {
       jest.clearAllMocks();
       (InsightModel.query().where as jest.Mock).mockReturnThis();
+      (InsightModel.query().whereNotExists as jest.Mock).mockReturnThis();
+      (InsightModel.query().whereRaw as jest.Mock).mockReturnThis();
       (InsightModel.query().orderBy as jest.Mock).mockReturnThis();
       (InsightModel.query().clone as jest.Mock).mockReturnThis();
       (InsightModel.query().select as jest.Mock).mockReturnThis();
@@ -102,13 +106,15 @@ describe("/api/insights", () => {
         "insights.user_id",
         1,
       );
-      expect(InsightModel.query().where as jest.Mock).toHaveBeenCalledWith(
-        "insights.title",
-        "ilike",
-        "%%",
+      expect(InsightModel.query().whereRaw as jest.Mock).toHaveBeenCalledWith(
+        "LOWER(insights.title) LIKE LOWER(?)",
+        ["%%"],
       );
       expect(
-        InsightModel.query().withGraphJoined as jest.Mock,
+        InsightModel.query().whereNotExists as jest.Mock,
+      ).toHaveBeenCalled();
+      expect(
+        InsightModel.query().withGraphFetched as jest.Mock,
       ).toHaveBeenCalled();
     });
 
@@ -132,12 +138,11 @@ describe("/api/insights", () => {
       expect(response.status).toBe(200);
 
       const json = await response.json();
-      expect(json).toEqual([mockInsights[0]]);
+      expect(json).toEqual([{ ...mockInsights[0], children: [], parents: [] }]);
 
-      expect(InsightModel.query().where as jest.Mock).toHaveBeenCalledWith(
-        "insights.title",
-        "ilike",
-        "%insight 1%",
+      expect(InsightModel.query().whereRaw as jest.Mock).toHaveBeenCalledWith(
+        "LOWER(insights.title) LIKE LOWER(?)",
+        ["%insight 1%"],
       );
     });
 
@@ -156,7 +161,7 @@ describe("/api/insights", () => {
       expect(response.status).toBe(200);
 
       let json = await response.json();
-      expect(json).toEqual([mockInsights[0]]);
+      expect(json).toEqual([{ ...mockInsights[0], children: [], parents: [] }]);
 
       expect(InsightModel.query().offset as jest.Mock).toHaveBeenCalledWith(0);
       expect(InsightModel.query().limit as jest.Mock).toHaveBeenCalledWith(1);
@@ -175,7 +180,7 @@ describe("/api/insights", () => {
       expect(response.status).toBe(200);
 
       json = await response.json();
-      expect(json).toEqual([mockInsights[1]]);
+      expect(json).toEqual([{ ...mockInsights[1], children: [], parents: [] }]);
 
       expect(InsightModel.query().offset as jest.Mock).toHaveBeenCalledWith(1);
       expect(InsightModel.query().limit as jest.Mock).toHaveBeenCalledWith(1);
@@ -350,7 +355,7 @@ describe("/api/insights", () => {
 
       const json = await response.json();
       expect(json.statusText).toBe(
-        "Internal server error while creating insight",
+        "Database connection failed",
       );
     });
 
@@ -371,9 +376,7 @@ describe("/api/insights", () => {
       expect(response.status).toBe(500);
 
       const json = await response.json();
-      expect(json.statusText).toBe(
-        "Internal server error while creating insight",
-      );
+      expect(json.statusText).toBe("Duplicate key");
     });
   });
 });

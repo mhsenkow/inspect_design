@@ -6,9 +6,9 @@ import { NextRequest } from "next/server";
 import { DELETE, DeleteSessionRouteProps } from "./[email]/route";
 import { UserLibSqlModel } from "../models/users";
 
-// Mock the UserModel from the database layer
+// Mock the UserLibSqlModel from the database layer
 jest.mock("../models/users", () => ({
-  UserModel: {
+  UserLibSqlModel: {
     query: jest.fn().mockReturnThis(), // Return a stable 'this' context
   },
 }));
@@ -55,8 +55,7 @@ describe("DELETE /api/logout", () => {
 
     // Verify the response
     expect(response.status).toBe(204);
-    const body = await response.json();
-    expect(body.statusText).toBe("Successfully logged out");
+    expect(response.statusText).toBe("Successfully logged out");
   });
 
   it("should return 401 Unauthorized if no token is provided", async () => {

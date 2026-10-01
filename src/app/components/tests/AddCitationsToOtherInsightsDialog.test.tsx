@@ -96,12 +96,13 @@ describe("AddCitationsToOtherInsightsDialog", () => {
   });
 
   it("resets state values and closes dialog on cancel", async () => {
+    const onClose = jest.fn();
     await act(async () => {
       render(
         <AddCitationsToOtherInsightsDialog
           id={ADD_CITATIONS_TO_OTHER_INSIGHTS_DIALOG_ID}
           isOpen={true}
-          onClose={jest.fn()}
+          onClose={onClose}
           selectedCitations={
             mockSelectedCitations as unknown as InsightEvidence[]
           }
@@ -129,8 +130,7 @@ describe("AddCitationsToOtherInsightsDialog", () => {
     await userEvent.click(screen.getByText("Cancel"));
 
     expect(checkboxInput.checked).toBeFalsy();
-    expect(setServerFunctionInput).toHaveBeenCalledWith(undefined);
-    expect(setActiveServerFunction).toHaveBeenCalledWith(undefined);
+    expect(onClose).toHaveBeenCalled();
   });
 
   it("correctly renders disabled insights", async () => {

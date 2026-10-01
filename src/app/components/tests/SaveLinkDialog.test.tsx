@@ -56,7 +56,7 @@ describe("SaveLinkDialog", () => {
         this.returnValue = returnValue;
       };
     }
-    (useLinks as jest.Mock).mockResolvedValue([[], jest.fn()]);
+    (useLinks as jest.Mock).mockReturnValue([[], jest.fn()]);
     (getSource as jest.Mock).mockResolvedValue({ blacklisted: false });
     (parseBaseUrl as jest.Mock).mockReturnValue("");
     (getPageTitle as jest.Mock).mockResolvedValue("");
@@ -76,13 +76,16 @@ describe("SaveLinkDialog", () => {
         id="saveLinkDialog"
         isOpen={true}
         onClose={jest.fn()}
+        onSubmit={mockSetServerFunctionInput}
         potentialInsightsFromServer={mockPotentialInsights}
         // setServerFunctionInput={mockSetServerFunctionInput}
         // setActiveServerFunction={jest.fn()}
       />,
       { container: document.getElementById("root")! },
     );
-    expect(screen.getByText("Save Link to Inspect")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Save link" }),
+    ).toBeInTheDocument();
   });
 
   describe("opening and closing the dialog", () => {
@@ -92,6 +95,7 @@ describe("SaveLinkDialog", () => {
           id="saveLinkDialog"
           isOpen={true}
           onClose={jest.fn()}
+          onSubmit={mockSetServerFunctionInput}
           potentialInsightsFromServer={mockPotentialInsights}
           // setServerFunctionInput={mockSetServerFunctionInput}
           // setActiveServerFunction={jest.fn()}
@@ -99,10 +103,10 @@ describe("SaveLinkDialog", () => {
         { container: document.getElementById("root")! },
       );
 
-      const input = screen.getByPlaceholderText("Link URL...");
+      const input = screen.getByPlaceholderText("https://example.com/article");
       fireEvent.change(input, { target: { value: "invalid-url" } });
 
-      const submitButton = screen.getByText("Submit");
+      const submitButton = screen.getByRole("button", { name: "Save link" });
       await expect(submitButton).toBeDisabled();
 
       const cancelButton = screen.getByText("Cancel");
@@ -118,6 +122,7 @@ describe("SaveLinkDialog", () => {
           id="saveLinkDialog"
           isOpen={true}
           onClose={jest.fn()}
+          onSubmit={mockSetServerFunctionInput}
           potentialInsightsFromServer={mockPotentialInsights}
           // setServerFunctionInput={mockSetServerFunctionInput}
           // setActiveServerFunction={jest.fn()}
@@ -125,7 +130,7 @@ describe("SaveLinkDialog", () => {
         { container: document.getElementById("root")! },
       );
 
-      const input = screen.getByPlaceholderText("Link URL...");
+      const input = screen.getByPlaceholderText("https://example.com/article");
       fireEvent.change(input, { target: { value: "http://example.com" } });
 
       await waitFor(() =>
@@ -138,7 +143,7 @@ describe("SaveLinkDialog", () => {
       await userEvent.click(insight1);
       expect((checkbox as HTMLInputElement).checked).toBe(true);
 
-      const submitButton = screen.getByText("Submit");
+      const submitButton = screen.getByRole("button", { name: "Save link" });
       await expect(submitButton).toBeEnabled();
       await userEvent.click(submitButton);
 
@@ -152,6 +157,7 @@ describe("SaveLinkDialog", () => {
           id="saveLinkDialog"
           isOpen={true}
           onClose={jest.fn()}
+          onSubmit={mockSetServerFunctionInput}
           potentialInsightsFromServer={mockPotentialInsights}
           // setServerFunctionInput={mockSetServerFunctionInput}
           // setActiveServerFunction={jest.fn()}
@@ -159,13 +165,13 @@ describe("SaveLinkDialog", () => {
         { container: document.getElementById("root")! },
       );
 
-      const input = screen.getByPlaceholderText("Link URL...");
+      const input = screen.getByPlaceholderText("https://example.com/article");
       fireEvent.change(input, { target: { value: "http://example.com" } });
 
-      const input2 = screen.getByPlaceholderText("New insight name");
+      const input2 = screen.getByPlaceholderText("Name for a new insight");
       fireEvent.change(input2, { target: { value: "New Insight" } });
 
-      const submitButton = screen.getByText("Submit");
+      const submitButton = screen.getByRole("button", { name: "Save link" });
       await expect(submitButton).toBeEnabled();
       await userEvent.click(submitButton);
 
@@ -180,6 +186,7 @@ describe("SaveLinkDialog", () => {
         id="saveLinkDialog"
         isOpen={true}
         onClose={jest.fn()}
+        onSubmit={mockSetServerFunctionInput}
         potentialInsightsFromServer={mockPotentialInsights}
         // setServerFunctionInput={mockSetServerFunctionInput}
         // setActiveServerFunction={jest.fn()}
@@ -190,7 +197,7 @@ describe("SaveLinkDialog", () => {
     const title = "Example Page Title";
     (getPageTitle as jest.Mock).mockResolvedValueOnce(title);
 
-    const input = screen.getByPlaceholderText("Link URL...");
+    const input = screen.getByPlaceholderText("https://example.com/article");
     fireEvent.change(input, { target: { value: "http://example.com" } });
 
     await waitFor(() => {
@@ -208,6 +215,7 @@ describe("SaveLinkDialog", () => {
         id="saveLinkDialog"
         isOpen={true}
         onClose={jest.fn()}
+        onSubmit={mockSetServerFunctionInput}
         potentialInsightsFromServer={mockPotentialInsights}
         // setServerFunctionInput={mockSetServerFunctionInput}
         // setActiveServerFunction={mockSetActiveServerFunction}
@@ -215,7 +223,7 @@ describe("SaveLinkDialog", () => {
       { container: document.getElementById("root")! },
     );
 
-    const input = getByPlaceholderText("Link URL...");
+    const input = getByPlaceholderText("https://example.com/article");
     fireEvent.change(input, { target: { value: "http://example.com" } });
 
     const cancelButton = getByText("Cancel");
@@ -230,6 +238,7 @@ describe("SaveLinkDialog", () => {
         id="saveLinkDialog"
         isOpen={true}
         onClose={jest.fn()}
+        onSubmit={mockSetServerFunctionInput}
         potentialInsightsFromServer={mockPotentialInsights}
         // setServerFunctionInput={mockSetServerFunctionInput}
         // setActiveServerFunction={jest.fn()}
@@ -237,10 +246,10 @@ describe("SaveLinkDialog", () => {
       { container: document.getElementById("root")! },
     );
 
-    const input = screen.getByPlaceholderText("Link URL...");
-    userEvent.type(input, "http://example.com");
+    const input = screen.getByPlaceholderText("https://example.com/article");
+    await userEvent.type(input, "http://example.com");
 
-    const submitButton = screen.getByText("Submit");
+    const submitButton = screen.getByRole("button", { name: "Save link" });
     await expect(submitButton).toBeDisabled();
   });
 
@@ -276,7 +285,7 @@ describe("SaveLinkDialog", () => {
         { container: document.getElementById("root")! },
       );
 
-      const input = screen.getByPlaceholderText("Link URL...");
+      const input = screen.getByPlaceholderText("https://example.com/article");
 
       // Use act to wrap the state update
       await act(async () => {
@@ -296,7 +305,7 @@ describe("SaveLinkDialog", () => {
         { timeout: 3000 },
       );
 
-      const submitButton = screen.getByText("Submit");
+      const submitButton = screen.getByRole("button", { name: "Save link" });
       expect(submitButton).toBeDisabled();
     });
   });
@@ -307,6 +316,7 @@ describe("SaveLinkDialog", () => {
         id="saveLinkDialog"
         isOpen={true}
         onClose={jest.fn()}
+        onSubmit={mockSetServerFunctionInput}
         potentialInsightsFromServer={mockPotentialInsights}
         // setServerFunctionInput={mockSetServerFunctionInput}
         // setActiveServerFunction={jest.fn()}
@@ -314,7 +324,7 @@ describe("SaveLinkDialog", () => {
       { container: document.getElementById("root")! },
     );
 
-    const input = screen.getByPlaceholderText("Link URL...");
+    const input = screen.getByPlaceholderText("https://example.com/article");
     fireEvent.change(input, { target: { value: "http://example.com" } });
 
     await waitFor(() =>
@@ -327,7 +337,7 @@ describe("SaveLinkDialog", () => {
     await userEvent.click(insight1);
     expect((checkbox as HTMLInputElement).checked).toBeTruthy();
 
-    const submitButton = screen.getByText("Submit");
+    const submitButton = screen.getByRole("button", { name: "Save link" });
     await expect(submitButton).toBeEnabled();
     await userEvent.click(submitButton);
 
@@ -344,6 +354,7 @@ describe("SaveLinkDialog", () => {
         id="saveLinkDialog"
         isOpen={true}
         onClose={jest.fn()}
+        onSubmit={mockSetServerFunctionInput}
         potentialInsightsFromServer={mockPotentialInsights}
         // setServerFunctionInput={mockSetServerFunctionInput}
         // setActiveServerFunction={mockSetActiveServerFunction}
@@ -351,7 +362,7 @@ describe("SaveLinkDialog", () => {
       { container: document.getElementById("root")! },
     );
 
-    const input = screen.getByPlaceholderText("Link URL...");
+    const input = screen.getByPlaceholderText("https://example.com/article");
     fireEvent.change(input, { target: { value: "http://example.com" } });
 
     await waitFor(() =>
@@ -371,7 +382,7 @@ describe("SaveLinkDialog", () => {
     await userEvent.click(insight2);
     expect((checkbox2 as HTMLInputElement).checked).toBeTruthy();
 
-    const submitButton = screen.getByText("Submit");
+    const submitButton = screen.getByRole("button", { name: "Save link" });
     await expect(submitButton).toBeEnabled();
     await userEvent.click(submitButton);
 
@@ -390,6 +401,7 @@ describe("SaveLinkDialog", () => {
         id="saveLinkDialog"
         isOpen={true}
         onClose={jest.fn()}
+        onSubmit={mockSetServerFunctionInput}
         potentialInsightsFromServer={mockPotentialInsights}
         // setServerFunctionInput={mockSetServerFunctionInput}
         // setActiveServerFunction={jest.fn()}
@@ -397,13 +409,13 @@ describe("SaveLinkDialog", () => {
       { container: document.getElementById("root")! },
     );
 
-    const input = screen.getByPlaceholderText("Link URL...");
+    const input = screen.getByPlaceholderText("https://example.com/article");
     fireEvent.change(input, { target: { value: "http://example.com" } });
 
-    const input2 = screen.getByPlaceholderText("New insight name");
+    const input2 = screen.getByPlaceholderText("Name for a new insight");
     fireEvent.change(input2, { target: { value: newInsightName } });
 
-    const submitButton = screen.getByText("Submit");
+    const submitButton = screen.getByRole("button", { name: "Save link" });
     await expect(submitButton).toBeEnabled();
     await userEvent.click(submitButton);
     expect(mockSetServerFunctionInput).toHaveBeenCalledWith({
@@ -419,6 +431,7 @@ describe("SaveLinkDialog", () => {
         id="saveLinkDialog"
         isOpen={true}
         onClose={jest.fn()}
+        onSubmit={mockSetServerFunctionInput}
         potentialInsightsFromServer={mockPotentialInsights}
         // setServerFunctionInput={mockSetServerFunctionInput}
         // setActiveServerFunction={jest.fn()}

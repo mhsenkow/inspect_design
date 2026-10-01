@@ -5,6 +5,7 @@ import { cookies, headers } from "next/headers";
 import { proxy, ANONYMOUS_REGEXES } from "./proxy";
 import { NextRequest } from "next/server";
 import { NextURL } from "next/dist/server/web/next-url";
+import { verifyTokenAndGetUser } from "./proxy/functions";
 
 jest.mock("next/headers");
 jest.mock("./proxy/functions");
@@ -22,6 +23,7 @@ describe("proxy", () => {
     };
     (cookies as jest.Mock).mockResolvedValue(new Map());
     (headers as jest.Mock).mockResolvedValue(new Map());
+    (verifyTokenAndGetUser as jest.Mock).mockResolvedValue(null);
   });
 
   it("should allow anonymous access to paths matching ANONYMOUS_REGEXES", async () => {
@@ -82,7 +84,10 @@ describe("proxy", () => {
     (headers as jest.Mock).mockResolvedValue(
       new Map([["x-access-token", token]]),
     );
-    // (decryptToken as jest.Mock).mockReturnValue({ id: 1, name: "Test User" });
+    (verifyTokenAndGetUser as jest.Mock).mockResolvedValue({
+      id: 1,
+      name: "Test User",
+    });
 
     const response = await proxy(req as NextRequest);
     expect(response.headers.get("x-authUser")).toBe(

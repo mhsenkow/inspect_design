@@ -15,9 +15,9 @@ jest.mock("../../functions", () => ({
 
 jest.mock("../models/insight_links", () => {
   const mockQueryBuilder = {
-    insert: jest.fn().mockReturnThis(),
-    withGraphFetched: jest.fn().mockReturnThis(),
-    then: jest.fn(),
+    insert: jest.fn(),
+    findByIds: jest.fn().mockReturnThis(),
+    withGraphFetched: jest.fn(),
   };
 
   const MockInsightModelConstructor = jest.fn();
@@ -32,27 +32,25 @@ jest.mock("../models/insight_links", () => {
 });
 
 describe("POST /api/children", () => {
-  const mockAuthUser = { user_id: 1, name: "Test User" };
+  const mockAuthUser = { id: 1, name: "Test User" };
   const mockChildren = [
-    { child_id: 1, parent_id: 2 },
-    { child_id: 3, parent_id: 4 },
+    { id: 11, child_id: 1, parent_id: 2 },
+    { id: 12, child_id: 3, parent_id: 4 },
   ];
+  const hydratedChildren = mockChildren.map((cl) => ({
+    ...cl,
+    childInsight: { evidence: [] },
+    parentInsight: {},
+  }));
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (InsightLinkModel.query().insert as jest.Mock).mockReturnThis();
-    (InsightLinkModel.query().withGraphFetched as jest.Mock).mockReturnThis();
-    (InsightLinkModel.query().then as jest.Mock).mockImplementation(
-      (callback) =>
-        Promise.resolve(
-          callback(
-            mockChildren.map((cl) => ({
-              ...cl,
-              childInsight: { evidence: [] },
-              parentInsight: {},
-            })),
-          ),
-        ),
+    (InsightLinkModel.query().insert as jest.Mock).mockResolvedValue(
+      mockChildren,
+    );
+    (InsightLinkModel.query().findByIds as jest.Mock).mockReturnThis();
+    (InsightLinkModel.query().withGraphFetched as jest.Mock).mockResolvedValue(
+      hydratedChildren,
     );
     (getAuthUser as jest.Mock).mockResolvedValue(mockAuthUser);
   });
@@ -111,30 +109,28 @@ describe("POST /api/children", () => {
 
   // eslint-disable-next-line jest/no-disabled-tests -- can't figure out how to throw ForeignKeyViolationError
   it.skip("returns 400 on ForeignKeyViolationError", async () => {
-    (InsightLinkModel.query().then as jest.Mock).mockReset();
-    (InsightLinkModel.query().then as jest.Mock).mockRejectedValueOnce({
-      nativeError: {
-        message: "FK error",
-      } as unknown as typeof ForeignKeyViolationError,
-    });
+    const error = Object.create(ForeignKeyViolationError.prototype);
+    error.message = "FK error";
+    (InsightLinkModel.query().insert as jest.Mock).mockRejectedValueOnce(error);
     const req = {
       json: jest.fn().mockResolvedValue({ children: mockChildren }),
     } as any;
     const res = await POST(req);
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(409);
     expect(await res.json()).toEqual({
-      statusText: "Either the child_id or parent_id is invalid",
+      statusText: "Either a child_id or parent_id is invalid",
     });
   });
 
-  it("throws error for other database errors", async () => {
-    (InsightLinkModel.query().then as jest.Mock).mockReset();
-    (InsightLinkModel.query().then as jest.Mock).mockImplementationOnce(() => {
-      throw new Error("DB error");
-    });
+  it("returns 500 for other database errors", async () => {
+    (InsightLinkModel.query().insert as jest.Mock).mockRejectedValueOnce(
+      new Error("DB error"),
+    );
     const req = {
       json: jest.fn().mockResolvedValue({ children: mockChildren }),
     } as any;
-    await expect(POST(req)).rejects.toThrow("DB error");
+    const res = await POST(req);
+    expect(res.status).toBe(500);
+    expect(await res.json()).toEqual({ statusText: "DB error" });
   });
 });
