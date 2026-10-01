@@ -6,7 +6,6 @@ import bcrypt from "bcryptjs";
 import { POST } from "./route";
 import { createSession } from "../../../proxy/functions";
 import { NextRequest } from "next/server";
-import { UserLibSqlModel, UserPostgresModel } from "../models/users";
 
 jest.mock("bcryptjs");
 jest.mock("../../../proxy/functions");

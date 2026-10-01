@@ -34,9 +34,8 @@ export async function POST(
         }));
       if (childrenToInsert.length > 0) {
         try {
-          const insertedLinks = await InsightLinkModel.query().insert(
-            childrenToInsert,
-          );
+          const insertedLinks =
+            await InsightLinkModel.query().insert(childrenToInsert);
           const insertedIds = (
             Array.isArray(insertedLinks) ? insertedLinks : [insertedLinks]
           )
@@ -58,7 +57,9 @@ export async function POST(
           }
           console.error("Other database error:", err);
           const message =
-            err instanceof Error ? err.message : "Unable to create insight link";
+            err instanceof Error
+              ? err.message
+              : "Unable to create insight link";
           // Unique parent/child pairs (u_cp) and other DB failures
           const isUnique =
             typeof message === "string" &&

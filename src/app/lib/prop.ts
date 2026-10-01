@@ -1,5 +1,5 @@
 /** Objection snakeCaseMappers may serialize either snake_case or camelCase. */
-export const prop = <T,>(
+export const prop = <T>(
   obj: unknown,
   snake: string,
   camel: string,

@@ -94,11 +94,15 @@ export const deleteComment = async (
   if (response.ok) {
     return true;
   }
-  const body = await readResponseJson<{ message?: string; statusText?: string }>(
-    response,
-  );
+  const body = await readResponseJson<{
+    message?: string;
+    statusText?: string;
+  }>(response);
   throw new Error(
-    errorMessageFromBody(body, response.statusText || "Unable to delete comment."),
+    errorMessageFromBody(
+      body,
+      response.statusText || "Unable to delete comment.",
+    ),
   );
 };
 

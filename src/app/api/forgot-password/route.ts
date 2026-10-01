@@ -19,10 +19,7 @@ export async function POST(req: ForgotPasswordRequest): Promise<NextResponse> {
   const normalizedEmail = email?.toLocaleLowerCase().trim();
 
   if (!normalizedEmail) {
-    return NextResponse.json(
-      { message: "Email is required" },
-      { status: 400 },
-    );
+    return NextResponse.json({ message: "Email is required" }, { status: 400 });
   }
 
   const user = (await UserLibSqlModel.query().findOne({

@@ -23,7 +23,9 @@ describe("FeedbackInputElement", () => {
         afterSubmit={mockAfterSubmit}
       />,
     );
-    expect(screen.getByText("Please provide your feedback")).toBeInTheDocument();
+    expect(
+      screen.getByText("Please provide your feedback"),
+    ).toBeInTheDocument();
   });
 
   it("renders reaction options when actionType is 'reaction'", () => {

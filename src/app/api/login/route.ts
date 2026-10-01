@@ -47,7 +47,10 @@ export async function POST(
   }
   const user = resultRows[0] as UserLibSqlModel;
 
-  if (user?.password && (await bcrypt.compare(trimmedPassword, user.password))) {
+  if (
+    user?.password &&
+    (await bcrypt.compare(trimmedPassword, user.password))
+  ) {
     const token = await createSession(user);
 
     return NextResponse.json({

@@ -2,13 +2,13 @@
 
 import styles from "../../../styles/components/client-side-page.module.css";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import moment from "moment";
 
 import {
   Fact,
   FactComment,
   FactReaction,
-  FLVResponse,
   Insight,
   InsightEvidence,
   InsightLink,
@@ -263,14 +263,17 @@ const ClientSidePage = ({
             if (childLinks.length) {
               const existing = new Set(
                 nextChildren
-                  .map((c) => linkId(c) ?? `${linkParentId(c)}-${linkChildId(c)}`)
+                  .map(
+                    (c) => linkId(c) ?? `${linkParentId(c)}-${linkChildId(c)}`,
+                  )
                   .filter(Boolean),
               );
               nextChildren = [
                 ...nextChildren,
                 ...childLinks.filter((link) => {
                   const key =
-                    linkId(link) ?? `${linkParentId(link)}-${linkChildId(link)}`;
+                    linkId(link) ??
+                    `${linkParentId(link)}-${linkChildId(link)}`;
                   return key != null && !existing.has(key);
                 }),
               ];
@@ -279,14 +282,17 @@ const ClientSidePage = ({
             if (parentLinks.length) {
               const existing = new Set(
                 nextParents
-                  .map((p) => linkId(p) ?? `${linkParentId(p)}-${linkChildId(p)}`)
+                  .map(
+                    (p) => linkId(p) ?? `${linkParentId(p)}-${linkChildId(p)}`,
+                  )
                   .filter(Boolean),
               );
               nextParents = [
                 ...nextParents,
                 ...parentLinks.filter((link) => {
                   const key =
-                    linkId(link) ?? `${linkParentId(link)}-${linkChildId(link)}`;
+                    linkId(link) ??
+                    `${linkParentId(link)}-${linkChildId(link)}`;
                   return key != null && !existing.has(key);
                 }),
               ];
@@ -319,7 +325,10 @@ const ClientSidePage = ({
         let message = "Action failed";
         if (error instanceof Error && error.message) {
           message = error.message;
-        } else if (typeof Response !== "undefined" && error instanceof Response) {
+        } else if (
+          typeof Response !== "undefined" &&
+          error instanceof Response
+        ) {
           message = `Request failed (${error.status})`;
         } else if (typeof error === "string" && error) {
           message = error;
@@ -334,18 +343,16 @@ const ClientSidePage = ({
   return (
     <div
       className={`${styles.pageContainer} ${
-        isOwner
-          ? styles.pageContainerOwner
-          : ""
+        isOwner ? styles.pageContainerOwner : ""
       }`}
     >
       <div className={styles.mainContent}>
         <CurrentUserContext.Provider value={currentUser}>
           <ServerActionContext.Provider value={{ executeAction }}>
             <div className={styles.stickyHeader}>
-              <a href="/insights" className={styles.backLink}>
+              <Link href="/insights" className={styles.backLink}>
                 Insights
-              </a>
+              </Link>
               <header className={styles.pageHeader}>
                 <div className={styles.titleRow}>
                   <EditableText
@@ -402,7 +409,10 @@ const ClientSidePage = ({
                         className={styles.textAction}
                         onClick={async () => {
                           if (token && confirm("Publish this insight?")) {
-                            await publishInsights({ insights: [insight] }, token);
+                            await publishInsights(
+                              { insights: [insight] },
+                              token,
+                            );
                             setInsight({ ...insight, is_public: true });
                           }
                         }}
@@ -423,16 +433,121 @@ const ClientSidePage = ({
             </div>
 
             <div className={styles.scrollBody}>
-            {/* Parent Insights Section */}
-            {(loggedIn || insight.parents.length > 0) && (
+              {/* Parent Insights Section */}
+              {(loggedIn || insight.parents.length > 0) && (
+                <section className={styles.section}>
+                  <div className={styles.sectionHeader}>
+                    <div className={styles.sectionHeaderRow}>
+                      <div>
+                        <h2 className={styles.sectionTitle}>Parents</h2>
+                        <p className={styles.sectionSubtitle}>
+                          {insight.parents.length > 0
+                            ? `${insight.parents.length}`
+                            : "None"}
+                        </p>
+                      </div>
+                      {isOwner && (
+                        <div className={styles.sectionActions}>
+                          <button
+                            onClick={() => {
+                              setIsAddParentInsightsDialogOpen(true);
+                            }}
+                            className={styles.addButton}
+                            aria-label="Add Parent Insight"
+                            title="Add Parent Insight"
+                          >
+                            <span className={styles.addButtonIcon}>+</span>
+                            <span className={styles.addButtonText}>Add</span>
+                          </button>
+                          {selectedParentInsights.length > 0 && (
+                            <button
+                              onClick={() => {
+                                if (
+                                  confirm(
+                                    "Are you sure you want to remove these parent relationships?",
+                                  )
+                                ) {
+                                  executeAction(
+                                    doDeleteParentInsights,
+                                    selectedParentInsights,
+                                  );
+                                }
+                              }}
+                              className={styles.removeButton}
+                              aria-label="Remove Selected Parent Insights"
+                              title="Remove Selected Parent Insights"
+                            >
+                              <span className={styles.addButtonText}>
+                                Remove
+                              </span>
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div
+                    className={`${styles.sectionBody} ${
+                      insight.parents.length > 0
+                        ? styles.sectionBodyScrollable
+                        : ""
+                    }`}
+                  >
+                    {insight.parents.length > 0 ? (
+                      <FactsDataContext.Provider
+                        value={{
+                          data:
+                            insight.parents.map((p) => ({
+                              ...p.parentInsight,
+                              ...p,
+                            })) ?? [],
+                          setData: (setStateActionOrFacts) => {
+                            if (typeof setStateActionOrFacts == "function") {
+                              setInsight({
+                                ...insight,
+                                parents: setStateActionOrFacts(
+                                  insight.parents,
+                                ) as InsightLink[],
+                              });
+                            } else {
+                              setInsight({
+                                ...insight,
+                                parents: setStateActionOrFacts as InsightLink[],
+                              });
+                            }
+                          },
+                        }}
+                      >
+                        <FactsListView
+                          factName="parentInsights"
+                          selectedFacts={selectedParentInsights}
+                          setSelectedFacts={
+                            setSelectedParentInsights as React.Dispatch<
+                              React.SetStateAction<Fact[]>
+                            >
+                          }
+                          selectedActions={[]}
+                          hideHead={true}
+                        />
+                      </FactsDataContext.Provider>
+                    ) : (
+                      <p className={styles.sectionBodyEmpty}>
+                        No parent insights
+                      </p>
+                    )}
+                  </div>
+                </section>
+              )}
+
+              {/* Child Insights Section */}
               <section className={styles.section}>
                 <div className={styles.sectionHeader}>
                   <div className={styles.sectionHeaderRow}>
                     <div>
-                      <h2 className={styles.sectionTitle}>Parents</h2>
+                      <h2 className={styles.sectionTitle}>Children</h2>
                       <p className={styles.sectionSubtitle}>
-                        {insight.parents.length > 0
-                          ? `${insight.parents.length}`
+                        {insight.children.length > 0
+                          ? `${insight.children.length}`
                           : "None"}
                       </p>
                     </div>
@@ -440,32 +555,32 @@ const ClientSidePage = ({
                       <div className={styles.sectionActions}>
                         <button
                           onClick={() => {
-                            setIsAddParentInsightsDialogOpen(true);
+                            setIsAddChildInsightsDialogOpen(true);
                           }}
                           className={styles.addButton}
-                          aria-label="Add Parent Insight"
-                          title="Add Parent Insight"
+                          aria-label="Add Child Insight"
+                          title="Add Child Insight"
                         >
                           <span className={styles.addButtonIcon}>+</span>
                           <span className={styles.addButtonText}>Add</span>
                         </button>
-                        {selectedParentInsights.length > 0 && (
+                        {selectedChildInsights.length > 0 && (
                           <button
                             onClick={() => {
                               if (
                                 confirm(
-                                  "Are you sure you want to remove these parent relationships?",
+                                  "Are you sure you want to remove these child relationships?",
                                 )
                               ) {
                                 executeAction(
-                                  doDeleteParentInsights,
-                                  selectedParentInsights,
+                                  doDeleteInsightChildren,
+                                  selectedChildInsights,
                                 );
                               }
                             }}
                             className={styles.removeButton}
-                            aria-label="Remove Selected Parent Insights"
-                            title="Remove Selected Parent Insights"
+                            aria-label="Remove Selected Child Insights"
+                            title="Remove Selected Child Insights"
                           >
                             <span className={styles.addButtonText}>Remove</span>
                           </button>
@@ -476,410 +591,329 @@ const ClientSidePage = ({
                 </div>
                 <div
                   className={`${styles.sectionBody} ${
-                    insight.parents.length > 0 ? styles.sectionBodyScrollable : ""
+                    insight.children.length > 0
+                      ? styles.sectionBodyScrollable
+                      : ""
                   }`}
                 >
-                  {insight.parents.length > 0 ? (
+                  {insight.children.length > 0 ? (
                     <FactsDataContext.Provider
                       value={{
-                        data:
-                          insight.parents.map((p) => ({
-                            ...p.parentInsight,
-                            ...p,
-                          })) ?? [],
+                        data: insight.children.map((c) => ({
+                          ...c.childInsight,
+                          ...c,
+                        })),
                         setData: (setStateActionOrFacts) => {
                           if (typeof setStateActionOrFacts == "function") {
                             setInsight({
                               ...insight,
-                              parents: setStateActionOrFacts(
-                                insight.parents,
+                              children: setStateActionOrFacts(
+                                insight.children,
                               ) as InsightLink[],
                             });
                           } else {
                             setInsight({
                               ...insight,
-                              parents: setStateActionOrFacts as InsightLink[],
+                              children: setStateActionOrFacts as InsightLink[],
                             });
                           }
                         },
                       }}
                     >
                       <FactsListView
-                        factName="parentInsights"
-                        selectedFacts={selectedParentInsights}
+                        factName="childInsights"
+                        selectedFacts={selectedChildInsights}
                         setSelectedFacts={
-                          setSelectedParentInsights as React.Dispatch<
+                          setSelectedChildInsights as React.Dispatch<
                             React.SetStateAction<Fact[]>
                           >
                         }
                         selectedActions={[]}
-                        hideHead={true}
+                        columns={[
+                          {
+                            name: "Citations",
+                            dataColumn: "childInsight.evidence",
+                            display: (insightLink: Fact | InsightLink) => (
+                              <span className={styles.metaChip}>
+                                {insightLink.childInsight.directEvidenceCount ??
+                                  0}
+                              </span>
+                            ),
+                          },
+                          {
+                            name: "Public",
+                            dataColumn: "childInsight.is_public",
+                            display: (insightRow: Fact | Insight) => (
+                              <span>
+                                {prop<boolean>(
+                                  insightRow,
+                                  "is_public",
+                                  "isPublic",
+                                )
+                                  ? "Yes"
+                                  : ""}
+                              </span>
+                            ),
+                          },
+                        ]}
                       />
                     </FactsDataContext.Provider>
                   ) : (
-                    <p className={styles.sectionBodyEmpty}>No parent insights</p>
+                    <p className={styles.sectionBodyEmpty}>No child insights</p>
                   )}
                 </div>
               </section>
-            )}
 
-            {/* Child Insights Section */}
-            <section className={styles.section}>
-              <div className={styles.sectionHeader}>
-                <div className={styles.sectionHeaderRow}>
-                  <div>
-                    <h2 className={styles.sectionTitle}>Children</h2>
-                    <p className={styles.sectionSubtitle}>
-                      {insight.children.length > 0
-                        ? `${insight.children.length}`
-                        : "None"}
-                    </p>
-                  </div>
-                  {isOwner && (
-                    <div className={styles.sectionActions}>
-                      <button
-                        onClick={() => {
-                          setIsAddChildInsightsDialogOpen(true);
-                        }}
-                        className={styles.addButton}
-                        aria-label="Add Child Insight"
-                        title="Add Child Insight"
-                      >
-                        <span className={styles.addButtonIcon}>+</span>
-                        <span className={styles.addButtonText}>Add</span>
-                      </button>
-                      {selectedChildInsights.length > 0 && (
+              {/* Evidence Section */}
+              <section className={styles.section}>
+                <div className={styles.sectionHeader}>
+                  <div className={styles.sectionHeaderRow}>
+                    <div>
+                      <h2 className={styles.sectionTitle}>Evidence</h2>
+                      <p className={styles.sectionSubtitle}>
+                        {liveSnippetData.length > 0
+                          ? `${liveSnippetData.length}`
+                          : "None"}
+                      </p>
+                    </div>
+                    {isOwner && (
+                      <div className={styles.sectionActions}>
                         <button
                           onClick={() => {
-                            if (
-                              confirm(
-                                "Are you sure you want to remove these child relationships?",
-                              )
-                            ) {
-                              executeAction(
-                                doDeleteInsightChildren,
-                                selectedChildInsights,
-                              );
-                            }
+                            setIsAddLinksAsEvidenceDialogOpen(true);
                           }}
-                          className={styles.removeButton}
-                          aria-label="Remove Selected Child Insights"
-                          title="Remove Selected Child Insights"
+                          className={styles.addButton}
+                          aria-label="Add Evidence"
+                          title="Add Evidence"
                         >
-                          <span className={styles.addButtonText}>Remove</span>
+                          <span className={styles.addButtonIcon}>+</span>
+                          <span className={styles.addButtonText}>Add</span>
                         </button>
-                      )}
-                    </div>
+                        {selectedCitations.length > 0 && (
+                          <button
+                            onClick={() => {
+                              if (
+                                confirm(
+                                  "Are you sure you want to remove these citations?",
+                                )
+                              ) {
+                                executeAction(doDeleteInsightCitations, {
+                                  citations: selectedCitations,
+                                });
+                              }
+                            }}
+                            className={styles.removeButton}
+                            aria-label="Remove Selected Citations"
+                            title="Remove Selected Citations"
+                          >
+                            <span className={styles.addButtonText}>Remove</span>
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div
+                  className={`${styles.sectionBody} ${
+                    liveSnippetData.length > 0
+                      ? styles.sectionBodyScrollable
+                      : ""
+                  }`}
+                >
+                  {liveSnippetData.length > 0 ? (
+                    <InfiniteScrollLoader
+                      data={liveSnippetData}
+                      setData={
+                        setLiveSnippetData as React.Dispatch<
+                          React.SetStateAction<Fact[] | undefined>
+                        >
+                      }
+                      limit={20}
+                      getDataFunctionParams={{ insightUid: insight.uid ?? "" }}
+                      getDataFunction={async (
+                        offset,
+                        token,
+                        getDataFunctionParams,
+                      ) => {
+                        if (getDataFunctionParams) {
+                          const response = await fetch(
+                            `/api/insights/${getDataFunctionParams.insightUid}?offset=${offset}`,
+                            {
+                              method: "GET",
+                              headers: {
+                                "Content-Type": "application/json",
+                                "x-access-token": token,
+                              },
+                            },
+                          );
+                          const json = (await response.json()) as Insight;
+                          return await json.citations;
+                        }
+                        return Promise.resolve([]);
+                      }}
+                    >
+                      <FactsListView
+                        factName="snippet"
+                        selectedFacts={selectedCitations}
+                        setSelectedFacts={
+                          setSelectedCitations as React.Dispatch<
+                            React.SetStateAction<Fact[]>
+                          >
+                        }
+                        selectedActions={[]}
+                      />
+                    </InfiniteScrollLoader>
+                  ) : (
+                    <p className={styles.sectionBodyEmpty}>No evidence yet</p>
                   )}
                 </div>
-              </div>
-              <div
-                className={`${styles.sectionBody} ${
-                  insight.children.length > 0 ? styles.sectionBodyScrollable : ""
-                }`}
-              >
-                {insight.children.length > 0 ? (
-                  <FactsDataContext.Provider
-                    value={{
-                      data: insight.children.map((c) => ({
-                        ...c.childInsight,
-                        ...c,
-                      })),
-                      setData: (setStateActionOrFacts) => {
-                        if (typeof setStateActionOrFacts == "function") {
+              </section>
+
+              {/* Feedback Section */}
+              <section className={styles.section}>
+                <div className={styles.sectionHeader}>
+                  <div className={styles.sectionHeaderRow}>
+                    <div>
+                      <h2 className={styles.sectionTitle}>Feedback</h2>
+                    </div>
+                    <div className={styles.sectionActions}>
+                      <button
+                        type="button"
+                        className={styles.addButton}
+                        aria-label="React"
+                        title="React"
+                        onClick={() =>
+                          currentUser
+                            ? setIsEditingReaction(true)
+                            : confirmAndRegister()
+                        }
+                      >
+                        <span className={styles.addButtonIcon} aria-hidden>
+                          😲
+                        </span>
+                        <span className={styles.addButtonText}>React</span>
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.addButton}
+                        aria-label="Comment"
+                        title="Comment"
+                        onClick={() =>
+                          currentUser
+                            ? setIsEditingComment(true)
+                            : confirmAndRegister()
+                        }
+                      >
+                        <span className={styles.addButtonIcon} aria-hidden>
+                          💬
+                        </span>
+                        <span className={styles.addButtonText}>Comment</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className={`${styles.sectionBody} ${styles.sectionBodyScrollable}`}
+                >
+                  {currentUser && isEditingReaction && (
+                    <FeedbackInputElement
+                      actionType="reaction"
+                      submitFunc={(reaction) => {
+                        if (token) {
+                          return submitReaction(
+                            { reaction, insight_id: insight.id },
+                            token,
+                          );
+                        }
+                        return Promise.resolve();
+                      }}
+                      directions="Pick a reaction"
+                      afterSubmit={(newObject) => {
+                        if (newObject) {
+                          const existingReaction = insight.reactions?.find(
+                            (r) => {
+                              const userId = prop<number>(
+                                r,
+                                "user_id",
+                                "userId",
+                              );
+                              const insightId = prop<number>(
+                                r,
+                                "insight_id",
+                                "insightId",
+                              );
+                              return (
+                                userId == currentUser?.id &&
+                                insightId == insight.id
+                              );
+                            },
+                          );
+                          const existingReactions = insight.reactions?.filter(
+                            (r) => r.id !== existingReaction?.id,
+                          );
                           setInsight({
                             ...insight,
-                            children: setStateActionOrFacts(
-                              insight.children,
-                            ) as InsightLink[],
-                          });
-                        } else {
-                          setInsight({
-                            ...insight,
-                            children: setStateActionOrFacts as InsightLink[],
+                            reactions: [
+                              ...(existingReactions ?? []),
+                              newObject as FactReaction,
+                            ],
                           });
                         }
-                      },
-                    }}
-                  >
-                    <FactsListView
-                      factName="childInsights"
-                      selectedFacts={selectedChildInsights}
-                      setSelectedFacts={
-                        setSelectedChildInsights as React.Dispatch<
-                          React.SetStateAction<Fact[]>
-                        >
-                      }
-                      selectedActions={[]}
-                      columns={[
-                        {
-                          name: "Citations",
-                          dataColumn: "childInsight.evidence",
-                          display: (insightLink: Fact | InsightLink) => (
-                            <span className={styles.metaChip}>
-                              {insightLink.childInsight.directEvidenceCount ?? 0}
-                            </span>
-                          ),
-                        },
-                        {
-                          name: "Public",
-                          dataColumn: "childInsight.is_public",
-                          display: (insightRow: Fact | Insight) => (
-                            <span>
-                              {prop<boolean>(insightRow, "is_public", "isPublic")
-                                ? "Yes"
-                                : ""}
-                            </span>
-                          ),
-                        },
-                      ]}
+                      }}
+                      closeFunc={() => setIsEditingReaction(false)}
                     />
-                  </FactsDataContext.Provider>
-                ) : (
-                  <p className={styles.sectionBodyEmpty}>No child insights</p>
-                )}
-              </div>
-            </section>
-
-            {/* Evidence Section */}
-            <section className={styles.section}>
-              <div className={styles.sectionHeader}>
-                <div className={styles.sectionHeaderRow}>
-                  <div>
-                    <h2 className={styles.sectionTitle}>Evidence</h2>
-                    <p className={styles.sectionSubtitle}>
-                      {liveSnippetData.length > 0
-                        ? `${liveSnippetData.length}`
-                        : "None"}
-                    </p>
-                  </div>
-                  {isOwner && (
-                    <div className={styles.sectionActions}>
-                      <button
-                        onClick={() => {
-                          setIsAddLinksAsEvidenceDialogOpen(true);
-                        }}
-                        className={styles.addButton}
-                        aria-label="Add Evidence"
-                        title="Add Evidence"
-                      >
-                        <span className={styles.addButtonIcon}>+</span>
-                        <span className={styles.addButtonText}>Add</span>
-                      </button>
-                      {selectedCitations.length > 0 && (
-                        <button
-                          onClick={() => {
-                            if (
-                              confirm(
-                                "Are you sure you want to remove these citations?",
-                              )
-                            ) {
-                              executeAction(doDeleteInsightCitations, {
-                                citations: selectedCitations,
-                              });
-                            }
-                          }}
-                          className={styles.removeButton}
-                          aria-label="Remove Selected Citations"
-                          title="Remove Selected Citations"
-                        >
-                          <span className={styles.addButtonText}>Remove</span>
-                        </button>
-                      )}
-                    </div>
                   )}
-                </div>
-              </div>
-              <div
-                className={`${styles.sectionBody} ${
-                  liveSnippetData.length > 0 ? styles.sectionBodyScrollable : ""
-                }`}
-              >
-                {liveSnippetData.length > 0 ? (
-                  <InfiniteScrollLoader
-                    data={liveSnippetData}
-                    setData={
-                      setLiveSnippetData as React.Dispatch<
-                        React.SetStateAction<Fact[] | undefined>
-                      >
-                    }
-                    limit={20}
-                    getDataFunctionParams={{ insightUid: insight.uid ?? "" }}
-                    getDataFunction={async (
-                      offset,
-                      token,
-                      getDataFunctionParams,
-                    ) => {
-                      if (getDataFunctionParams) {
-                        const response = await fetch(
-                          `/api/insights/${getDataFunctionParams.insightUid}?offset=${offset}`,
-                          {
-                            method: "GET",
-                            headers: {
-                              "Content-Type": "application/json",
-                              "x-access-token": token,
-                            },
-                          },
-                        );
-                        const json = (await response.json()) as Insight;
-                        return await json.citations;
-                      }
-                      return Promise.resolve([]);
-                    }}
-                  >
-                    <FactsListView
-                      factName="snippet"
-                      selectedFacts={selectedCitations}
-                      setSelectedFacts={
-                        setSelectedCitations as React.Dispatch<
-                          React.SetStateAction<Fact[]>
-                        >
-                      }
-                      selectedActions={[]}
-                    />
-                  </InfiniteScrollLoader>
-                ) : (
-                  <p className={styles.sectionBodyEmpty}>No evidence yet</p>
-                )}
-              </div>
-            </section>
-
-            {/* Feedback Section */}
-            <section className={styles.section}>
-              <div className={styles.sectionHeader}>
-                <div className={styles.sectionHeaderRow}>
-                  <div>
-                    <h2 className={styles.sectionTitle}>Feedback</h2>
-                  </div>
-                  <div className={styles.sectionActions}>
-                    <button
-                      type="button"
-                      className={styles.addButton}
-                      aria-label="React"
-                      title="React"
-                      onClick={() =>
-                        currentUser
-                          ? setIsEditingReaction(true)
-                          : confirmAndRegister()
-                      }
-                    >
-                      <span className={styles.addButtonIcon} aria-hidden>
-                        😲
-                      </span>
-                      <span className={styles.addButtonText}>React</span>
-                    </button>
-                    <button
-                      type="button"
-                      className={styles.addButton}
-                      aria-label="Comment"
-                      title="Comment"
-                      onClick={() =>
-                        currentUser
-                          ? setIsEditingComment(true)
-                          : confirmAndRegister()
-                      }
-                    >
-                      <span className={styles.addButtonIcon} aria-hidden>
-                        💬
-                      </span>
-                      <span className={styles.addButtonText}>Comment</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div className={`${styles.sectionBody} ${styles.sectionBodyScrollable}`}>
-                {currentUser && isEditingReaction && (
-                  <FeedbackInputElement
-                    actionType="reaction"
-                    submitFunc={(reaction) => {
-                      if (token) {
-                        return submitReaction(
-                          { reaction, insight_id: insight.id },
-                          token,
-                        );
-                      }
-                      return Promise.resolve();
-                    }}
-                    directions="Pick a reaction"
-                    afterSubmit={(newObject) => {
-                      if (newObject) {
-                        const existingReaction = insight.reactions?.find((r) => {
-                          const userId = prop<number>(r, "user_id", "userId");
-                          const insightId = prop<number>(
-                            r,
-                            "insight_id",
-                            "insightId",
+                  {currentUser && isEditingComment && (
+                    <FeedbackInputElement
+                      actionType="comment"
+                      submitFunc={(comment) => {
+                        if (token) {
+                          return submitComment(
+                            { comment, insight_id: insight.id },
+                            token,
                           );
-                          return (
-                            userId == currentUser?.id && insightId == insight.id
-                          );
-                        });
-                        const existingReactions = insight.reactions?.filter(
-                          (r) => r.id !== existingReaction?.id,
-                        );
-                        setInsight({
-                          ...insight,
-                          reactions: [
-                            ...(existingReactions ?? []),
-                            newObject as FactReaction,
-                          ],
-                        });
-                      }
-                    }}
-                    closeFunc={() => setIsEditingReaction(false)}
-                  />
-                )}
-                {currentUser && isEditingComment && (
-                  <FeedbackInputElement
-                    actionType="comment"
-                    submitFunc={(comment) => {
-                      if (token) {
-                        return submitComment(
-                          { comment, insight_id: insight.id },
-                          token,
-                        );
-                      }
-                      return Promise.resolve();
-                    }}
-                    directions="Write a short comment"
-                    afterSubmit={(newObject) => {
-                      if (newObject) {
-                        setInsight({
-                          ...insight,
-                          comments: [...(insight.comments ?? []), newObject],
-                        });
-                      }
-                    }}
-                    closeFunc={() => setIsEditingComment(false)}
-                  />
-                )}
-                {insightComments && insightComments.length > 0 ? (
-                  <div className={styles.commentsList}>
-                    {insightComments.map((comment) => (
-                      <Comment
-                        key={`Insight Comment #${comment.id}`}
-                        comment={comment}
-                        removeCommentFunc={(id) => {
+                        }
+                        return Promise.resolve();
+                      }}
+                      directions="Write a short comment"
+                      afterSubmit={(newObject) => {
+                        if (newObject) {
                           setInsight({
                             ...insight,
-                            comments:
-                              insight.comments?.filter((c) => c.id !== id) ??
-                              [],
+                            comments: [...(insight.comments ?? []), newObject],
                           });
-                        }}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  !isEditingReaction &&
-                  !isEditingComment && (
-                    <p className={styles.sectionBodyEmpty}>
-                      No comments yet. Be the first to share your thoughts.
-                    </p>
-                  )
-                )}
-              </div>
-            </section>
+                        }
+                      }}
+                      closeFunc={() => setIsEditingComment(false)}
+                    />
+                  )}
+                  {insightComments && insightComments.length > 0 ? (
+                    <div className={styles.commentsList}>
+                      {insightComments.map((comment) => (
+                        <Comment
+                          key={`Insight Comment #${comment.id}`}
+                          comment={comment}
+                          removeCommentFunc={(id) => {
+                            setInsight({
+                              ...insight,
+                              comments:
+                                insight.comments?.filter((c) => c.id !== id) ??
+                                [],
+                            });
+                          }}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    !isEditingReaction &&
+                    !isEditingComment && (
+                      <p className={styles.sectionBodyEmpty}>
+                        No comments yet. Be the first to share your thoughts.
+                      </p>
+                    )
+                  )}
+                </div>
+              </section>
             </div>
 
             {isOwner && (

@@ -5,12 +5,7 @@ import React, { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import {
-  FLVResponse,
-  Insight,
-  InsightEvidence,
-  User,
-} from "../types";
+import { FLVResponse, Insight, InsightEvidence, User } from "../types";
 import useUser from "../hooks/useUser";
 import SaveLinkDialog, {
   ServerFunctionInputSchemaForSavedLinks,
@@ -220,7 +215,10 @@ const ClientSidePage = ({
                     const citationCount = insight.evidence?.length ?? 0;
                     const childCount = insight.children?.length ?? 0;
                     return (
-                      <li key={insight.uid || insight.id} className={styles.insightCard}>
+                      <li
+                        key={insight.uid || insight.id}
+                        className={styles.insightCard}
+                      >
                         <Link
                           href={`/insights/${insight.uid}`}
                           className={styles.insightCardLink}
@@ -251,11 +249,11 @@ const ClientSidePage = ({
               )}
             </section>
           ) : (
-            <section className={styles.networkSection} aria-label="Insights network">
-              <HybridRadialNetwork
-                data={filteredInsights}
-                crossLinks={[]}
-              />
+            <section
+              className={styles.networkSection}
+              aria-label="Insights network"
+            >
+              <HybridRadialNetwork data={filteredInsights} crossLinks={[]} />
             </section>
           )}
 
@@ -266,7 +264,11 @@ const ClientSidePage = ({
                   id: "create",
                   label: "Create insight",
                   icon: (
-                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <svg
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                      focusable="false"
+                    >
                       <path
                         d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5z"
                         fill="currentColor"
@@ -279,7 +281,11 @@ const ClientSidePage = ({
                   id: "save-link",
                   label: "Save link",
                   icon: (
-                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <svg
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                      focusable="false"
+                    >
                       <path
                         d="M10 13a5 5 0 0 0 7.54.54l1.92-1.92a5 5 0 0 0-7.07-7.07L10.7 6.2"
                         fill="none"

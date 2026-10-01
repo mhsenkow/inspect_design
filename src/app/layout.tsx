@@ -38,7 +38,10 @@ const Dashboard = async ({ children }: Props): Promise<React.JSX.Element> => {
   return (
     <html lang="en" data-theme="light" suppressHydrationWarning>
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, viewport-fit=cover"
+        />
         <Script id="inspect-theme-boot" strategy="beforeInteractive">
           {themeBootScript}
         </Script>
@@ -48,14 +51,12 @@ const Dashboard = async ({ children }: Props): Promise<React.JSX.Element> => {
         <header className="inspect-header">
           <div className="inspect-header__inner">
             <div className="inspect-header__left">
-              <Link href={loggedIn ? "/insights" : "/"} className="inspect-brand">
+              <Link
+                href={loggedIn ? "/insights" : "/"}
+                className="inspect-brand"
+              >
                 <span className="inspect-brand__mark">
-                  <Image
-                    src="/images/icon.png"
-                    width={14}
-                    height={14}
-                    alt=""
-                  />
+                  <Image src="/images/icon.png" width={14} height={14} alt="" />
                 </span>
                 <span className="inspect-brand__text">Inspect</span>
               </Link>

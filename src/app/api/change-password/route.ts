@@ -37,9 +37,9 @@ export async function POST(req: Request): Promise<NextResponse> {
     );
   }
 
-  const user = (await UserLibSqlModel.query().findById(
-    authUser.id,
-  )) as UserLibSqlModel | undefined;
+  const user = (await UserLibSqlModel.query().findById(authUser.id)) as
+    | UserLibSqlModel
+    | undefined;
 
   if (!user?.password) {
     return NextResponse.json({ message: "User not found" }, { status: 404 });

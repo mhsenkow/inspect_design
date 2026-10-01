@@ -53,6 +53,7 @@ const isUniqueEmailError = (error: unknown): boolean => {
 };
 
 const toPublicUser = (user: UserLibSqlModel, token: string): User => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { password: _password, ...safeUser } = user;
   return {
     id: safeUser.id,
@@ -136,7 +137,9 @@ export async function POST(
 
     if (isUniqueEmailError(error)) {
       return NextResponse.json(
-        { message: "User already exists. Please login or reset your password." },
+        {
+          message: "User already exists. Please login or reset your password.",
+        },
         { status: 409 },
       );
     }

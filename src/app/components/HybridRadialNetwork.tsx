@@ -234,7 +234,10 @@ const HybridRadialNetwork: React.FC<HybridNetworkProps> = ({
     );
     // Circle must clear the full rectangle, plus breathing room between cards
     const collideRadius = Math.hypot(cardWidth, cardHeight) / 2 + 28;
-    const linkDistance = Math.max(collideRadius * 2.15, clamp(density * 0.9, 140, 280));
+    const linkDistance = Math.max(
+      collideRadius * 2.15,
+      clamp(density * 0.9, 140, 280),
+    );
     const chargeStrength = -clamp(area / (nodes.length * 4.2), 220, 900);
 
     const titleType = (raw: string | undefined) => {
@@ -258,10 +261,7 @@ const HybridRadialNetwork: React.FC<HybridNetworkProps> = ({
 
     // Seed on a viewport-filling grid so spacing starts even
     const aspect = width / Math.max(height, 1);
-    const cols = Math.max(
-      1,
-      Math.ceil(Math.sqrt(nodes.length * aspect)),
-    );
+    const cols = Math.max(1, Math.ceil(Math.sqrt(nodes.length * aspect)));
     const rows = Math.max(1, Math.ceil(nodes.length / cols));
     const marginX = cardWidth * 0.55 + 24;
     const marginY = cardHeight * 0.55 + 24;
@@ -274,14 +274,8 @@ const HybridRadialNetwork: React.FC<HybridNetworkProps> = ({
       const row = Math.floor(index / cols);
       const jitterX = ((index * 37) % 11) - 5;
       const jitterY = ((index * 53) % 11) - 5;
-      node.x =
-        cols === 1
-          ? width / 2
-          : marginX + stepX * col + jitterX;
-      node.y =
-        rows === 1
-          ? height / 2
-          : marginY + stepY * row + jitterY;
+      node.x = cols === 1 ? width / 2 : marginX + stepX * col + jitterX;
+      node.y = rows === 1 ? height / 2 : marginY + stepY * row + jitterY;
     });
 
     const svg = d3
@@ -385,9 +379,13 @@ const HybridRadialNetwork: React.FC<HybridNetworkProps> = ({
       nodeLayer.classed(styles.nodeFocused, (n) => n.id === id);
       const isTouching = (l: SimLink) => {
         const s =
-          typeof l.source === "object" ? (l.source as SimNode).id : String(l.source);
+          typeof l.source === "object"
+            ? (l.source as SimNode).id
+            : String(l.source);
         const t =
-          typeof l.target === "object" ? (l.target as SimNode).id : String(l.target);
+          typeof l.target === "object"
+            ? (l.target as SimNode).id
+            : String(l.target);
         return s === id || t === id;
       };
       linkLayer.classed(styles.linkDimmed, (l) => !isTouching(l));
@@ -535,11 +533,13 @@ const HybridRadialNetwork: React.FC<HybridNetworkProps> = ({
         const strength = 0.35 * alpha;
         for (const node of nodes) {
           if (node.x == null || node.y == null) continue;
-          if (node.x < padX) node.vx = (node.vx ?? 0) + (padX - node.x) * strength;
+          if (node.x < padX)
+            node.vx = (node.vx ?? 0) + (padX - node.x) * strength;
           if (node.x > width - padX) {
             node.vx = (node.vx ?? 0) + (width - padX - node.x) * strength;
           }
-          if (node.y < padY) node.vy = (node.vy ?? 0) + (padY - node.y) * strength;
+          if (node.y < padY)
+            node.vy = (node.vy ?? 0) + (padY - node.y) * strength;
           if (node.y > height - padY) {
             node.vy = (node.vy ?? 0) + (height - padY - node.y) * strength;
           }
@@ -628,10 +628,7 @@ const HybridRadialNetwork: React.FC<HybridNetworkProps> = ({
         .attr("x2", (d) => linkTarget(d).x ?? 0)
         .attr("y2", (d) => linkTarget(d).y ?? 0);
 
-      nodeLayer.attr(
-        "transform",
-        (d) => `translate(${d.x ?? 0},${d.y ?? 0})`,
-      );
+      nodeLayer.attr("transform", (d) => `translate(${d.x ?? 0},${d.y ?? 0})`);
 
       if (!fitted && simulation.alpha() < 0.12) {
         fitted = true;
@@ -665,7 +662,12 @@ const HybridRadialNetwork: React.FC<HybridNetworkProps> = ({
       });
 
     (
-      nodeLayer as unknown as d3.Selection<SVGGElement, SimNode, SVGGElement, unknown>
+      nodeLayer as unknown as d3.Selection<
+        SVGGElement,
+        SimNode,
+        SVGGElement,
+        unknown
+      >
     ).call(drag);
 
     return () => {
@@ -684,9 +686,7 @@ const HybridRadialNetwork: React.FC<HybridNetworkProps> = ({
   const handleZoomOut = () => zoomApiRef.current?.zoomBy(1 / 1.28);
   const handleFit = () => zoomApiRef.current?.fit();
 
-  const handleCanvasKeyDown = (
-    event: React.KeyboardEvent<HTMLDivElement>,
-  ) => {
+  const handleCanvasKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (!canZoom) return;
     if (event.key === "+" || event.key === "=") {
       event.preventDefault();

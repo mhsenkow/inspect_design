@@ -39,7 +39,7 @@ describe("EditableText", () => {
     });
 
     it("enters edit mode on click", async () => {
-      const { getByText, getByDisplayValue } = render(
+      const { getByDisplayValue } = render(
         <EditableText
           insight={{ title: "Test Title" } as Insight}
           fieldName={"title"}
@@ -50,7 +50,7 @@ describe("EditableText", () => {
     });
 
     it("exits edit mode on submit", async () => {
-      const { getByText, getByDisplayValue, queryByDisplayValue } = render(
+      const { getByDisplayValue, queryByDisplayValue } = render(
         <EditableText
           insight={{ title: "Test Title" } as Insight}
           fieldName={"title"}
@@ -82,7 +82,7 @@ describe("EditableText", () => {
     });
 
     it("disables the submit button if the title is the empty string", async () => {
-      const { getByText, getByDisplayValue } = render(
+      const { getByDisplayValue } = render(
         <EditableText
           insight={{ title: "Test Title" } as Insight}
           fieldName={"title"}
@@ -93,11 +93,13 @@ describe("EditableText", () => {
       fireEvent.change(textarea, { target: { value: "" } });
       expect(getByDisplayValue("")).toBeInTheDocument();
 
-      await expect(screen.getByRole("button", { name: /Save/i })).toBeDisabled();
+      await expect(
+        screen.getByRole("button", { name: /Save/i }),
+      ).toBeDisabled();
     });
 
     it("calls fetch on submit", async () => {
-      const { getByText, findByText, getByDisplayValue } = render(
+      const { getByDisplayValue } = render(
         <EditableText
           apiRoot="/api"
           insight={{ title: "Test Title", uid: "asdf" } as Insight}
@@ -144,13 +146,17 @@ describe("EditableText", () => {
       const consoleErrorMock = jest
         .spyOn(console, "error")
         .mockImplementation(() => {});
-      const alertMock = jest.spyOn(window, "alert").mockImplementation(() => {});
+      const alertMock = jest
+        .spyOn(window, "alert")
+        .mockImplementation(() => {});
       window.fetch = jest.fn().mockResolvedValue({
         ok: false,
         status: 400,
         statusText: "Bad Request",
         text: async () =>
-          JSON.stringify({ statusText: "title, description, or is_public is required" }),
+          JSON.stringify({
+            statusText: "title, description, or is_public is required",
+          }),
       });
 
       const { getByDisplayValue } = render(
@@ -208,7 +214,7 @@ describe("EditableText", () => {
     });
 
     it("does not call fetch if title is unchanged on submit", async () => {
-      const { getByText, getByDisplayValue } = render(
+      const { getByDisplayValue } = render(
         <EditableText
           apiRoot="/api"
           insight={{ title: "Unchanged Title", uid: "uid123" } as Insight}
@@ -238,7 +244,7 @@ describe("EditableText", () => {
     });
 
     it("enters edit mode on click", async () => {
-      const { getByText, getByDisplayValue } = render(
+      const { getByDisplayValue } = render(
         <EditableText
           insight={{ description: "Test Description" } as Insight}
           fieldName={"description"}
@@ -250,7 +256,7 @@ describe("EditableText", () => {
     });
 
     it("exits edit mode on submit", async () => {
-      const { getByText, getByDisplayValue, queryByDisplayValue } = render(
+      const { getByDisplayValue, queryByDisplayValue } = render(
         <EditableText
           insight={{ description: "Test Description" } as Insight}
           fieldName={"description"}
@@ -284,7 +290,7 @@ describe("EditableText", () => {
     });
 
     it("calls fetch on submit", async () => {
-      const { getByText, findByText, getByDisplayValue } = render(
+      const { getByDisplayValue } = render(
         <EditableText
           apiRoot="/api"
           insight={{ description: "Test Description", uid: "asdf" } as Insight}

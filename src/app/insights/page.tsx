@@ -24,10 +24,7 @@ const InsightsPage = async (): Promise<React.JSX.Element> => {
 
   if (insights && Array.isArray(insights)) {
     return (
-      <ClientSidePage
-        insights={insights}
-        currentUser={currentUser || null}
-      />
+      <ClientSidePage insights={insights} currentUser={currentUser || null} />
     );
   }
   return (

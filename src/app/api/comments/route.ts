@@ -35,9 +35,8 @@ export async function POST(
         user_id: authUser.id,
       };
       try {
-        const inserted = await CommentModel.query().insertAndFetch(
-          commentToInsert,
-        );
+        const inserted =
+          await CommentModel.query().insertAndFetch(commentToInsert);
         const newComment = await CommentModel.query()
           .findById(inserted.id!)
           .withGraphFetched("user");

@@ -83,7 +83,9 @@ const ResetPasswordForm = (): React.JSX.Element => {
         <header className="auth-card__header">
           <p className="auth-eyebrow">Inspect</p>
           <h1 className="auth-title">Choose a new password</h1>
-          <p className="auth-lead">Pick something secure, then sign in again.</p>
+          <p className="auth-lead">
+            Pick something secure, then sign in again.
+          </p>
         </header>
 
         <form name="resetPassword" onSubmit={handleSubmit} noValidate>
@@ -142,12 +144,20 @@ const ResetPasswordForm = (): React.JSX.Element => {
           </div>
 
           {error && (
-            <div className="alert alert-error" role="alert" aria-live="assertive">
+            <div
+              className="alert alert-error"
+              role="alert"
+              aria-live="assertive"
+            >
               <div className="alert-message">{error}</div>
             </div>
           )}
           {message && (
-            <div className="alert alert-success" role="status" aria-live="polite">
+            <div
+              className="alert alert-success"
+              role="status"
+              aria-live="polite"
+            >
               <div className="alert-message">{message}</div>
             </div>
           )}

@@ -157,7 +157,11 @@ const RegisterForm = (): React.JSX.Element => {
           </div>
 
           {error && (
-            <div className="alert alert-error" role="alert" aria-live="assertive">
+            <div
+              className="alert alert-error"
+              role="alert"
+              aria-live="assertive"
+            >
               <div className="alert-message">
                 {error}
                 {/already exists/i.test(error) && (

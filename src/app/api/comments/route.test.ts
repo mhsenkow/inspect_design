@@ -4,7 +4,6 @@
 
 import { NextRequest } from "next/server";
 
-import { CommentModel } from "../models/comments";
 import { POST } from "./route";
 import { getAuthUser } from "../../functions";
 import { ForeignKeyViolationError } from "objection";

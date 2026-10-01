@@ -82,12 +82,20 @@ const ForgotPasswordForm = (): React.JSX.Element => {
           </div>
 
           {error && (
-            <div className="alert alert-error" role="alert" aria-live="assertive">
+            <div
+              className="alert alert-error"
+              role="alert"
+              aria-live="assertive"
+            >
               <div className="alert-message">{error}</div>
             </div>
           )}
           {message && (
-            <div className="alert alert-success" role="status" aria-live="polite">
+            <div
+              className="alert alert-success"
+              role="status"
+              aria-live="polite"
+            >
               <div className="alert-message">{message}</div>
             </div>
           )}
