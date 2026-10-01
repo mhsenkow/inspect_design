@@ -73,7 +73,7 @@ test.describe("Insight page", () => {
       `http://localhost:3000/insights/${currentInsight.uid}`,
     );
     await expect(page.getByRole("button", { name: "Edit title" })).toHaveText(
-      currentInsight.title,
+      currentInsight.title ?? "",
     );
   });
 
