@@ -239,6 +239,15 @@
   width: 100%;
 }
 
+.pageContainerNetwork .pageIntro {
+  margin-bottom: 0.35rem;
+  gap: 0.4rem;
+}
+
+.pageContainerNetwork .pageSubtitle {
+  margin-top: 0.15rem;
+}
+
 .networkSection {
   width: 100%;
   flex: 1 1 auto;

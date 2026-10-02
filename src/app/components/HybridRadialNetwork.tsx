@@ -221,24 +221,24 @@ const HybridRadialNetwork: React.FC<HybridNetworkProps> = ({
 
     const area = width * height;
     const density = Math.sqrt(area / Math.max(nodes.length, 1));
-    const isCompact = width < 520 || nodes.length > 18;
+    const isCompact = width < 520 || nodes.length > 14;
     const cardWidth = clamp(
-      density * (isCompact ? 0.58 : 0.7),
-      isCompact ? 152 : 176,
-      isCompact ? 196 : 240,
+      density * (isCompact ? 0.48 : 0.58),
+      isCompact ? 132 : 152,
+      isCompact ? 176 : 200,
     );
     const cardHeight = clamp(
-      cardWidth * 0.46,
-      isCompact ? 70 : 78,
-      isCompact ? 92 : 104,
+      cardWidth * 0.44,
+      isCompact ? 58 : 66,
+      isCompact ? 78 : 88,
     );
-    // Circle must clear the full rectangle, plus breathing room between cards
-    const collideRadius = Math.hypot(cardWidth, cardHeight) / 2 + 28;
+    // Keep cards close — just enough clearance to avoid overlap
+    const collideRadius = Math.hypot(cardWidth, cardHeight) / 2 + 10;
     const linkDistance = Math.max(
-      collideRadius * 2.15,
-      clamp(density * 0.9, 140, 280),
+      collideRadius * 1.55,
+      clamp(density * 0.55, 90, 170),
     );
-    const chargeStrength = -clamp(area / (nodes.length * 4.2), 220, 900);
+    const chargeStrength = -clamp(area / (nodes.length * 7.5), 90, 380);
 
     const titleType = (raw: string | undefined) => {
       const text = (raw || "Untitled").trim() || "Untitled";
@@ -259,12 +259,12 @@ const HybridRadialNetwork: React.FC<HybridNetworkProps> = ({
       return { text, fontSize, lengthClass, targetLines };
     };
 
-    // Seed on a viewport-filling grid so spacing starts even
+    // Seed on a tighter viewport-filling grid
     const aspect = width / Math.max(height, 1);
     const cols = Math.max(1, Math.ceil(Math.sqrt(nodes.length * aspect)));
     const rows = Math.max(1, Math.ceil(nodes.length / cols));
-    const marginX = cardWidth * 0.55 + 24;
-    const marginY = cardHeight * 0.55 + 24;
+    const marginX = cardWidth * 0.4 + 12;
+    const marginY = cardHeight * 0.4 + 12;
     const usableW = Math.max(width - marginX * 2, cardWidth);
     const usableH = Math.max(height - marginY * 2, cardHeight);
     const stepX = cols === 1 ? 0 : usableW / (cols - 1 || 1);
@@ -272,8 +272,8 @@ const HybridRadialNetwork: React.FC<HybridNetworkProps> = ({
     nodes.forEach((node, index) => {
       const col = index % cols;
       const row = Math.floor(index / cols);
-      const jitterX = ((index * 37) % 11) - 5;
-      const jitterY = ((index * 53) % 11) - 5;
+      const jitterX = ((index * 37) % 7) - 3;
+      const jitterY = ((index * 53) % 7) - 3;
       node.x = cols === 1 ? width / 2 : marginX + stepX * col + jitterX;
       node.y = rows === 1 ? height / 2 : marginY + stepY * row + jitterY;
     });
@@ -287,12 +287,23 @@ const HybridRadialNetwork: React.FC<HybridNetworkProps> = ({
 
     const zoomGroup = svg.append("g").attr("class", "zoom-container");
 
+    const isNodeEventTarget = (target: EventTarget | null) => {
+      if (!(target instanceof Element)) return false;
+      return Boolean(
+        target.closest(`.${styles.networkNode}`) ||
+          target.closest(`.${styles.nodeHit}`) ||
+          target.closest(`.${styles.nodeCard}`) ||
+          target.closest("foreignObject"),
+      );
+    };
+
     const zoomBehavior = d3
       .zoom<SVGSVGElement, unknown>()
-      .scaleExtent([0.2, 3.5])
+      .scaleExtent([0.35, 3.5])
       .filter((event) => {
-        // Allow wheel/pinch/drag; ignore right-click
+        // Allow wheel/pinch always; don't steal pan from node hover/click/drag
         if (event.type === "wheel") return true;
+        if (isNodeEventTarget(event.target)) return false;
         return !event.ctrlKey && event.button === 0;
       })
       .on("start", () => {
@@ -340,10 +351,7 @@ const HybridRadialNetwork: React.FC<HybridNetworkProps> = ({
       .join("g")
       .attr("class", styles.networkNode)
       .style("cursor", "pointer")
-      .on("click", (event, d) => {
-        event.stopPropagation();
-        handleNodeNavigate(d.insight);
-      });
+      .style("pointer-events", "all");
 
     const adjacency = new Map<string, Set<string>>();
     for (const link of links) {
@@ -395,6 +403,7 @@ const HybridRadialNetwork: React.FC<HybridNetworkProps> = ({
     };
 
     let isDragging = false;
+    let suppressClick = false;
 
     const cancelHidePreview = () => {
       if (hidePreviewTimer.current) {
@@ -430,7 +439,6 @@ const HybridRadialNetwork: React.FC<HybridNetworkProps> = ({
       let top = py - previewH * 0.35;
       if (top + previewH > height - 10) top = height - previewH - 10;
       if (top < 10) top = 10;
-      // If still covering the node heavily, nudge below/above
       if (Math.abs(top + previewH / 2 - py) < halfH) {
         top = py + halfH + gap;
         if (top + previewH > height - 10) top = py - halfH - gap - previewH;
@@ -446,15 +454,14 @@ const HybridRadialNetwork: React.FC<HybridNetworkProps> = ({
       });
     };
 
-    nodeLayer
-      .on("mouseenter", (_event, d) => {
-        focusNode(d.id);
-        showPreviewFor(d);
-      })
-      .on("mouseleave", () => {
-        clearFocus();
-        hidePreview();
-      });
+    const onNodeActivate = (event: MouseEvent, d: SimNode) => {
+      event.stopPropagation();
+      if (suppressClick) {
+        suppressClick = false;
+        return;
+      }
+      handleNodeNavigate(d.insight);
+    };
 
     nodeLayer
       .append("foreignObject")
@@ -464,6 +471,7 @@ const HybridRadialNetwork: React.FC<HybridNetworkProps> = ({
       .attr("x", -cardWidth / 2)
       .attr("y", -cardHeight / 2)
       .style("overflow", "visible")
+      .style("pointer-events", "none")
       .append("xhtml:div")
       .attr("xmlns", "http://www.w3.org/1999/xhtml")
       .attr(
@@ -483,7 +491,8 @@ const HybridRadialNetwork: React.FC<HybridNetworkProps> = ({
           .style("font-weight", "600")
           .style("text-align", "left")
           .style("justify-content", "flex-start")
-          .style("align-items", "center");
+          .style("align-items", "center")
+          .style("pointer-events", "none");
         card
           .append("xhtml:span")
           .attr("class", `${styles.nodeTitle} ${lengthClass}`)
@@ -494,7 +503,33 @@ const HybridRadialNetwork: React.FC<HybridNetworkProps> = ({
           .style("text-align", "left")
           .style("font-weight", "600")
           .style("width", "100%")
+          .style("pointer-events", "none")
           .text(text);
+      });
+
+    // Hit target on top of foreignObject so hover/click always work in SVG.
+    nodeLayer
+      .append("rect")
+      .attr("class", styles.nodeHit)
+      .attr("width", cardWidth)
+      .attr("height", cardHeight)
+      .attr("x", -cardWidth / 2)
+      .attr("y", -cardHeight / 2)
+      .attr("rx", 12)
+      .attr("ry", 12)
+      .attr("fill", "transparent")
+      .style("pointer-events", "all")
+      .style("cursor", "pointer");
+
+    nodeLayer
+      .on("click", (event, d) => onNodeActivate(event, d))
+      .on("mouseenter", (_event, d) => {
+        focusNode(d.id);
+        showPreviewFor(d);
+      })
+      .on("mouseleave", () => {
+        clearFocus();
+        hidePreview();
       });
 
     const simulation = d3
@@ -505,32 +540,32 @@ const HybridRadialNetwork: React.FC<HybridNetworkProps> = ({
           .forceLink<SimNode, SimLink>(links)
           .id((d) => d.id)
           .distance((d) =>
-            d.kind === "cross" ? linkDistance * 1.1 : linkDistance,
+            d.kind === "cross" ? linkDistance * 1.05 : linkDistance,
           )
-          .strength((d) => (d.kind === "cross" ? 0.12 : 0.28)),
+          .strength((d) => (d.kind === "cross" ? 0.18 : 0.45)),
       )
       .force(
         "charge",
         d3
           .forceManyBody<SimNode>()
           .strength(chargeStrength)
-          .distanceMin(collideRadius)
-          .distanceMax(Math.max(width, height) * 0.9),
+          .distanceMin(collideRadius * 0.8)
+          .distanceMax(Math.max(width, height) * 0.55),
       )
       .force(
         "collide",
         d3
           .forceCollide<SimNode>()
           .radius(collideRadius)
-          .strength(1)
-          .iterations(4),
+          .strength(0.95)
+          .iterations(3),
       )
-      .force("x", d3.forceX<SimNode>(width / 2).strength(0.018))
-      .force("y", d3.forceY<SimNode>(height / 2).strength(0.022))
+      .force("x", d3.forceX<SimNode>(width / 2).strength(0.045))
+      .force("y", d3.forceY<SimNode>(height / 2).strength(0.055))
       .force("bounds", (alpha) => {
-        const padX = cardWidth / 2 + 20;
-        const padY = cardHeight / 2 + 20;
-        const strength = 0.35 * alpha;
+        const padX = cardWidth / 2 + 10;
+        const padY = cardHeight / 2 + 10;
+        const strength = 0.45 * alpha;
         for (const node of nodes) {
           if (node.x == null || node.y == null) continue;
           if (node.x < padX)
@@ -546,8 +581,8 @@ const HybridRadialNetwork: React.FC<HybridNetworkProps> = ({
         }
       })
       .alpha(1)
-      .alphaDecay(0.016)
-      .velocityDecay(0.32);
+      .alphaDecay(0.022)
+      .velocityDecay(0.38);
 
     const linkSource = (d: SimLink) => d.source as SimNode;
     const linkTarget = (d: SimLink) => d.target as SimNode;
@@ -572,15 +607,15 @@ const HybridRadialNetwork: React.FC<HybridNetworkProps> = ({
 
       const boundsWidth = Math.max(maxX - minX, 1);
       const boundsHeight = Math.max(maxY - minY, 1);
-      const pad = Math.max(24, Math.min(width, height) * 0.05);
-      // Never zoom in past 1 — keep the spread that fills the canvas
+      const pad = Math.max(16, Math.min(width, height) * 0.035);
+      // Allow a light zoom-in so denser graphs fill the canvas
       const scale = clamp(
         Math.min(
           (width - pad * 2) / boundsWidth,
           (height - pad * 2) / boundsHeight,
         ),
-        0.45,
-        1,
+        0.55,
+        1.35,
       );
       const tx = width / 2 - scale * (minX + boundsWidth / 2);
       const ty = height / 2 - scale * (minY + boundsHeight / 2);
@@ -615,7 +650,7 @@ const HybridRadialNetwork: React.FC<HybridNetworkProps> = ({
 
     let fitted = false;
 
-    simulation.on("tick", () => {
+    const applyPositions = () => {
       linkLayer
         .attr("x1", (d) => linkSource(d).x ?? 0)
         .attr("y1", (d) => linkSource(d).y ?? 0)
@@ -628,37 +663,60 @@ const HybridRadialNetwork: React.FC<HybridNetworkProps> = ({
         .attr("x2", (d) => linkTarget(d).x ?? 0)
         .attr("y2", (d) => linkTarget(d).y ?? 0);
 
-      nodeLayer.attr("transform", (d) => `translate(${d.x ?? 0},${d.y ?? 0})`);
+      nodeLayer.attr(
+        "transform",
+        (d) => `translate(${d.x ?? 0},${d.y ?? 0})`,
+      );
+    };
 
-      if (!fitted && simulation.alpha() < 0.12) {
-        fitted = true;
-        fitToViewport(true);
-      }
+    // Place nodes at seed positions immediately (before async ticks).
+    applyPositions();
+
+    // Warm-start so the first paint isn't a single stacked pile.
+    for (let i = 0; i < 40; i += 1) simulation.tick();
+    applyPositions();
+    fitToViewport(false);
+    fitted = true;
+
+    simulation.on("tick", () => {
+      applyPositions();
     });
 
     simulation.on("end", () => {
-      if (!fitted) fitToViewport(true);
+      fitToViewport(true);
     });
 
     const drag = d3
       .drag<SVGGElement, SimNode>()
+      .clickDistance(8)
       .on("start", (event, d) => {
-        isDragging = true;
-        setPreview(null);
-        clearFocus();
-        if (!event.active) simulation.alphaTarget(0.25).restart();
+        suppressClick = false;
+        if (!event.active) simulation.alphaTarget(0.2).restart();
         d.fx = d.x;
         d.fy = d.y;
       })
       .on("drag", (event, d) => {
+        if (!isDragging) {
+          isDragging = true;
+          suppressClick = true;
+          setPreview(null);
+          clearFocus();
+        }
         d.fx = event.x;
         d.fy = event.y;
       })
       .on("end", (event, d) => {
+        const wasDragging = isDragging;
         isDragging = false;
         if (!event.active) simulation.alphaTarget(0);
         d.fx = null;
         d.fy = null;
+        if (wasDragging) {
+          // Drop the synthetic click that follows a real drag.
+          window.setTimeout(() => {
+            suppressClick = false;
+          }, 0);
+        }
       });
 
     (
