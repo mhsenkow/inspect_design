@@ -22,7 +22,8 @@ const useUser = () => {
   }, []);
 
   const exportedSetToken = (token: string) => {
-    Cookies.set("token", token, { expires: 7, sameSite: "Lax" });
+    // path must be "/" so the session is visible on /insights after /login
+    Cookies.set("token", token, { expires: 7, sameSite: "Lax", path: "/" });
     setToken(token);
     setLoggedIn(true);
   };

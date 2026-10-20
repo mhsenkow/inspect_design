@@ -53,7 +53,8 @@ const LoginForm = (): React.JSX.Element => {
 
       setToken(user.token);
       setLoggedIn(true);
-      router.replace(returnTo);
+      // Full navigation so the server layout re-reads the session cookie
+      window.location.assign(returnTo);
     } catch (err) {
       const raw =
         err instanceof Error ? err.message : "An unknown error occurred.";

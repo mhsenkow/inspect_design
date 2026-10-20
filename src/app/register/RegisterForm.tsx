@@ -49,7 +49,8 @@ const RegisterForm = (): React.JSX.Element => {
 
       setToken(newUser.token);
       setLoggedIn(true);
-      router.replace(returnTo);
+      // Full navigation so the server layout re-reads the session cookie
+      window.location.assign(returnTo);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Registration failed.");
     } finally {

@@ -8,7 +8,7 @@ const useAPI = (cookieUser: CookieUser) => {
     // TODO: enable secure cookie when we switch to HTTPS
     // js-cookie handles JSON objects automatically.
     // It also correctly sets path, expiration, and SameSite attributes.
-    Cookies.set("token", user, { expires: 7, sameSite: "Lax" }); // `expires: 7` means 7 days
+    Cookies.set("token", user, { expires: 7, sameSite: "Lax", path: "/" }); // `expires: 7` means 7 days
     return user;
   };
 

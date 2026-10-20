@@ -1,19 +1,36 @@
 "use client";
 
 import styles from "../../styles/components/login-register-links.module.css";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import Cookies from "js-cookie";
 import { usePathname } from "next/navigation";
 
 import useUser from "../hooks/useUser";
 
 const LoginRegisterLinks = ({
-  loggedIn,
+  loggedIn: loggedInFromServer,
 }: {
   loggedIn: boolean;
 }): React.JSX.Element => {
-  const { logout } = useUser();
+  const { logout, loggedIn: loggedInFromClient } = useUser();
   const path = usePathname();
+  const [mounted, setMounted] = useState(false);
+  const [cookieLoggedIn, setCookieLoggedIn] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Re-check the cookie on every route change. Login sets the cookie in a
+  // different useUser instance, so we cannot rely on that hook alone.
+  useEffect(() => {
+    setCookieLoggedIn(!!Cookies.get("token"));
+  }, [path, loggedInFromClient, loggedInFromServer]);
+
+  const loggedIn = mounted
+    ? loggedInFromClient || cookieLoggedIn || loggedInFromServer
+    : loggedInFromServer;
 
   if (loggedIn) {
     return (
