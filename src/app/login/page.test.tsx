@@ -19,8 +19,14 @@ jest.mock("../hooks/useUser", () => () => ({
 }));
 
 describe("LoginForm", () => {
+  const assign = jest.fn();
+
   beforeEach(() => {
     jest.clearAllMocks();
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      value: { ...window.location, assign },
+    });
   });
 
   it("renders login form", () => {
@@ -53,7 +59,7 @@ describe("LoginForm", () => {
       "password",
     );
     await waitFor(() => {
-      expect(replace).toHaveBeenCalledWith("/insights");
+      expect(assign).toHaveBeenCalledWith("/insights");
     });
   });
 });
