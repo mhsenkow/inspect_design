@@ -6,10 +6,11 @@ import LoginForm from "./LoginForm";
 import { handleLogin } from "./LoginPageFunctions";
 
 const replace = jest.fn();
+const refresh = jest.fn();
 
 jest.mock("./LoginPageFunctions");
 jest.mock("next/navigation", () => ({
-  useRouter: () => ({ push: jest.fn(), replace }),
+  useRouter: () => ({ push: jest.fn(), replace, refresh }),
   useSearchParams: () => new URLSearchParams("return=/insights"),
 }));
 jest.mock("../hooks/useUser", () => () => ({
@@ -19,14 +20,8 @@ jest.mock("../hooks/useUser", () => () => ({
 }));
 
 describe("LoginForm", () => {
-  const assign = jest.fn();
-
   beforeEach(() => {
     jest.clearAllMocks();
-    Object.defineProperty(window, "location", {
-      configurable: true,
-      value: { ...window.location, assign },
-    });
   });
 
   it("renders login form", () => {
@@ -59,7 +54,8 @@ describe("LoginForm", () => {
       "password",
     );
     await waitFor(() => {
-      expect(assign).toHaveBeenCalledWith("/insights");
+      expect(refresh).toHaveBeenCalled();
+      expect(replace).toHaveBeenCalledWith("/insights");
     });
   });
 });

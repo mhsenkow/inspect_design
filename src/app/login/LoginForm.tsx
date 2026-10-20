@@ -53,8 +53,9 @@ const LoginForm = (): React.JSX.Element => {
 
       setToken(user.token);
       setLoggedIn(true);
-      // Full navigation so the server layout re-reads the session cookie
-      window.location.assign(returnTo);
+      // Refresh server layout so Insights nav / header see the new cookie
+      router.refresh();
+      router.replace(returnTo);
     } catch (err) {
       const raw =
         err instanceof Error ? err.message : "An unknown error occurred.";
