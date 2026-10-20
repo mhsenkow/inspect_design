@@ -39,9 +39,7 @@ const ForgotPasswordForm = (): React.JSX.Element => {
       setMessage(data.message || "Check your email for a reset link.");
       const path =
         data.resetPath ||
-        (data.resetUrl
-          ? data.resetUrl.replace(/^https?:\/\/[^/]+/i, "")
-          : "");
+        (data.resetUrl ? data.resetUrl.replace(/^https?:\/\/[^/]+/i, "") : "");
       if (path.startsWith("/reset-password")) {
         setResetPath(path);
       }

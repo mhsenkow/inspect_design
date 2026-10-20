@@ -648,8 +648,6 @@ const HybridRadialNetwork: React.FC<HybridNetworkProps> = ({
       fitToViewport(true);
     });
 
-    let fitted = false;
-
     const applyPositions = () => {
       linkLayer
         .attr("x1", (d) => linkSource(d).x ?? 0)
@@ -663,10 +661,7 @@ const HybridRadialNetwork: React.FC<HybridNetworkProps> = ({
         .attr("x2", (d) => linkTarget(d).x ?? 0)
         .attr("y2", (d) => linkTarget(d).y ?? 0);
 
-      nodeLayer.attr(
-        "transform",
-        (d) => `translate(${d.x ?? 0},${d.y ?? 0})`,
-      );
+      nodeLayer.attr("transform", (d) => `translate(${d.x ?? 0},${d.y ?? 0})`);
     };
 
     // Place nodes at seed positions immediately (before async ticks).
@@ -676,7 +671,6 @@ const HybridRadialNetwork: React.FC<HybridNetworkProps> = ({
     for (let i = 0; i < 40; i += 1) simulation.tick();
     applyPositions();
     fitToViewport(false);
-    fitted = true;
 
     simulation.on("tick", () => {
       applyPositions();

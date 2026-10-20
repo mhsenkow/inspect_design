@@ -33,7 +33,9 @@ test("forgot password → reset → login with new password", async ({
   await page.waitForURL(/\/login\?passwordReset=1/, { timeout: 10_000 });
   await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
   await expect(
-    page.getByText("Your password was updated. Sign in with your new password."),
+    page.getByText(
+      "Your password was updated. Sign in with your new password.",
+    ),
   ).toBeVisible();
 
   // Stale cookie must not auto-bounce away from the form.

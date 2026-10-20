@@ -1027,9 +1027,7 @@ const ClientSidePage = ({
                           onClick={() => handleConfirmDeleteInsight(false)}
                           disabled={isDeletingInsight}
                         >
-                          {isDeletingInsight
-                            ? "Deleting…"
-                            : "Delete this only"}
+                          {isDeletingInsight ? "Deleting…" : "Delete this only"}
                         </ModalButton>
                         <ModalButton
                           variant="danger"

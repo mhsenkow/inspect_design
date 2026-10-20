@@ -68,9 +68,7 @@ describe("POST /api/forgot-password", () => {
     expect(res.status).toBe(200);
     expect(setPasswordResetKey).toHaveBeenCalled();
     const body = await res.json();
-    expect(body.resetPath).toBe(
-      "/reset-password?token=reset-token-hex",
-    );
+    expect(body.resetPath).toBe("/reset-password?token=reset-token-hex");
     expect(body.resetUrl).toBe(
       "http://localhost:3000/reset-password?token=reset-token-hex",
     );
