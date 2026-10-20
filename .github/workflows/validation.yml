@@ -15,8 +15,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ">=22.0.0"
+          cache: yarn
       - name: Install dependencies
-        run: yarn install
+        run: |
+          set -e
+          for i in 1 2 3; do
+            if yarn install --frozen-lockfile; then
+              exit 0
+            fi
+            echo "yarn install failed (attempt $i); retrying in 15s..."
+            sleep 15
+          done
+          exit 1
       - name: Run type-check
         run: yarn type-check
 
@@ -25,12 +35,22 @@ jobs:
     needs: type-check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: ">=22.0.0"
+          cache: yarn
       - name: Install dependencies
-        run: yarn install
+        run: |
+          set -e
+          for i in 1 2 3; do
+            if yarn install --frozen-lockfile; then
+              exit 0
+            fi
+            echo "yarn install failed (attempt $i); retrying in 15s..."
+            sleep 15
+          done
+          exit 1
       - name: Run eslint
         run: yarn lint
 
@@ -43,8 +63,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ">=22.0.0"
+          cache: yarn
       - name: Install dependencies
-        run: yarn install
+        run: |
+          set -e
+          for i in 1 2 3; do
+            if yarn install --frozen-lockfile; then
+              exit 0
+            fi
+            echo "yarn install failed (attempt $i); retrying in 15s..."
+            sleep 15
+          done
+          exit 1
       - name: Run jest tests
         run: yarn test
 
@@ -78,8 +108,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ">=22.0.0"
+          cache: yarn
       - name: Install dependencies
-        run: yarn install
+        run: |
+          set -e
+          for i in 1 2 3; do
+            if yarn install --frozen-lockfile; then
+              exit 0
+            fi
+            echo "yarn install failed (attempt $i); retrying in 15s..."
+            sleep 15
+          done
+          exit 1
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
       - name: Build Next.js app
